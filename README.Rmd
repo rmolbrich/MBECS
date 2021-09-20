@@ -1,5 +1,5 @@
 ---
-title: "AwesomeTutorial"
+title: "MBECS - Microbiome Batch-Effect Correction Suite"
 author: "Michael Olbrich"
 date: "9/20/2021"
 output: github_document
