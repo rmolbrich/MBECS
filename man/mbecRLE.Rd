@@ -14,6 +14,7 @@ mbecRLE(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 \item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
 }
 \description{
+<<<<<<< HEAD
 Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the first covariate,
 colored by the second covariate. Effectively illustrating the relative expression between samples from different
 batches within the respective study groups. Other covariates can be chosen as input and the function will check for
@@ -24,6 +25,16 @@ The function returns either a plot-frame or the finished ggplot object. Input fo
 a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
 contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
 }
+=======
+Takes two covariates, i.e., group and batch, and computes the RLE-plot the grouping of the first covariate,
+colored by the second covariate. Effectively illustrating the relative expression between samples from different
+batches within the respective study groups. Other covariates can be chosen as input and the function will check for
+factors and convert if necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+}
+>>>>>>> 209531de0d896d3caaa2b8941588fe3cee86d328
 \examples{
 This will return the data.frame for plotting.
 \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), return.data=TRUE)}
