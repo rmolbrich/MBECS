@@ -1,11 +1,28 @@
 # ANALYSIS FUNCTIONS ------------------------------------------------------
 
-
-#' Computes RLE for groups and batches and returns plot or data frame.
-#' @param input.obj, list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param model.vars, two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
+#' Relative Log Expression Plot
+#'
+#' Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the first covariate,
+#' colored by the second covariate. Effectively illustrating the relative expression between samples from different
+#' batches within the respective study groups. Other covariates can be chosen as input and the function will check for
+#' factors and convert if necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords RLE relative log expression
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
 #' @export
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), return.data=TRUE)}
+#'
+#' This will return the ggplot2 object for display, saving and modification.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"), return.data=FALSE)}
 mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   cols <- pals::tableau20(20)
@@ -55,12 +72,30 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 }
 
 
-
-#' Creates nice PCA plot with axis-density graphs
+#' Principal Component Analysis Plot
+#'
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected principal components.
+#' Covariates determine sample-shape and color and can be switched to shift the emphasis on either group. In addition to the
+#' ordination-plot, the function will show the distribution of eigenvalues (colored by the second covariate) on their
+#' respective principal components.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords PCA principal component analysis
 #' @param input.obj, list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
 #' @param pca.axes, numeric vector which axes to plot, first is X and second is Y
 #' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
 #' @include mbecs_classes.R
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+#'
+#' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on x-axis and PC2 on y-axis.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=TRUE)}
 setGeneric("mbecPCA", signature="input.obj",
            function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE)
              standardGeneric("mbecPCA")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecPCA}
 \alias{mbecPCA}
-\title{Creates nice PCA plot with axis-density graphs}
+\title{Principal Component Analysis Plot}
 \usage{
 mbecPCA(
   input.obj,
@@ -14,10 +14,31 @@ mbecPCA(
 \arguments{
 \item{input.obj, }{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
+\item{model.vars}{two covariates of interest to select by first variable selects shape and second one determines coloring}
+
 \item{pca.axes, }{numeric vector which axes to plot, first is X and second is Y}
 
 \item{return.data, }{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
 \description{
-Creates nice PCA plot with axis-density graphs
+Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected principal components.
+Covariates determine sample-shape and color and can be switched to shift the emphasis on either group. In addition to the
+ordination-plot, the function will show the distribution of eigenvalues (colored by the second covariate) on their
+respective principal components.
 }
+\details{
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+
+This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on x-axis and PC2 on y-axis.
+\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=TRUE)}
+}
+\keyword{PCA}
+\keyword{analysis}
+\keyword{component}
+\keyword{principal}

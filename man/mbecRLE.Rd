@@ -2,17 +2,36 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecRLE}
 \alias{mbecRLE}
-\title{Computes RLE for groups and batches and returns plot or data frame.}
+\title{Relative Log Expression Plot}
 \usage{
 mbecRLE(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 }
 \arguments{
-\item{input.obj, }{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
-\item{model.vars, }{two covariates of interest to select by first variable selects panels and second one determines coloring}
+\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
 
-\item{return.data, }{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
 }
 \description{
-Computes RLE for groups and batches and returns plot or data frame.
+Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the first covariate,
+colored by the second covariate. Effectively illustrating the relative expression between samples from different
+batches within the respective study groups. Other covariates can be chosen as input and the function will check for
+factors and convert if necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
 }
+\details{
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), return.data=TRUE)}
+
+This will return the ggplot2 object for display, saving and modification.
+\dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"), return.data=FALSE)}
+}
+\keyword{RLE}
+\keyword{expression}
+\keyword{log}
+\keyword{relative}
