@@ -1,5 +1,6 @@
 ### define mbec storage object - inherit from phyloseq
 #' @export
+#' @import phyloseq
 MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character", log="character", transformations="list"))
 
 #' Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
@@ -14,22 +15,22 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @param refseq reference sequences as optional input
 #' @return produces an R-object of type MbecData
 #' @export
-MbecData <- function(type=character(), 
+MbecData <- function(type=character(),
                      log=character(),
-                     input.obj, 
-                     meta.obj=NULL, 
+                     input.obj,
+                     meta.obj=NULL,
                      required.col=c("sample","group","batch"),
                      tax_table=NULL,
                      phy_tree=NULL,
                      refseq=NULL,
                      list=list()) {
-  
+
   # if input is of class phyloseq - just include the type and done.
   if( "phyloseq" %in% class(input.obj) ) {
     return( new("MbecData", type=type, log=log, input.obj) )
   } else {
     # if we got a matrix of counts - the meta object also needs to contain data
-    
+
     ## Make all the necessary tests for matrix-like inputs and return counts
     if( !all(apply(input.obj, 2, is.numeric)) ) {
       stop("All the values in your input need to be numeric!", call. = FALSE)
@@ -41,15 +42,15 @@ MbecData <- function(type=character(),
     # check orientation of counts for phyloseq-constructor - meta.obj needs to be sxf anyway (if not then FU)
     if( dim(input.obj)[1] == length(meta.obj[,eval(required.col[1])]) ) {
       # taxa are columns
-      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = F), 
-                                                                     phyloseq::sample_data(meta.obj), 
-                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE), 
+      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = F),
+                                                                     phyloseq::sample_data(meta.obj),
+                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
                                                                      phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),
                                                                      phyloseq::refseq(refseq, errorIfNULL = FALSE))) )
     } else {
-      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = T), 
-                                                                     phyloseq::sample_data(meta.obj), 
-                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE), 
+      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = T),
+                                                                     phyloseq::sample_data(meta.obj),
+                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
                                                                      phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),
                                                                      phyloseq::refseq(refseq, errorIfNULL = FALSE))) )
     }
@@ -65,11 +66,11 @@ MbecData <- function(type=character(),
 #' @param update logical (TRUE) replace input fields (FALSE) add to the input.obj
 #' @export
 mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=character(), update=TRUE) {
-  
+
   if( is.null(new.cnts) ) {
     message("Nothing to do - returning input unchanged.")
   }
-  
+
   # UPDATE replaces values and appends log
   if( update ) {
     message("Update is: ", update,", replacing counts and setting type to '", type, "'.")
@@ -77,13 +78,13 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
     if( all(phyloseq::sample_names(input.obj) %in% colnames(new.cnts)) ) {
       # fxs orientation
       attr(input.obj, "otu_table") <- phyloseq::otu_table(new.cnts, taxa_are_rows = TRUE)
-      
+
     } else if( all(phyloseq::sample_names(input.obj) %in% rownames(new.cnts)) ) {
       # sxf orientation
       attr(input.obj, "otu_table") <- phyloseq::otu_table(new.cnts, taxa_are_rows = FALSE)
     }
-    
-    # change type 
+
+    # change type
     attr(input.obj, "type") <- type
     # append log
     tmp.log <- attr(input.obj, "log")
@@ -91,14 +92,14 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
     tmp.log <- paste(tmp.log, log, sep = "|")
     attr(input.obj, "log") <- tmp.log
     message("new log is: ", tmp.log)
-    
+
   } else {
-    # no-UPDATE puts values in a list and does nothing to the log 
+    # no-UPDATE puts values in a list and does nothing to the log
     message("Update is: ", update,", adding counts to transformations-list.")
-    
+
     # put new counts into the transformations list
     attr(input.obj, "transformations")[[eval(type)]] <- new.cnts
-    
+
     # append log
     tmp.log <- attr(input.obj, "log")
     message("old log is: ",tmp.log)
@@ -110,7 +111,7 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 }
 
 
-#' This function is a helper tor retrieve cnts (otu_table) in desired orientation, 
+#' This function is a helper tor retrieve cnts (otu_table) in desired orientation,
 #' i.e., features in rows (fxs) or in columns (sxf).
 #' @param input.obj, can be either 'phyloseq' or 'MbecData' class
 #' @param orientation, select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
@@ -123,10 +124,10 @@ setGeneric("mbecGetData", signature="input.obj",
 
 #IMPLEMENT function to use a vector as input
 .mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL) {
-  
+
   # in general the input should be of class phyloseq or MbecData - so just get the fields to evaluate here
   tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE))
-  
+
   # enable check of covariates if 'required.col' is supplied
   if( !is.null(required.col) ) {
     ## check if meta is set and contains all the required columns
@@ -134,25 +135,25 @@ setGeneric("mbecGetData", signature="input.obj",
       stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
     }
   }
-  
+
   # 1. if everything is fine
   if( (!attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "sxf") || (attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "fxs") ) {
     tmp.cnts <- data.frame(phyloseq::otu_table(input.obj))
-    
+
   } else if( (!attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "fxs") || (attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "sxf") ) {
     # if orientations do not fit - transpose count-matrix
     tmp.cnts <- data.frame(t(phyloseq::otu_table(input.obj)))
-    
+
   } else {
     ### If this happens, sth. is severely broken.
     stop("Stop the shenanigans!")
   }
-  
+
   # meta has always the same orientation
   tmp.meta <- data.frame(phyloseq::sample_data(input.obj))
-  
+
   return(list(tmp.cnts, tmp.meta))
-  
+
 }
 
 setMethod("mbecGetData", "phyloseq",
@@ -174,12 +175,12 @@ setMethod("mbecGetData", "list",
             ### for a list input with counts and meta-data, we need to do some more checks
             tmp.cnts <- input.obj[[1]]
             tmp.meta <- data.frame(input.obj[[2]])
-            
+
             ## Make all the necessary tests for matrix-like inputs and return counts
             if( !all(apply(tmp.cnts, 2, is.numeric)) ) {
               stop("All the values in your input need to be numeric!", call. = FALSE)
             }
-            
+
             # enable check of covariates if 'required.col' is supplied
             if( !is.null(required.col) ) {
               ## check if meta is set and contains all the required columns
@@ -187,25 +188,25 @@ setMethod("mbecGetData", "list",
                 stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
               }
             }
-            
+
             # figure out orientation - meta is supposed to have samplename in rows
             if( all(rownames(tmp.meta) %in% colnames(tmp.cnts)) ) {
               # fxs orientation - if it matches the 'orientation' flag just return, else transpose first
               if( orientation == "sxf" ) {
                 tmp.cnts <- t(tmp.cnts)
               } # nothing else matters
-              
+
             } else if( all(rownames(tmp.meta) %in% rownames(tmp.cnts)) ) {
               # sxf orientation - if it matches the 'orientation' flag just return, else transpose first
               if( orientation == "fxs" ) {
                 tmp.cnts <- t(tmp.cnts)
               } # nothing else matters
-              
+
             } else {
               ### If this happens, sth. is severely broken.
               stop("Stop the shenanigans! Either the dimensions of 'count' and 'meta' mtrices do not fit, or you lack col/row-names in your inputs.")
             }
-            
+
             return(list(data.frame(tmp.cnts), tmp.meta))
           }
 )
@@ -223,7 +224,7 @@ setGeneric("mbecProcessInput", signature="input.obj",
 
 # the generic version is for MbecData type inputs
 .mbecProcessInput <- function(input.obj, required.col=NULL) {
-  
+
   # check sample_data if 'required.col' is not NULL
   # enable check of covariates if 'required.col' is supplied
   if( !is.null(required.col) ) {
@@ -232,7 +233,7 @@ setGeneric("mbecProcessInput", signature="input.obj",
       stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
     }
   }
-  
+
   # If validation succeeds, just return the input unchanged.
   return(input.obj)
 }
@@ -247,7 +248,7 @@ setMethod("mbecProcessInput", "MbecData",
 # class phyloseq requires use of the MbecData-constructor
 setMethod("mbecProcessInput", "phyloseq",
           function(input.obj, required.col=NULL) {
-            
+
             # check sample_data if 'required.col' is not NULL
             # enable check of covariates if 'required.col' is supplied
             if( !is.null(required.col) ) {
@@ -256,14 +257,14 @@ setMethod("mbecProcessInput", "phyloseq",
                 stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
               }
             }
-            
+
             # if everything checks out - create new MbecData object and return
-            return.obj <- new("MbecData", 
-                              type="raw", 
-                              log="newobject", 
+            return.obj <- new("MbecData",
+                              type="raw",
+                              log="newobject",
                               transformations=list(),
                               input.obj)
-            
+
             return(return.obj)
           }
 )
@@ -271,21 +272,22 @@ setMethod("mbecProcessInput", "phyloseq",
 # class phyloseq requires use of the MbecData-constructor
 setMethod("mbecProcessInput", "list",
           function(input.obj, required.col=NULL) {
-            
+
             if( length(input.obj) != 2 ) {
               stop("Stop: Please provide the required input.")
             }
-            
+
             # with numeric inputs, just call mbecGetData to handle all the testing and such
             input.obj <- mbecGetData(input.obj, orientation = "fxs", required.col = required.col)
-            
-            return.obj <- new("MbecData", 
-                              type="raw", 
-                              log="newobject", 
+
+            return.obj <- new("MbecData",
+                              type="raw",
+                              log="newobject",
                               transformations=list(),
                               phyloseq::phyloseq(phyloseq::otu_table(input.obj[[1]], taxa_are_rows = TRUE),
                                                  phyloseq::sample_data(input.obj[[2]])))
-            
+
             return(return.obj)
           }
 )
+
