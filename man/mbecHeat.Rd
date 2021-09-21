@@ -29,6 +29,9 @@ mbecHeat(
 
 \item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
+}
 \description{
 Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
 group and batch to depict clustering in these groups. More covariates can be included.

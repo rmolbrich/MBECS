@@ -23,6 +23,9 @@ mbecBox(
 
 \item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
+}
 \description{
 Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a box-plot. Includes the
 density-plot, i.e., the distribution of counts for each sub-group. Selection methods for features are 'TOP' and 'ALL' which

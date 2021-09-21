@@ -13,6 +13,9 @@ mbecRLE(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 
 \item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
 }
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
+}
 \description{
 Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the first covariate,
 colored by the second covariate. Effectively illustrating the relative expression between samples from different

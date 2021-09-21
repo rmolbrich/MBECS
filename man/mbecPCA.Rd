@@ -20,6 +20,9 @@ mbecPCA(
 
 \item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
+}
 \description{
 Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected principal components.
 Covariates determine sample-shape and color and can be switched to shift the emphasis on either group. In addition to the
