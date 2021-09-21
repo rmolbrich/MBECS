@@ -27,21 +27,25 @@ mbecBox(
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a box-plot. Includes the
-density-plot, i.e., the distribution of counts for each sub-group. Selection methods for features are 'TOP' and 'ALL' which
-select the top-n or all features respectively. The default value for n is 10 and can be changed with the acompanying parameter.
+Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a
+box-plot. Includes the density-plot, i.e., the distribution of counts for each sub-group.
+Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
+respectively. The default value for n is 10 and can be changed with the accompanying parameter.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
-a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
+be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
+covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
+the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 This will return the plot-frame of all features i the data-set.
-\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch", return.data=TRUE)}
+\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch",
+return.data=TRUE)}
 
 This will return the ggplot2 object of the top 15 most variable features.
-\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15, model.var="batch", return.data=FALSE)}
+\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15,
+model.var="batch", return.data=FALSE)}
 }
 \keyword{Box}
 \keyword{abundance}

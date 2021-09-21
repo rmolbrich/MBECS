@@ -17,20 +17,24 @@ mbecMosaic(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Depicts the dispersion of samples over two (preferentially categorical*) covariates of interest. Effectively showing,
-the un-/evenness within and between covariates to inform the choice of methods for the subsequent steps in an analysis.
+Depicts the dispersion of samples over two (preferentially categorical*) covariates of interest.
+Effectively showing, the un-/evenness within and between covariates to inform the choice of
+methods for the subsequent steps in an analysis.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
-a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 This will return the plot-frame of for the samples grouped by treatment and sex
-\dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"), return.data=TRUE)}
+\dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"),
+return.data=TRUE)}
 
 This will return the ggplot2 object of the samples grouped by group and batch
-\dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates), model.vars=c("group","batch"), return.data=FALSE)}
+\dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates),
+model.vars=c("group","batch"), return.data=FALSE)}
 }
 \keyword{Mosaic}
 \keyword{allocation}

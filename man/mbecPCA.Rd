@@ -24,22 +24,27 @@ mbecPCA(
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected principal components.
-Covariates determine sample-shape and color and can be switched to shift the emphasis on either group. In addition to the
-ordination-plot, the function will show the distribution of eigenvalues (colored by the second covariate) on their
-respective principal components.
+Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
+principal components. Covariates determine sample-shape and color and can be switched to shift
+the emphasis on either group. In addition to the ordination-plot, the function will show the
+distribution of eigenvalues (colored by the second covariate) on their respective principal
+components.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
-a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set
+can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 This will return the data.frame for plotting.
-\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
 
-This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on x-axis and PC2 on y-axis.
-\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
+This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+x-axis and PC2 on y-axis.
+\dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 }
 \keyword{PCA}
 \keyword{analysis}

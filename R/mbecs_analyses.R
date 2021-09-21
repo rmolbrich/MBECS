@@ -1,15 +1,18 @@
 # ANALYSIS FUNCTIONS ------------------------------------------------------
 
+
 #' Relative Log Expression Plot
 #'
-#' Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the first covariate,
-#' colored by the second covariate. Effectively illustrating the relative expression between samples from different
-#' batches within the respective study groups. Other covariates can be chosen as input and the function will check for
-#' factors and convert if necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
+#' Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the
+#' first covariate, colored by the second covariate. Effectively illustrating the relative
+#' expression between samples from different batches within the respective study groups. Other
+#' covariates can be chosen as input and the function will check for factors and convert if
+#' necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
-#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
+#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
+#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
+#' the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords RLE relative log expression
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -20,10 +23,12 @@
 #'
 #' @examples
 #' This will return the data.frame for plotting.
-#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), return.data=TRUE)}
+#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), return.data=TRUE)}
 #'
 #' This will return the ggplot2 object for display, saving and modification.
-#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"), return.data=FALSE)}
+#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
+#' return.data=FALSE)}
 mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   cols <- pals::tableau20(20)
@@ -73,16 +78,19 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 }
 
 
+
 #' Principal Component Analysis Plot
 #'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected principal components.
-#' Covariates determine sample-shape and color and can be switched to shift the emphasis on either group. In addition to the
-#' ordination-plot, the function will show the distribution of eigenvalues (colored by the second covariate) on their
-#' respective principal components.
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
+#' principal components. Covariates determine sample-shape and color and can be switched to shift
+#' the emphasis on either group. In addition to the ordination-plot, the function will show the
+#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' components.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
-#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set
+#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+#' in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -95,10 +103,13 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #'
 #' @examples
 #' This will return the data.frame for plotting.
-#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
+#' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' x-axis and PC2 on y-axis.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setGeneric("mbecPCA", signature="input.obj",
            function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE)
              standardGeneric("mbecPCA")
@@ -244,13 +255,15 @@ setMethod("mbecPCA", "list",
 
 #' Feature Differential Abundance Box-Plot
 #'
-#' Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a box-plot. Includes the
-#' density-plot, i.e., the distribution of counts for each sub-group. Selection methods for features are 'TOP' and 'ALL' which
-#' select the top-n or all features respectively. The default value for n is 10 and can be changed with the acompanying parameter.
+#' Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a
+#' box-plot. Includes the density-plot, i.e., the distribution of counts for each sub-group.
+#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
+#' respectively. The default value for n is 10 and can be changed with the accompanying parameter.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
-#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
+#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
+#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
+#' the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Box abundance density
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -264,10 +277,12 @@ setMethod("mbecPCA", "list",
 #'
 #' @examples
 #' This will return the plot-frame of all features i the data-set.
-#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch", return.data=TRUE)}
+#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch",
+#' return.data=TRUE)}
 #'
 #' This will return the ggplot2 object of the top 15 most variable features.
-#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15, model.var="batch", return.data=FALSE)}
+#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15,
+#' model.var="batch", return.data=FALSE)}
 mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", return.data=FALSE) {
 
   cols <- cols[c(1,3,5,7,9,11,13,15,17,19)]
@@ -343,14 +358,15 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
 #' Feature Differential Abundance Heatmap
 #'
-#' Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
-#' group and batch to depict clustering in these groups. More covariates can be included.
-#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features respectively.
-#' The default value for n is 10 and can be changed with the accompanying parameter.
+#' Shows the abundance value of selected features in a heatmap. By default, the function expects two
+#' covariates group and batch to depict clustering in these groups. More covariates can be included.
+#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
+#' respectively. The default value for n is 10 and can be changed with the accompanying parameter.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
-#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+#' in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Heat abundance clustering
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -366,10 +382,12 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #'
 #' @examples
 #' This will return the plot-frame of all features i the data-set.
-#' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+#' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE,
+#' scale=TRUE, method="ALL", return.data=TRUE)}
 #'
 #' This will return the ggplot2 object of the top 15 most variable features.
-#' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
+#' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"),
+#' center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=10, return.data=FALSE) {
 
   cols <- cols[c(1,3,5,7,9,11,13,15,17,19)]
@@ -435,12 +453,14 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 
 #' Mosaic Sample Group Allocation
 #'
-#' Depicts the dispersion of samples over two (preferentially categorical*) covariates of interest. Effectively showing,
-#' the un-/evenness within and between covariates to inform the choice of methods for the subsequent steps in an analysis.
+#' Depicts the dispersion of samples over two (preferentially categorical*) covariates of interest.
+#' Effectively showing, the un-/evenness within and between covariates to inform the choice of
+#' methods for the subsequent steps in an analysis.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
-#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+#' in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Mosaic sample allocation
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -452,10 +472,12 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 #'
 #' @examples
 #' This will return the plot-frame of for the samples grouped by treatment and sex
-#' \dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"), return.data=TRUE)}
+#' \dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"),
+#' return.data=TRUE)}
 #'
 #' This will return the ggplot2 object of the samples grouped by group and batch
-#' \dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates), model.vars=c("group","batch"), return.data=FALSE)}
+#' \dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates),
+#' model.vars=c("group","batch"), return.data=FALSE)}
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   cols <- pals::tableau20(20)
@@ -523,51 +545,66 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
 #' Estimate Explained Variance
 #'
-#' The function offers a selection of methods/algorithms to estimate the proportion of variance that can be attributed to
-#' covariates of interest. This shows, how much variation is explained by the treatment effect, which proportion is introduced
-#' by processing in batches and the leftover variance, i.e., residuals that are not currently explained. Covariates of interest (CoI)
-#' are selected by the user and the function will incorporate them into the model building for the respective algorithm. The user can
-#' select from five different approaches to adapt to the characteristics of the data-set, e.g., LMMs are a better choice than LMs for
-#' a very unbalanced study design. Available approaches are: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda),
-#' Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef).
+#' The function offers a selection of methods/algorithms to estimate the proportion of variance that
+#' can be attributed to covariates of interest. This shows, how much variation is explained by the
+#' treatment effect, which proportion is introduced by processing in batches and the leftover
+#' variance, i.e., residuals that are not currently explained. Covariates of interest (CoI) are
+#' selected by the user and the function will incorporate them into the model building for the
+#' respective algorithm. The user can select from five different approaches to adapt to the
+#' characteristics of the data-set, e.g., LMMs are a better choice than LMs for a very unbalanced
+#' study design. Available approaches are: Linear Model (lm), Linear Mixed Model (lmm),
+#' Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or
+#' Silhouette Coefficient (s.coef).
 #'
-#' Linear Model (lm): An additive model of all covariates is fitted to each feature respectively an the proportion of variance is
-#' extracted for each covariate (OTU_x ~ covariate_1 + covariate_2 + ...).
+#' Linear Model (lm): An additive model of all covariates is fitted to each feature respectively
+#' and the proportion of variance is extracted for each covariate
+#' (OTU_x ~ covariate_1 + covariate_2 + ...).
 #'
-#' Linear Mixed Model (lmm): All but the first covariate are considered mixed effects. A model is fitted to each OTU respectively and
-#' the proportion of variance extracted for each covariate (OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
+#' Linear Mixed Model (lmm): All but the first covariate are considered mixed effects. A model is
+#' fitted to each OTU respectively and the proportion of variance extracted for each covariate
+#' (OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
 #'
-#' partial Redundancy Analysis (rda): Iterates over given covariates, builds a model of all covariates that includes one variable as
-#' condition/constraint and then fits it to the feature abundance matrix. The difference in explained variance between the full- and
-#' the constrained-model is then attributed to the constraint (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
+#' partial Redundancy Analysis (rda): Iterates over given covariates, builds a model of all
+#' covariates that includes one variable as condition/constraint and then fits it to the feature
+#' abundance matrix. The difference in explained variance between the full- and the constrained-
+#' model is then attributed to the constraint.
+#' (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
 #'
-#' Principal Variance Component Analysis (pvca): Algorithm - calculate the correlation of the fxs count-matrix - from there extract
-#' the eigenvectors and eigenvalues and calculate the proportion of explained variance per eigenvector (i.e. principal component) by
-#' dividing the eigenvalues by the sum of eigenvalues. Now select as many PCs as required to fill a chosen quota for the total proportion
-#' of explained variance. Iterate over all PCs and fit a linear mixed model that contains all covariates as random effect and all unique
-#' interactions between two covariates. Compute variance covariance components form the resulting model --> From there we get the Variance
-#' that each covariate(variable) contributes to this particular PC. Then just standardize variance by dividing it through the sum of
-#' variance for that model. Scale each PCs results by the proportion this PC accounted for in the first place. And then do it again by
-#' dividing it through the total amount of explained variance, i.e. the cutoff to select the number of PCs to take (but obviously not the
-#' cutoff but rather the actual values for the selected PCs). Finally take the average over each random variable and interaction term and
-#' display in a nice plot
+#' Principal Variance Component Analysis (pvca): Algorithm - calculate the correlation of the fxs
+#' count-matrix - from there extract the eigenvectors and eigenvalues and calculate the proportion
+#' of explained variance per eigenvector (i.e. principal component) by dividing the eigenvalues by
+#' the sum of eigenvalues. Now select as many PCs as required to fill a chosen quota for the total
+#' proportion of explained variance. Iterate over all PCs and fit a linear mixed model that contains
+#' all covariates as random effect and all unique interactions between two covariates. Compute
+#' variance covariance components form the resulting model --> From there we get the Variance that
+#' each covariate(variable) contributes to this particular PC. Then just standardize variance by
+#' dividing it through the sum of variance for that model. Scale each PCs results by the proportion
+#' this PC accounted for in the first place. And then do it again by dividing it through the total
+#' amount of explained variance, i.e. the cutoff to select the number of PCs to take (obviously
+#' not the cutoff but rather the actual values for the selected PCs). Finally take the average
+#' over each random variable and interaction term and display in a nice plot.
 #'
-#' Silhouette Coefficient (s.coef): Calculate principal components and get sample-wise distances on the
-#' resulting (sxPC) matrix. Then iterate over all the covariates and calculate the cluster silhouette (which is basically either zero,
-#' if the cluster contains only a single element, or it is the distance to the closest different cluster minus the distance of the sample
-#' within its own cluster divided (scaled) by the maximum distance). Average over each element in a cluster for all clusters and there is
-#' the representation of how good the clustering is. This shows how good a particular covariate characterizes the data, i.e., a treatment
-#' variable for instance may differentiate the samples into treated and untreated groups which implies two clusters. In an ideal scenario,
-#' the treatment variable, i.e., indicator for some biological effect would produce a perfect clustering. In reality, the confounding variables,
-#' e.g., batch, sex or age, will also influence the ordination of samples. Hence, the clustering coefficient is somewhat similar to the
-#' amount of explained variance metric that the previous methods used. If used to compare an uncorrected data-set to a batch-corrected set,
-#' the expected result would be an increase of clustering coefficient for the biological effect (and all other covariates - because a certain amount
-#' of uncertainty was removed from the data) and a decrease for the batch effect.
+#' Silhouette Coefficient (s.coef): Calculate principal components and get sample-wise distances on
+#' the resulting (sxPC) matrix. Then iterate over all the covariates and calculate the cluster
+#' silhouette (which is basically either zero, if the cluster contains only a single element, or it
+#' is the distance to the closest different cluster minus the distance of the sample within its own
+#' cluster divided (scaled) by the maximum distance). Average over each element in a cluster for all
+#' clusters and there is the representation of how good the clustering is. This shows how good a
+#' particular covariate characterizes the data, i.e., a treatment variable for instance may
+#' differentiate the samples into treated and untreated groups which implies two clusters. In an
+#' ideal scenario, the treatment variable, i.e., indicator for some biological effect would produce
+#' a perfect clustering. In reality, the confounding variables, e.g., batch, sex or age, will also
+#' influence the ordination of samples. Hence, the clustering coefficient is somewhat similar to the
+#' amount of explained variance metric that the previous methods used. If used to compare an
+#' uncorrected data-set to a batch-corrected set, the expected result would be an increase of
+#' clustering coefficient for the biological effect (and all other covariates - because a certain
+#' amount of uncertainty was removed from the data) and a decrease for the batch effect.
 #'
-#' The function returns a data-frame for further analysis - the report functions (mbecReport and mbecReportPrelim) will
-#' automatically produce plots. Input for the data-set can be an MbecData-object, a phyloseq-object or a list that contains
-#' counts and covariate data. The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for the data-set can
+#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
+#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
+#' the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Model Evaluation Variance
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
@@ -578,11 +615,15 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a data-frame that contains the variance attributable to group and batch according to linear additive model.
-#' \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"), method="lm", type="RAW")}
-#'
-#' This will return a data-frame that contains the variance attributable to group and batch according to linear additive model.
-#' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"), method="pvca")}
+#' This will return a data-frame that contains the variance attributable to group and batch
+#' according to linear additive model.
+#' \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
+#' method="lm", type="RAW")}
+####################################################################################################
+#' This will return a data-frame that contains the variance attributable to group and batch
+#' according to linear additive model.
+#' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
+#' method="pvca")}
 mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca","s.coef"), type="NONE") {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!

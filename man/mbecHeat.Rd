@@ -33,22 +33,25 @@ mbecHeat(
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
-group and batch to depict clustering in these groups. More covariates can be included.
-Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features respectively.
-The default value for n is 10 and can be changed with the accompanying parameter.
+Shows the abundance value of selected features in a heatmap. By default, the function expects two
+covariates group and batch to depict clustering in these groups. More covariates can be included.
+Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
+respectively. The default value for n is 10 and can be changed with the accompanying parameter.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
-a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
-contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 This will return the plot-frame of all features i the data-set.
-\dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+\dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE,
+scale=TRUE, method="ALL", return.data=TRUE)}
 
 This will return the ggplot2 object of the top 15 most variable features.
-\dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
+\dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"),
+center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 }
 \keyword{Heat}
 \keyword{abundance}
