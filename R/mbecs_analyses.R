@@ -84,10 +84,10 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
-#' @param input.obj, list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
 #' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
-#' @param pca.axes, numeric vector which axes to plot, first is X and second is Y
-#' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
 #' @include mbecs_classes.R
 #'
 #' @examples
@@ -95,7 +95,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
 #'
 #' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=TRUE)}
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates), model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setGeneric("mbecPCA", signature="input.obj",
            function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE)
              standardGeneric("mbecPCA")
@@ -238,13 +238,31 @@ setMethod("mbecPCA", "list",
           }
 )
 
-#' Produces box-plot + density for OTUs in phyloseq object.
-#' @param input.obj, list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param method, one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'
-#' @param n, number of OTUs to display for 'TOP' method
-#' @param model.var, covariate to group by, default is batch
-#' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
-#' @export
+
+#' Feature Differential Abundance Box-Plot
+#'
+#' Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a box-plot. Includes the
+#' density-plot, i.e., the distribution of counts for each sub-group. Selection methods for features are 'TOP' and 'ALL' which
+#' select the top-n or all features respectively. The default value for n is 10 and can be changed with the acompanying parameter.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords Box abundance density
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param method one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'
+#' @param n number of OTUs to display for 'TOP' method
+#' @param model.var covariate to group by, default is batch
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' This will return the plot-frame of all features i the data-set.
+#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch", return.data=TRUE)}
+#'
+#' This will return the ggplot2 object of the top 15 most variable features.
+#' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15, model.var="batch", return.data=FALSE)}
 mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", return.data=FALSE) {
 
   cols <- cols[c(1,3,5,7,9,11,13,15,17,19)]
@@ -318,14 +336,33 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 }
 
 
-#' Produces box-plot + density for OTUs in phyloseq object.
-#' @param input.obj, list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param grouping, covariate to group by, default is batch
-#' @param center, flag to activate centering
-#' @param scale, flag to activate scaling
-#' @param method, one of 'ALL' or 'TOP' or a vector of feature names
-#' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
-#' @export
+#' Feature Differential Abundance Heatmap
+#'
+#' Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
+#' group and batch to depict clustering in these groups. More covariates can be included.
+#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features respectively.
+#' The default value for n is 10 and can be changed with the accompanying parameter.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
+#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords Heat abundance clustering
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars covariates of interest to show in heatmap
+#' @param center flag to activate centering
+#' @param scale flag to activate scaling
+#' @param method one of 'ALL' or 'TOP' or a vector of feature names
+#' @param n number of features to select in method TOP
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' This will return the plot-frame of all features i the data-set.
+#' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+#'
+#' This will return the ggplot2 object of the top 15 most variable features.
+#' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=10, return.data=FALSE) {
 
   cols <- cols[c(1,3,5,7,9,11,13,15,17,19)]
@@ -394,6 +431,38 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 #' @param grouping, two covariates of interest to display sample distribution for
 #' @param return.data, logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
 #' @export
+#'
+#'
+
+
+
+#' Mosaic Sample Group Allocation
+#'
+#' Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
+#' group and batch to depict clustering in these groups. More covariates can be included.
+#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features respectively.
+#' The default value for n is 10 and can be changed with the accompanying parameter.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
+#' a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+#' contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords Heat abundance clustering
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars covariates of interest to show in heatmap
+#' @param center flag to activate centering
+#' @param scale flag to activate scaling
+#' @param method one of 'ALL' or 'TOP' or a vector of feature names
+#' @param n number of features to select in method TOP
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' This will return the plot-frame of all features i the data-set.
+#' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+#'
+#' This will return the ggplot2 object of the top 15 most variable features.
+#' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   cols <- pals::tableau20(20)

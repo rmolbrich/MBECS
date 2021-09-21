@@ -9,10 +9,34 @@ mbecMosaic(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 \arguments{
 \item{input.obj, }{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
+\item{model.vars}{covariates of interest to show in heatmap}
+
 \item{return.data, }{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 
 \item{grouping, }{two covariates of interest to display sample distribution for}
+
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+
+\item{center}{flag to activate centering}
+
+\item{scale}{flag to activate scaling}
+
+\item{method}{one of 'ALL' or 'TOP' or a vector of feature names}
+
+\item{n}{number of features to select in method TOP}
+
+\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
 \description{
 Produces mosaic plot to visualize sub-populations due to group-wise combinations, e.g., group x batch
 }
+\examples{
+This will return the plot-frame of all features i the data-set.
+\dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+
+This will return the ggplot2 object of the top 15 most variable features.
+\dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
+}
+\keyword{Heat}
+\keyword{abundance}
+\keyword{clustering}

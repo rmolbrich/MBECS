@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecHeat}
 \alias{mbecHeat}
-\title{Produces box-plot + density for OTUs in phyloseq object.}
+\title{Feature Differential Abundance Heatmap}
 \usage{
 mbecHeat(
   input.obj,
@@ -15,18 +15,38 @@ mbecHeat(
 )
 }
 \arguments{
-\item{input.obj, }{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
-\item{center, }{flag to activate centering}
+\item{model.vars}{covariates of interest to show in heatmap}
 
-\item{scale, }{flag to activate scaling}
+\item{center}{flag to activate centering}
 
-\item{method, }{one of 'ALL' or 'TOP' or a vector of feature names}
+\item{scale}{flag to activate scaling}
 
-\item{return.data, }{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{method}{one of 'ALL' or 'TOP' or a vector of feature names}
 
-\item{grouping, }{covariate to group by, default is batch}
+\item{n}{number of features to select in method TOP}
+
+\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
 \description{
-Produces box-plot + density for OTUs in phyloseq object.
+Shows the abundance value of selected features in a heatmap. By default, the function expects two covariates
+group and batch to depict clustering in these groups. More covariates can be included.
+Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features respectively.
+The default value for n is 10 and can be changed with the accompanying parameter.
 }
+\details{
+The function returns either a plot-frame or the finished ggplot object. Input for the data-set can be an MbecData-object,
+a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return the plot-frame of all features i the data-set.
+\dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)}
+
+This will return the ggplot2 object of the top 15 most variable features.
+\dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
+}
+\keyword{Heat}
+\keyword{abundance}
+\keyword{clustering}

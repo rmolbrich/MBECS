@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecBox}
 \alias{mbecBox}
-\title{Produces box-plot + density for OTUs in phyloseq object.}
+\title{Feature Differential Abundance Box-Plot}
 \usage{
 mbecBox(
   input.obj,
@@ -13,16 +13,33 @@ mbecBox(
 )
 }
 \arguments{
-\item{input.obj, }{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
-\item{method, }{one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'}
+\item{method}{one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'}
 
-\item{n, }{number of OTUs to display for 'TOP' method}
+\item{n}{number of OTUs to display for 'TOP' method}
 
-\item{model.var, }{covariate to group by, default is batch}
+\item{model.var}{covariate to group by, default is batch}
 
-\item{return.data, }{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
 }
 \description{
-Produces box-plot + density for OTUs in phyloseq object.
+Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a box-plot. Includes the
+density-plot, i.e., the distribution of counts for each sub-group. Selection methods for features are 'TOP' and 'ALL' which
+select the top-n or all features respectively. The default value for n is 10 and can be changed with the acompanying parameter.
 }
+\details{
+The function returns either a plot-frame or the finished ggplot object. Input for th data-set can be an MbecData-object,
+a phyloseq-object or a list that contains counts and covariate data. The covariate table requires an 'sID' column that
+contains sample IDs equal to the sample naming in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return the plot-frame of all features i the data-set.
+\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch", return.data=TRUE)}
+
+This will return the ggplot2 object of the top 15 most variable features.
+\dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15, model.var="batch", return.data=FALSE)}
+}
+\keyword{Box}
+\keyword{abundance}
+\keyword{density}
