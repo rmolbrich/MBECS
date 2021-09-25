@@ -850,10 +850,35 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 #' Helper function that takes a fitted model and extracts the
 #' fraction of variances attributable to every model-variable
 #' @param model.fit lm() or lmm() output
+#'
+
+#' Model Variable Variance Extraction
+#'
+#' Inputs for this function are the fitted models of lm/lmm approaches.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
+#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
+#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
+#' the counts table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords RLE relative log expression
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
+#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' @export
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), return.data=TRUE)}
+#'
+#' This will return the ggplot2 object for display, saving and modification.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
+#' return.data=FALSE)}
 mbecVarianceStats <- function( model.fit ) {
 
   ### ToDo: implement lmm and glm versions of this
-
 
   # check validity of model fit
   mbecValidateModel( model.fit)
@@ -861,25 +886,58 @@ mbecVarianceStats <- function( model.fit ) {
 
   if( class(model.fit) %in% "lm" ) {              # linear model
     # get model coefficients
-    model.sum <- summary(model.fit)
-    w.cof2[i] <- sum.res$coefficients[3,1]
+    # model.sum <- summary(model.fit)
+    # w.cof2[i] <- model.sum$coefficients[3,1]
 
-    an = anova(model.fit)
-    varFrac = an[['Sum Sq']] / sum( an[['Sum Sq']] )
-    names(varFrac) = rownames(an)
+    vp = stats::anova(model.fit) %>%
+      data.frame() %>%
+      dplyr::mutate("variance" = select(.,"Sum.Sq") / sum(select(.,"Sum.Sq")), .keep="none") %>%
+      t()
 
   } else if( class(model.fit) %in% "lmerMod" ) {  # linear-mixed model
 
-    # extract variance components
-    vc = unlist(getVarianceComponents(model.fit))
+    # this is the un-adjusted variance --> divide by total variance and done
+    vc <- mbecMixedVariance(model.fit)
 
-    # create fractions
-    varFrac = vc / sum(vc)
+    # BUT maybe we want to adjust/condition for one or more variables..
+    # and make this shit more complicated than it needs to be
+    adjust = NULL # some arbitrary adjustment for development
 
-    # remove ".(Intercept)" string
-    names(varFrac) = gsub("\\.\\(Intercept\\)", "", names(varFrac))
+    # 1. make this adjustment validity check
+    # check for varying coefficient models - whatever that is.. copy and paste for now
+    if (max(sapply(varComp, length)) > 1 && !is.null(adjust)) {
+      stop("The adjust and adjustAll arguments are not currently supported for varying coefficient models")
+    }
+    # 2. for all covariates perform the variance calculation - for varying coefficients the total sum is somehow only this particular coefficient + all other variables - BUT the other coefficient level are ignored here
+    # so, we need variances and scaled variance in subsequent steps - but only calculate once if possible
 
-    ### ToDo: Variance calculation
+    # meh
+    lib.df <- data.frame("covariates"=colnames(model.fit@frame),
+                         row.names=sapply(colnames(model.fit@frame), function(covariate)
+                           paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]), sep=""), collapse = ",")))
+    # and a look-up table to make variance calculations nice and easy
+    total.var.LUT <- unlist(lapply(vc, function(var.comp) {
+      if( !is.null(names(var.comp)) ) {
+        weights = (table(fit@frame[[lib.df[eval(paste(names(var.comp), collapse = ",")),]]])/nrow(fit@frame))
+        var.comp %*% weights
+      } else var.comp
+    } ) )
+
+    vp <- list()
+    # now just sum total variance from LUT and leave out the current effect
+    # the trick here is to  add the current effect later to the sum -->
+    # in case it is a normal coefficient, it just works as a normal sum
+    # but if it is a vector, i.e., varying coefficients, the separate addition produces a vector
+    # instead of a scalar -> all the varying components can be updated in one fail-swoop *MUHAHAHAHA*
+    for( effect in names(vc) ) {
+
+      # value of this effect divided by the total variance
+      tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in% eval(effect))])
+      vp[[eval(effect)]] <- vc[[eval(effect)]] / (tmp.t.var + vc[[eval(effect)]])
+    }
+
+
+
 
 
   } else if( class(model.fit) %in% "glm" ) {
@@ -889,9 +947,55 @@ mbecVarianceStats <- function( model.fit ) {
 
 
 
-  return(varFrac)
+  return(vp)
 }
 
+
+
+
+#' Linear-Mixed Models Variance Components
+#'
+#' return order is residuals, random_effects, fixed_effects
+mbecMixedVariance <- function(model.fit) {
+  # remember: sd == sqrt(var)
+
+  # VarCorr computes var, sd, cov for residuals and random effects
+  rVC <- lme4::VarCorr(model.fit)
+  # Standard Deviation of Residuals is stored as 'sc' attribute in rVC - and squared to get variances
+  # iterate over the list(s) of random effects in rVC and squre sd to get variance - and don't forget to unlist()
+  # so, technically this is the residualsRandomVar-vector
+  # diag() is the same as attr(random.eff,"stddev")^2 and return the variances
+  randomVar <- c("Residuals"=attr(rVC, "sc")^2,
+                 lapply(rVC,diag))
+  # scale to number of observations - aka (N-1)/N
+  n.scaling <- (stats::nobs(model.fit) - 1) / stats::nobs(model.fit)
+  # pp is class 'merPredD' and X is dense model matrix for the fixed-effects parameters
+  # fixedEffect value with fixed effects parameters
+  # 'fixef()' extract the estimates for the fixed effects parameters
+  # --> The fixed effects variance, σ2f, is the variance of the matrix-multiplication
+  # β∗X (parameter vector by model matrix)
+  #
+  # extract both components and multiply each column by the corresponding value in the effects estimate
+  # and then scale to sample-size, i.e., (N-1)/N
+  fixedVar <- t(t(model.fit@pp$X) * lme4::fixef(model.fit)) %>%
+    as.data.frame() %>%
+    # 1. drop intercept
+    dplyr::select(!"(Intercept)") %>%
+    # 2. row-sums for all effects - can calculate total variance
+    dplyr::mutate("total.var"=apply(., 1, sum)) %>%
+    # 3. apply to get the scaled variance in each column
+    apply(., 2, function(effect) var(effect) * n.scaling)
+
+  # maybe fancy later, but for now this works
+  fixedVar <- lapply(split(
+    head(fixedVar, -1) / sum(head(fixedVar, -1)) * tail(fixedVar, 1),
+    names(head(fixedVar, -1))),unname)
+
+  # add attribute for total.var to every list element - to make the following steps less of a pain
+
+  # concatenate and return the lists
+  return(c(randomVar, fixedVar))
+}
 
 #' Helper function that ensure validity of the model by testing colinearity
 #' @param model.fit lm() or lmm() output
