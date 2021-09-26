@@ -7,7 +7,7 @@
 mbecModelVariance(
   input.obj,
   model.vars = character(),
-  method = c("lm", "lmm", "rda", "pvca", "s.coef"),
+  method = c("lm", "lmm", "rda", "pvca"),
   type = "NONE"
 )
 }

@@ -624,7 +624,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' according to linear additive model.
 #' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="pvca")}
-mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca","s.coef"), type="NONE") {
+mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), type="NONE") {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
   ### ToDo: safety checks and logic to distinguish model types and also take care of this matrix-input issue
@@ -650,9 +650,16 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   if( method == "lm" ) {
     message("Fitting linear model to every feature and extract proportion of variance explained by covariates.")
 
-    model.variances <- apply(tmp.cnts, 2, FUN = function(x){
-      model.fit <- stats::lm(x ~ group + batch, data = tmp.meta)
-      p<- mbecVarianceStats(model.fit)
+    # Magically stopped working..
+    # model.variances <- apply(tmp.cnts, 2, FUN = function(x){
+    #   model.fit <- stats::lm(x ~ group + batch, data = tmp.meta)
+    #   data.frame(mbecVarianceStats(model.fit)) # cast to data.frame to preserve naming
+    # })
+
+    model.variances <- sapply(colnames(tmp.cnts), FUN = function(x) {
+      model.fit <- stats::lm(tmp.cnts[,eval(x)] ~ group + batch, data = tmp.meta)
+      # data.frame(mbecVarianceStats(model.fit))
+      data.frame(mbecVarianceStats(model.fit))
     })
     modelType = "anova"
 
@@ -693,7 +700,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     # iterate over the vector of covariate names (model.vars) to construct formulas for 'RDA' procedure
     for( condition.idx in 1:length(model.vars) ) {
       # the counts are always available in sxf format in variable 'tmp.cnts'
-      # just iterate over all covariates and keep one to condition on
+      # just iterate over all covariates and keep on to condition on
       tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
                                             paste(model.vars[-eval(condition.idx)], "+", collapse=" "),
                                             " Condition(", model.vars[eval(condition.idx)],")", sep=""))
@@ -701,7 +708,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
       tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
 
       # estimate significance of
-      tmp.sig <- anova(tmp.rda.covariate,permutations = how(nperm=999))$`Pr(>F)`[1]
+      tmp.sig <- anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>F)`[1]
 
       # calculate proportion of variance for this covariate as quotient of its eigenvalue and the sum of eigenvalues
       # partial.chi denotes the variance in the 'CONDITION'
@@ -710,14 +717,11 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     }
 
     modelType = "rda"
-
     # make-up some return format
-
     res <- data.frame(t(model.variances)) %>% mutate(type = eval(type))
     attr(res, "modelType") <- modelType
 
     return(res)
-
 
 
   } else if( method == "pvca" ) {
@@ -753,7 +757,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # create a long-df that contains a column for all selected eigen-vectors and the required covariates (which obviously repeat for all vectors)
     # join selected eigenvectors and covariate data in a single df
-    lmm.df <- eVec %>% as_tibble(.) %>% select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
+    lmm.df <- eVec %>% tibble::as_tibble(., .name_repair = "unique") %>% select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
     #lmm.df <- eVec %>% cbind(., tmp.meta)  %>% as_tibble(.) %>% select_at(1:eval(n.PCs))
 
     # # figure out how many effects there are - it is a random effect for every covariate - plus an interaction term for
@@ -883,8 +887,8 @@ mbecVarianceStats <- function( model.fit ) {
   # check validity of model fit
   mbecValidateModel( model.fit)
 
-
-  if( class(model.fit) %in% "lm" ) {              # linear model
+  # linear model
+  if( class(model.fit) %in% "lm" ) {
     # get model coefficients
     # model.sum <- summary(model.fit)
     # w.cof2[i] <- model.sum$coefficients[3,1]
@@ -901,13 +905,13 @@ mbecVarianceStats <- function( model.fit ) {
 
     # BUT maybe we want to adjust/condition for one or more variables..
     # and make this shit more complicated than it needs to be
-    adjust = NULL # some arbitrary adjustment for development
-
-    # 1. make this adjustment validity check
-    # check for varying coefficient models - whatever that is.. copy and paste for now
-    if (max(sapply(varComp, length)) > 1 && !is.null(adjust)) {
-      stop("The adjust and adjustAll arguments are not currently supported for varying coefficient models")
-    }
+    # adjust = NULL # some arbitrary adjustment for development
+    #
+    # # 1. make this adjustment validity check
+    # # check for varying coefficient models - whatever that is.. copy and paste for now
+    # if (max(sapply(varComp, length)) > 1 && !is.null(adjust)) {
+    #   stop("The adjust and adjustAll arguments are not currently supported for varying coefficient models")
+    # }
     # 2. for all covariates perform the variance calculation - for varying coefficients the total sum is somehow only this particular coefficient + all other variables - BUT the other coefficient level are ignored here
     # so, we need variances and scaled variance in subsequent steps - but only calculate once if possible
 
@@ -915,13 +919,17 @@ mbecVarianceStats <- function( model.fit ) {
     lib.df <- data.frame("covariates"=colnames(model.fit@frame),
                          row.names=sapply(colnames(model.fit@frame), function(covariate)
                            paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]), sep=""), collapse = ",")))
+
     # and a look-up table to make variance calculations nice and easy
     total.var.LUT <- unlist(lapply(vc, function(var.comp) {
-      if( !is.null(names(var.comp)) ) {
-        weights = (table(fit@frame[[lib.df[eval(paste(names(var.comp), collapse = ",")),]]])/nrow(fit@frame))
+      if( length(var.comp) > 1 ) {
+        weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp), collapse = ",")),]]])/nrow(model.fit@frame))
         var.comp %*% weights
-      } else var.comp
-    } ) )
+      } else {
+        names(var.comp) <- NULL
+        var.comp
+      }
+    } ), use.names = T, recursive = F)
 
     vp <- list()
     # now just sum total variance from LUT and leave out the current effect
@@ -936,16 +944,13 @@ mbecVarianceStats <- function( model.fit ) {
       vp[[eval(effect)]] <- vc[[eval(effect)]] / (tmp.t.var + vc[[eval(effect)]])
     }
 
-
-
-
+    vp <- unlist(vp)
+    names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
 
   } else if( class(model.fit) %in% "glm" ) {
 
     ### ToDon't
   }
-
-
 
   return(vp)
 }
@@ -953,9 +958,9 @@ mbecVarianceStats <- function( model.fit ) {
 
 
 
-#' Linear-Mixed Models Variance Components
+
+#' Extract Linear-Mixed Models Variance Components
 #'
-#' return order is residuals, random_effects, fixed_effects
 mbecMixedVariance <- function(model.fit) {
   # remember: sd == sqrt(var)
 
@@ -970,8 +975,8 @@ mbecMixedVariance <- function(model.fit) {
   # scale to number of observations - aka (N-1)/N
   n.scaling <- (stats::nobs(model.fit) - 1) / stats::nobs(model.fit)
   # pp is class 'merPredD' and X is dense model matrix for the fixed-effects parameters
-  # fixedEffect value with fixed effects parameters
-  # 'fixef()' extract the estimates for the fixed effects parameters
+  # fixedEffect-value
+  # with fixed effects parameters 'fixef()' extract the estimates for the fixed effects parameters
   # --> The fixed effects variance, σ2f, is the variance of the matrix-multiplication
   # β∗X (parameter vector by model matrix)
   #
@@ -991,11 +996,13 @@ mbecMixedVariance <- function(model.fit) {
     head(fixedVar, -1) / sum(head(fixedVar, -1)) * tail(fixedVar, 1),
     names(head(fixedVar, -1))),unname)
 
-  # add attribute for total.var to every list element - to make the following steps less of a pain
+  # add attribute for total.var to every list element - to make the following steps less of a pita
 
   # concatenate and return the lists
   return(c(randomVar, fixedVar))
 }
+
+
 
 #' Helper function that ensure validity of the model by testing colinearity
 #' @param model.fit lm() or lmm() output
@@ -1013,6 +1020,52 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
     if( colinScore(model.fit) > colinearityThreshold ) {
       stop("Some covariates are strongly correlated. Try again.")
     }
+
+    # ### DEVOPS
+    #
+    # # check that factors are random and continuous variables are fixed
+    # ###################################################################
+    #
+    # # remove backticks with gsub manually
+    # # solve issue that backticks are conserved is some but not all parts of lmer()
+    #
+    # # Simplified testing of random versus fixed effects
+    # # allows (A|B) only where A is continuous
+    #
+    # # variables fit by regression
+    # testVar = attr(attr(model.fit@frame, "terms"), "term.labels")
+    # testVar = gsub("`", "", testVar)
+    #
+    # # get type for each variable
+    # # keep only tested variables
+    # varType = attr(attr(model.fit@frame, "terms"), "dataClasses")[-1]
+    # varType = varType[testVar]
+    #
+    # # random effects
+    # randVar = names(model.fit@flist)
+    #
+    # # fixed effects
+    # # starting with all variables, remove random variables
+    # fixedVar = setdiff(testVar, randVar)
+    #
+    # for( i in 1:length(varType) ){
+    #
+    #   # if factor is not random
+    #   if( (showWarnings && ! dream) && varType[i] %in% c("factor", "character") && (! names(varType)[i] %in% randVar) ){
+    #     stop(paste("Categorical variables modeled as fixed effect:", paste(names(varType)[i], collapse=', '), "\nThe results will not behave as expected and may be very wrong!!"))
+    #   }
+    #
+    #   # If numeric/double is not fixed
+    #   if( (showWarnings && ! dream) && varType[i] %in% c("numeric", "double") && (!names(varType)[i] %in% fixedVar) ){
+    #     stop(paste("Continuous variable cannot be modeled as a random effect:", names(varType)[i]))
+    #   }
+    # }
+    #
+    # # show convergance message
+    # if( showWarnings && !is.null(fit@optinfo$conv$lme4$messages) && (fit@optinfo$conv$lme4$messages != "boundary (singular) fit: see ?isSingular")){
+    #   stop(fit@optinfo$conv$lme4$messages)
+    # }
+
   }
 }
 
@@ -1038,6 +1091,5 @@ colinScore <- function(model.fit) {
 
   return(score)
 }
-
 
 
