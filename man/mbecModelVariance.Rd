@@ -8,15 +8,19 @@ mbecModelVariance(
   input.obj,
   model.vars = character(),
   method = c("lm", "lmm", "rda", "pvca"),
-  type = "NONE"
+  model.form = NULL,
+  type = "NONE",
+  no.warning = TRUE
 )
 }
 \arguments{
 \item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)}
 
-\item{model.vars}{vector of covariates to include in model-construction}
+\item{model.vars}{vector of covariates to include in model-construction, in case parameter 'model.form' is not supplied}
 
 \item{method}{select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)}
+
+\item{model.form}{string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"}
 
 \item{type}{creates a column with that string in the output df - to keep track of cnt-source}
 }

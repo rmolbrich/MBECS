@@ -608,8 +608,9 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #'
 #' @keywords Model Evaluation Variance
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
-#' @param model.vars vector of covariates to include in model-construction
+#' @param model.vars vector of covariates to include in model-construction, in case parameter 'model.form' is not supplied
 #' @param method select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)
+#' @param model.form string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"
 #' @param type creates a column with that string in the output df - to keep track of cnt-source
 #' @return df that contains proportions of variance for given covariates in every feature
 #' @include mbecs_classes.R
@@ -619,18 +620,22 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' according to linear additive model.
 #' \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="lm", type="RAW")}
-####################################################################################################
 #' This will return a data-frame that contains the variance attributable to group and batch
 #' according to linear additive model.
 #' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="pvca")}
-mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), type="NONE") {
+mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), model.form=NULL, type="NONE", no.warning=TRUE) {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
   ### ToDo: safety checks and logic to distinguish model types and also take care of this matrix-input issue
   ### ToDoAsWell: How2Make lm and lmm formulas.. or if  or whatever
   ## ToDo: check this out - itis part of lmm just put it her to remind me
   ## control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
+  oldw <- getOption("warn")
+  if( no.warning ) {
+    options(warn = -1)
+  }
+  on.exit(options(warn = oldw))
 
   ## PVCA stuff
   pct_threshold = .5876   # threshold for explained variances
@@ -649,18 +654,34 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   ## 1. implement for linear model
   if( method == "lm" ) {
     message("Fitting linear model to every feature and extract proportion of variance explained by covariates.")
-
-    # Magically stopped working..
-    # model.variances <- apply(tmp.cnts, 2, FUN = function(x){
-    #   model.fit <- stats::lm(x ~ group + batch, data = tmp.meta)
-    #   data.frame(mbecVarianceStats(model.fit)) # cast to data.frame to preserve naming
+    # if no formula is supplied a simple additive model will be constructed
+    if( !is.null(model.form) ) {
+      message("Use provided model formula.")
+      # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
+      tmp.formula <- as.formula(model.form)
+    } else {
+      message("Construct formula from covariates.")
+      tmp.formula = stats::as.formula(paste("y", " ~ ",
+                                            paste(model.vars, collapse=" + ")))
+    }
+    ## so, for some reason this shit does not work with apply, because the iterator will not update in the formula
+    ## maybe try again once the rest works
+    ### DEBUG ###
+    # model.variances <- sapply(colnames(tmp.cnts), FUN = function(x) {
+    #   model.fit <- stats::lm(tmp.cnts[,eval(x)] ~ group + batch, data = tmp.meta)
+    #   # data.frame(mbecVarianceStats(model.fit))
+    #   data.frame(mbecVarianceStats(model.fit))
     # })
+    ### DEBUG ###
 
-    model.variances <- sapply(colnames(tmp.cnts), FUN = function(x) {
-      model.fit <- stats::lm(tmp.cnts[,eval(x)] ~ group + batch, data = tmp.meta)
-      # data.frame(mbecVarianceStats(model.fit))
-      data.frame(mbecVarianceStats(model.fit))
-    })
+    model.variances <- NULL
+    for( x in colnames(tmp.cnts)) {
+      y <- tmp.cnts[[eval(x)]]
+
+      model.fit <- stats::lm(tmp.formula, data=tmp.meta)
+      model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    }
+
     modelType = "anova"
 
   } else if( method == "lmm" ) {
@@ -668,10 +689,26 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
 
-    model.variances <- apply(tmp.cnts, 2, FUN = function(x) {
-      model.fit <- lme4::lmer(x ~ group + (1|batch), data=tmp.meta, control=control)
-      p <- mbecVarianceStats(model.fit)
-    })
+    # if no formula is supplied a simple additive model will be constructed
+    if( !is.null(model.form) ) {
+      message("Use provided model formula.")
+      # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
+      tmp.formula <- as.formula(model.form)
+    } else {
+      message("Construct formula from covariates.")
+      f.terms <- paste("(1|",model.vars,")", sep="")
+      tmp.formula <- as.formula(paste(paste("y", model.vars[1], sep=" ~ "), paste(f.terms[-1], collapse=" + "), sep=" + "))
+
+    }
+    # now fit a model to every feature
+    model.variances <- NULL
+    for( x in colnames(tmp.cnts)) {
+      # meh
+      y <- tmp.cnts[[eval(x)]]
+
+      model.fit <- lme4::lmer(tmp.formula, data=tmp.meta)
+      model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    }
 
     modelType = "linear-mixed model"
 
@@ -827,7 +864,6 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
       tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,eval(var.elem)]), dist = tmp.dist)
 
-
       avg.sil.df <- rbind.data.frame(avg.sil.df, data.frame("variable"=var.elem,
                                                             "cluster"=levels(tmp.meta[,eval(var.elem)]),
                                                             "sil.coefficient"= c(summary(tmp.sil))$clus.avg.widths))
@@ -841,7 +877,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   }
 
   # transpose result and add column with correction/transformation type.. maybe more later though
-  res <- data.frame(t(model.variances)) %>% mutate(type = eval(type))
+  res <- mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- modelType
 
   ### fancy return type from variancePart package - wait if we need that
@@ -849,7 +885,6 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
   return( res )
 }
-
 
 #' Helper function that takes a fitted model and extracts the
 #' fraction of variances attributable to every model-variable
@@ -946,6 +981,7 @@ mbecVarianceStats <- function( model.fit ) {
 
     vp <- unlist(vp)
     names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
+    vp <- data.frame(t(vp))
 
   } else if( class(model.fit) %in% "glm" ) {
 
@@ -954,7 +990,6 @@ mbecVarianceStats <- function( model.fit ) {
 
   return(vp)
 }
-
 
 
 
@@ -1001,6 +1036,7 @@ mbecMixedVariance <- function(model.fit) {
   # concatenate and return the lists
   return(c(randomVar, fixedVar))
 }
+
 
 
 
