@@ -2,17 +2,34 @@
 % Please edit documentation in R/mbecs_helper.R
 \name{percentileNorm}
 \alias{percentileNorm}
-\title{The function applies normalization to every batch of a case/control study, is called by 'batchCorrection()'
-group/treatment vector is limited to two classes, i.e., case/control study}
+\title{Percentile Normalization}
 \usage{
 percentileNorm(cnts, meta)
 }
 \arguments{
-\item{cnts, }{matrix of cnts in sxf orientation}
+\item{cnts}{numeric matrix (samples x features)}
 
-\item{meta, }{df that requires columns 'group' and 'batch'}
+\item{meta}{data-frame of covariate columns, first column contains study groups, second column contains batches}
+}
+\value{
+numeric matrix of corrected counts
 }
 \description{
-The function applies normalization to every batch of a case/control study, is called by 'batchCorrection()'
-group/treatment vector is limited to two classes, i.e., case/control study
+Wrapper to help perform percentile normalization on a matrix of counts. Takes counts and a
+data-frame of grouping variables and returns a matrix of transformed counts. This is designed
+(by the Developers of the procedure) to work with case/control experiments by taking the
+untreated group as reference and adjusting the other groupings of TRT x Batch to it.
 }
+\details{
+The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
+can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return a matrix of normalised counts, according to the covariate information in meta
+\dontrun{mtx.pn_counts <- percentileNorm(cnts=mtx_of_cnts, meta=grouping_info)}
+}
+\keyword{Log}
+\keyword{Ratio}
+\keyword{Transformation}

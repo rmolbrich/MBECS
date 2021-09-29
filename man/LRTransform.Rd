@@ -2,8 +2,7 @@
 % Please edit documentation in R/mbecs_helper.R
 \name{LRTransform}
 \alias{LRTransform}
-\title{Wrapper to help perform log-ratio transformations.
-Adapted from packages 'mixOmics' and 'robCompositions' to work on matrices and Phyloseq objects alike.}
+\title{Log-Ratio Transformation}
 \usage{
 LRTransform(
   input.obj,
@@ -19,7 +18,28 @@ LRTransform(
 
 \item{offset, }{optional offset in case of sparse matrix}
 }
-\description{
-Wrapper to help perform log-ratio transformations.
-Adapted from packages 'mixOmics' and 'robCompositions' to work on matrices and Phyloseq objects alike.
+\value{
+MbecDataObject with transformed counts
 }
+\description{
+Wrapper to help perform log-ratio transformations ,adapted from packages 'mixOmics' and
+'robCompositions' to work on matrices and Phyloseq objects alike.
+}
+\details{
+The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
+can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
+The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
+in the counts table. Correct orientation of counts will be handled internally.
+}
+\examples{
+This will return the cumulative log-ratio tansformed counts in an MbecData object
+\dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+method="CLR", offset=0)}
+
+This will return the inverse log-ratio transformed counts in an MbecData object
+\dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+method="ILR", offset=0)}
+}
+\keyword{Log}
+\keyword{Ratio}
+\keyword{Transformation}

@@ -2,8 +2,7 @@
 % Please edit documentation in R/mbecs_helper.R
 \name{poscore}
 \alias{poscore}
-\title{Implementation of Claire Duvallet's 'percentileofscore()' for python
-Will return values in the interval \link{0,100} and 100 if reference vector has zero length.}
+\title{Percentile of Score}
 \usage{
 poscore(cnt.vec, cnt, type = c("rank", "weak", "strict", "mean"))
 }
@@ -14,7 +13,31 @@ poscore(cnt.vec, cnt, type = c("rank", "weak", "strict", "mean"))
 
 \item{type, }{one of 'rank', 'weak', 'strict' or 'mean' to determine how score is calculated}
 }
-\description{
-Implementation of Claire Duvallet's 'percentileofscore()' for python
-Will return values in the interval \link{0,100} and 100 if reference vector has zero length.
+\value{
+a score for given counts in relation to reference counts
 }
+\description{
+Helper function that calculates percentiles of scores for batch-correction method 'pn'
+(percentile normalization). R-implementation of Claire Duvallet's 'percentileofscore()' for
+python.
+}
+\details{
+Calculates the number of values that bigger than reference (left) and the number of values that
+are smaller than the reference (right). Percentiles of scores are given in the interval I:\link{0,100}.
+Depending on type of calculation, the score will be computed as follows:
+
+\dontrun{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}
+
+\dontrun{weak = right / n*100}
+
+\dontrun{strict = left / n*100}
+
+\dontrun{mean = (right + left) * 50/n)}
+}
+\examples{
+This will return a score for the supplied vector with default evaluation (strict).
+\dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
+}
+\keyword{Log}
+\keyword{Ratio}
+\keyword{Transformation}
