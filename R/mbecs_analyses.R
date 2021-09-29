@@ -886,38 +886,32 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   return( res )
 }
 
-#' Helper function that takes a fitted model and extracts the
-#' fraction of variances attributable to every model-variable
-#' @param model.fit lm() or lmm() output
-#'
 
 #' Model Variable Variance Extraction
 #'
-#' Inputs for this function are the fitted models of lm/lmm approaches.
+#' For a Linear (Mixed) Model, this function extracts the proportion of variance that can be
+#' explained by terms and interactions and returns a named row-vector.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-#' the counts table. Correct orientation of counts will be handled internally.
+#' Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and return the
+#' Sum of squares for each term, scaled by the total sum of squares.
 #'
-#' @keywords RLE relative log expression
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
-#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract residuals,
+#' random effects and fixed effects components from the model. The components are then
+#' transformed to reflect explained proportions of variance for the model coefficients.
+#' The function implements transformation for varying coefficients as well, but
+#' NO ADJUSTMENT for single or multiple coefficients at this point.
+#'
+#' @keywords lm lmm proportion variance
+#' @param model.fit linear (mixed) model object of class 'lm' or 'lmerMod'
+#' @return a named row-vector, containing proportional variance for model terms
 #' @export
 #'
 #' @examples
 #' This will return the data.frame for plotting.
-#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
-#' model.vars=c("treatment","batches"), return.data=TRUE)}
-#'
-#' This will return the ggplot2 object for display, saving and modification.
-#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
-#' return.data=FALSE)}
+#' \dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
 mbecVarianceStats <- function( model.fit ) {
 
-  ### ToDo: implement lmm and glm versions of this
+  ### ToDo: implement glm versions of this
 
   # check validity of model fit
   mbecValidateModel( model.fit)
@@ -930,7 +924,7 @@ mbecVarianceStats <- function( model.fit ) {
 
     vp = stats::anova(model.fit) %>%
       data.frame() %>%
-      dplyr::mutate("variance" = select(.,"Sum.Sq") / sum(select(.,"Sum.Sq")), .keep="none") %>%
+      dplyr::mutate("variance" = dplyr::select(.,"Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
       t()
 
   } else if( class(model.fit) %in% "lmerMod" ) {  # linear-mixed model
@@ -992,10 +986,27 @@ mbecVarianceStats <- function( model.fit ) {
 }
 
 
-
-
-#' Extract Linear-Mixed Models Variance Components
+#' Mixed Model Variance-Component Extraction
 #'
+#' A helper function that extracts the variance components of linear mixed models, i.e., residuals,
+#' random-effects, fixed-effects, scales them to sample-size and returns a list of components.
+#'
+#' Uses 'lme4::VarCorr' to extract Residuals and random-effects components. Standard Deviation of
+#' Residuals is stored as 'sc' attribute in the output of 'VarCorr'.
+#'
+#' Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter estimates. The attribute
+#' 'pp' of the model contains the dense model matrix for fixed-effects parameters (X). The fixed
+#' effects variance, σ2f, is the variance of the matrix-multiplication β∗X (parameter vector by
+#' model matrix)
+#'
+#' @keywords lmm proportion variance
+#' @param model.fit linear mixed model object of class 'lmerMod'
+#' @return a named list, containing proportional variance for model terms
+#' @export
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{list.variance <- mbecMixedVariance(model.fit=MyMixedModel-obj)}
 mbecMixedVariance <- function(model.fit) {
   # remember: sd == sqrt(var)
 
@@ -1038,11 +1049,21 @@ mbecMixedVariance <- function(model.fit) {
 }
 
 
-
-
-#' Helper function that ensure validity of the model by testing colinearity
+#' Validate Linear (Mixed) Models
+#'
+#' A helper function that calculates the collinearity between model variables and stops execution
+#' if the maximum value is bigger than the allowed threshold.
+#'
+#' ToDo: maybe some additional validation steps and more informative output.
+#'
+#' @keywords collinearity model validation
 #' @param model.fit lm() or lmm() output
 #' @param colinearityThreshold cut-off for model rejection
+#' @export
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{mbecValidateModel(model.fit=MyMixedModel-obj, colinearityThreshold=0.999)}
 mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
   ## ToDo: health & Safety
 
@@ -1106,10 +1127,20 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 }
 
 
+#' Variable Correlation Linear (Mixe) Models
+#'
 #' Takes a fitted model and computes maximum correlation between covariates as return value.
 #' Return value contains actual correlation-matrix as 'vcor' attribute.
-#' Works for lm and lmm.
+#'
+#' ToDo: maybe some additional validation steps and more informative output.
+#'
+#' @keywords collinearity model validation
 #' @param model.fit lm() or lmm() output
+#' @export
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
 colinScore <- function(model.fit) {
   # get variance-covariance matrix
   V <- vcov(model.fit)
@@ -1124,7 +1155,6 @@ colinScore <- function(model.fit) {
     score = max(abs(C[lower.tri(C)]))
     attr( score, "vcor") = C
   }
-
   return(score)
 }
 

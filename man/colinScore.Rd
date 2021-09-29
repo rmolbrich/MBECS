@@ -2,9 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{colinScore}
 \alias{colinScore}
-\title{Takes a fitted model and computes maximum correlation between covariates as return value.
-Return value contains actual correlation-matrix as 'vcor' attribute.
-Works for lm and lmm.}
+\title{Variable Correlation Linear (Mixe) Models}
 \usage{
 colinScore(model.fit)
 }
@@ -14,5 +12,14 @@ colinScore(model.fit)
 \description{
 Takes a fitted model and computes maximum correlation between covariates as return value.
 Return value contains actual correlation-matrix as 'vcor' attribute.
-Works for lm and lmm.
 }
+\details{
+ToDo: maybe some additional validation steps and more informative output.
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
+}
+\keyword{collinearity}
+\keyword{model}
+\keyword{validation}

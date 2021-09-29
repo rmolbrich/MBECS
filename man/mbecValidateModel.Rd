@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecValidateModel}
 \alias{mbecValidateModel}
-\title{Helper function that ensure validity of the model by testing colinearity}
+\title{Validate Linear (Mixed) Models}
 \usage{
 mbecValidateModel(model.fit, colinearityThreshold = 0.999)
 }
@@ -12,5 +12,16 @@ mbecValidateModel(model.fit, colinearityThreshold = 0.999)
 \item{colinearityThreshold}{cut-off for model rejection}
 }
 \description{
-Helper function that ensure validity of the model by testing colinearity
+A helper function that calculates the collinearity between model variables and stops execution
+if the maximum value is bigger than the allowed threshold.
 }
+\details{
+ToDo: maybe some additional validation steps and more informative output.
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{mbecValidateModel(model.fit=MyMixedModel-obj, colinearityThreshold=0.999)}
+}
+\keyword{collinearity}
+\keyword{model}
+\keyword{validation}

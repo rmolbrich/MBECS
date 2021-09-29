@@ -2,46 +2,35 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecVarianceStats}
 \alias{mbecVarianceStats}
-\title{Helper function that takes a fitted model and extracts the
-fraction of variances attributable to every model-variable}
+\title{Model Variable Variance Extraction}
 \usage{
 mbecVarianceStats(model.fit)
 }
 \arguments{
-\item{model.fit}{lm() or lmm() output
-
-Model Variable Variance Extraction
-
-Inputs for this function are the fitted models of lm/lmm approaches.
-
-The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-the counts table. Correct orientation of counts will be handled internally.}
-
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
-
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
-
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
+\item{model.fit}{linear (mixed) model object of class 'lm' or 'lmerMod'}
 }
 \value{
-either a ggplot2 object or a formatted data-frame to plot from
+a named row-vector, containing proportional variance for model terms
 }
 \description{
-Helper function that takes a fitted model and extracts the
-fraction of variances attributable to every model-variable
+For a Linear (Mixed) Model, this function extracts the proportion of variance that can be
+explained by terms and interactions and returns a named row-vector.
+}
+\details{
+Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and return the
+Sum of squares for each term, scaled by the total sum of squares.
+
+Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract residuals,
+random effects and fixed effects components from the model. The components are then
+transformed to reflect explained proportions of variance for the model coefficients.
+The function implements transformation for varying coefficients as well, but
+NO ADJUSTMENT for single or multiple coefficients at this point.
 }
 \examples{
 This will return the data.frame for plotting.
-\dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
-model.vars=c("treatment","batches"), return.data=TRUE)}
-
-This will return the ggplot2 object for display, saving and modification.
-\dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
-return.data=FALSE)}
+\dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
 }
-\keyword{RLE}
-\keyword{expression}
-\keyword{log}
-\keyword{relative}
+\keyword{lm}
+\keyword{lmm}
+\keyword{proportion}
+\keyword{variance}

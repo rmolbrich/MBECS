@@ -2,10 +2,33 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecMixedVariance}
 \alias{mbecMixedVariance}
-\title{Extract Linear-Mixed Models Variance Components}
+\title{Mixed Model Variance-Component Extraction}
 \usage{
 mbecMixedVariance(model.fit)
 }
-\description{
-Extract Linear-Mixed Models Variance Components
+\arguments{
+\item{model.fit}{linear mixed model object of class 'lmerMod'}
 }
+\value{
+a named list, containing proportional variance for model terms
+}
+\description{
+A helper function that extracts the variance components of linear mixed models, i.e., residuals,
+random-effects, fixed-effects, scales them to sample-size and returns a list of components.
+}
+\details{
+Uses 'lme4::VarCorr' to extract Residuals and random-effects components. Standard Deviation of
+Residuals is stored as 'sc' attribute in the output of 'VarCorr'.
+
+Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter estimates. The attribute
+'pp' of the model contains the dense model matrix for fixed-effects parameters (X). The fixed
+effects variance, σ2f, is the variance of the matrix-multiplication β∗X (parameter vector by
+model matrix)
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{list.variance <- mbecMixedVariance(model.fit=MyMixedModel-obj)}
+}
+\keyword{lmm}
+\keyword{proportion}
+\keyword{variance}
