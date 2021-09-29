@@ -4,14 +4,14 @@
 \alias{mbecLM}
 \title{Linear (Mixed) Model Feature to Batch Fit}
 \usage{
-mbecLM(input.obj, model.vars = c("group", "batch"), method = c("lm", "lmm"))
+mbecLM(input.obj, method = c("lm", "lmm"), model.vars = c("group", "batch"))
 }
 \arguments{
 \item{input.obj, }{mbecData object or numeric matrix (correct orientation is handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
-
 \item{method, }{either 'lm' or 'lmm' for linear (mixed) models or 'auto' to detect correct method (not implemented yet)}
+
+\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
 }
 \value{
 vector of fdr corrected p-values that show significance of treatment for every feature

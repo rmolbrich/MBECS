@@ -295,7 +295,7 @@ mbecSavePlot <- function(plot.obj, f.title="mbecTest") {
 #' @examples
 #' This will return p-value for the linear model fit
 #' \dontrun{val.score <- mbecLM(input.obj, model.vars=c("group","batch"), method="lm")}
-mbecLM <- function(input.obj, model.vars=c("group","batch"), method=c("lm","lmm")) {
+mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch")) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
   #       alternative correction methods
   #       auto mode selection procedure --> detect unbalanced design?!
@@ -319,11 +319,16 @@ mbecLM <- function(input.obj, model.vars=c("group","batch"), method=c("lm","lmm"
     })
 
   } else if( method == "lmm" ) {
+    # overkill, but just keep it for now
+    r.terms <- paste("(1|",model.vars[2],")", sep="")
 
-    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(x){
-      nc.lmm <- lmerTest::lmer(x ~ tmp.meta[,model.vars[1]] + (1|tmp.meta[,model.vars[2]]), data = tmp.meta)
+    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(x) {
+
+      tmp.formula <- as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
+      nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula), data = tmp.meta)))
       nc.lmm.summary <- summary(nc.lmm)
       p <- nc.lmm.summary$coefficients[2,5]
+
     })
   }
 
