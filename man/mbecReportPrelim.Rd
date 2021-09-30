@@ -7,7 +7,7 @@
 mbecReportPrelim(
   input.obj,
   model.vars = c("group", "batch"),
-  return.plot = FALSE
+  return.data = FALSE
 )
 }
 \arguments{

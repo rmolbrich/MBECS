@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{colinScore}
 \alias{colinScore}
-\title{Variable Correlation Linear (Mixe) Models}
+\title{Variable Correlation Linear (Mixed) Models}
 \usage{
 colinScore(model.fit)
 }

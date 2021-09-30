@@ -1127,7 +1127,7 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 }
 
 
-#' Variable Correlation Linear (Mixe) Models
+#' Variable Correlation Linear (Mixed) Models
 #'
 #' Takes a fitted model and computes maximum correlation between covariates as return value.
 #' Return value contains actual correlation-matrix as 'vcor' attribute.
@@ -1156,6 +1156,178 @@ colinScore <- function(model.fit) {
     attr( score, "vcor") = C
   }
   return(score)
+}
+
+
+# VARIANCE PLOTTATION -----------------------------------------------------
+
+
+#' Plot Proportion of Variance for L(M)M
+#'
+#' Covariate-Variances as modeled by linear (mixed) models will be displayed as box-plots.
+#' It works with the output of 'mbecVarianceStats()' for methods 'lm' and 'lmm'. Format of this
+#' output is a data.frame that contains a column for every model variable and as many rows as
+#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
+#' to display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance linear mixed models
+#' @param variance.obj, list or single output of 'mbecVarianceStats' with method lm
+#' @export
+#'
+#' @examples
+#' This will return a paneled plot that shows results for three variance assessments.
+#' \dontrun{p.lmm <- mbecVarianceStatsPlot(variance.obj=list(df1, df2, df3))}
+mbecVarianceStatsPlot <- function( variance.obj ) {
+
+  plot.df <- variance.obj %>%
+    bind_rows() %>% # this seems to work with single objects and lists
+    gather(., "covariate", "variance", -type) %>%
+    mutate(type = factor(type, levels = unique(type))) %>%
+    mutate(variance = as.numeric(as.character(variance)))
+
+  leplot <- ggplot(plot.df, aes(x = covariate, y = variance, fill = covariate)) +
+    geom_boxplot() +
+    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1),
+          strip.text = element_text(size = 12), panel.grid = element_blank(),
+          axis.text = element_text(size = 12), axis.title = element_text(size = 15),
+          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
+    labs(x = 'Covariate', y = 'Proportion Variance', name = 'Covariate') + ylim(0,1)
+
+  return(leplot)
+
+}
+
+
+#' Plot Proportion of Variance for pRDA
+#'
+#' Covariate-Variances as modeled by pRDA will be displayed as box-plots.
+#' It works with the output of 'mbecVarianceStats()' for the method 'rda'. Format of this
+#' output is a data.frame that contains a column for every model variable and as many rows as
+#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
+#' to display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance partial Redundancy Analysis
+#' @param rda.obj, list or single output of 'mbecVarianceStats' with method rda
+#' @export
+#'
+#' @examples
+#' This will return a paneled plot that shows results for three variance assessments.
+#' \dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
+mbecRDAStatsPlot <- function(rda.obj) {
+  # first tidy-magic to create df for plotting
+  leTest <- rda.obj %>%
+    gather(., "covariate", "variance", -type) %>%
+    mutate(type = factor(type, levels = unique(type))) %>%
+    #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
+    mutate(variance = as.numeric(as.character(variance))) %>%
+    mutate(variance.r = round(variance, 2))
+
+  # now plot
+  lePlot <- ggplot(data = leTest, aes(x = covariate, y = variance, fill = covariate)) +
+    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
+    # significance at the top
+    # geom_text(data = leTest, aes(type, 100, label = significance),
+    #           position = position_dodge(width = 0.9), size = 3) +
+    # variance above the bars
+    geom_text(data = leTest, aes(covariate, variance + 2.5, label = variance.r),
+              position = position_dodge(width = 0.9), size = 3) +
+    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
+    theme_bw() +
+    labs(y = "Variance explained (%)") +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1),
+          panel.grid = element_blank(), axis.text = element_text(size = 12),
+          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
+          legend.text = element_text(size = 12)) + ylim(0,100)
+
+  return(lePlot)
+  # FIN
+}
+
+
+#' Plot Proportion of Variance for PVCA
+#'
+#' Covariate-Variances as modeled by PVCA will be displayed as box-plots.
+#' It works with the output of 'mbecVarianceStats()' for the method 'pvca'. Format of this
+#' output is a data.frame that contains a column for every model variable and as many rows as
+#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
+#' to display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance pvca
+#' @param pvca.obj, list or single output of 'mbecVarianceStats' with method pvca
+#' @export
+#'
+#' @examples
+#' This will return a paneled plot that shows results for three variance assessments.
+#' \dontrun{p.pvca <- mbecPVCAStatsPlot(variance.obj=list(df1, df2, df3))}
+mbecPVCAStatsPlot <- function(pvca.obj) {
+  # first tidy-magic to create df for plotting
+  plot.df <- pvca.obj %>%
+    gather(., "covariate", "variance", -type) %>%
+    mutate(covariate=gsub("\\.",":",covariate)) %>%
+    mutate(type = factor(type, levels = unique(type))) %>%
+    mutate(variance = as.numeric(as.character(variance))) %>%
+    mutate(variance.r = round(variance, 2)) %>%
+    mutate(variance.p = round(variance*100, 2))
+
+  # now plot
+  lePlot <- ggplot(data = plot.df, aes(x = covariate, y = variance.p, fill = covariate)) +
+    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
+    geom_text(data = plot.df, aes(covariate, variance.p + 2.5, label = variance.p),
+              position = position_dodge(width = 0.9), size = 3) + theme_bw() +
+    facet_grid(cols=vars(type), scales="free", space="free_x", drop=T) +
+    labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1),
+          panel.grid = element_blank(), axis.text = element_text(size = 12),
+          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
+          legend.text = element_text(size = 12)) + ylim(0,100)
+
+  return(lePlot)
+  # FIN
+}
+
+
+#' Plot Silhouette Coefficient
+#'
+#' The goodness of clustering assessed by the silhouette coefficient.
+#' It works with the output of 'mbecVarianceStats()' for the method 's.coef'. Format of this
+#' output is a data.frame that contains a column for every model variable and as many rows as
+#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
+#' to display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance linear mixed models
+#' @param scoef.obj, list or single output of 'mbecVarianceStats' with method s.coef
+#' @export
+#'
+#' @examples
+#' This will return a paneled plot that shows results for three variance assessments.
+#' \dontrun{p.sc <- mbecSCOEFStatsPlot(variance.obj=list(df1, df2, df3))}
+mbecSCOEFStatsPlot <- function(scoef.obj) {
+
+  # first tidy-magic to create df for plotting
+  plot.df <- scoef.obj %>%
+    mutate(variable=gsub("\\.",":",variable)) %>%
+    mutate(type = factor(type, levels = unique(type))) %>%
+    mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
+    mutate(sil.coefficient.r = round(sil.coefficient, 2))
+
+  # now plot
+  lePlot <- ggplot(plot.df, aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
+    geom_point() + facet_grid(cols = vars(type)) + theme_bw() +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1),
+          strip.text = element_text(size = 12), panel.grid = element_blank(),
+          axis.text = element_text(size = 10), axis.title = element_text(size = 15),
+          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
+    scale_color_manual(values = cols) +
+    labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
+
+  return(lePlot)
+  # FIN
 }
 
 

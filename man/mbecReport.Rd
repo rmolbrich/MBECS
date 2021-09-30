@@ -2,17 +2,58 @@
 % Please edit documentation in R/mbecs_reports.R
 \name{mbecReport}
 \alias{mbecReport}
-\title{Wrapper function for the analyses required to construct preliminary or post-correction reports.}
+\title{MBECS Report Pipeline}
 \usage{
-mbecReport(input.obj, model.vars = c("group", "batch"), return.plot = FALSE)
+mbecReport(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 }
 \arguments{
-\item{input.obj, }{list of phyloseq objects to compare, first element is considered uncorrected data}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
 
-\item{model.vars, }{required covariates to build models}
+\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
 
-\item{return.plot, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
+\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
+}
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Wrapper function for the analyses required to construct preliminary or post-correction reports.
+A wrapper for the generation of preliminary and comparative reports. The function will call the
+appropriate sub-routines based on the given input. The subsequent sections will assume that the
+covariates 'treatment' and 'batch' are the effects of interest (CoI). Other variables can be
+chosen via the functions 'model.vars' parameter. Accepted inputs are MbecData-objects,
+phyloseq-objects or a list that contains counts and covariate data. Multiple MbecData and
+phyloseq objects in a list will produce a comparative report and single objects generate a
+preliminary report.
 }
+\details{
+The reports are partitioned into three sections for both types of reports.
+
+Study Summary: This section provides a general overview of study design with a summary of
+covariate variables, distribution of samples with respect to grouping, e.g., case/control or
+un-treated/different treatment levels, and known batches as well as an ordination-plot for
+the first two principal components.
+
+Visualization: This section aims to provide a visual assessment of the batch-effect. It provides
+a plot of relative log-expression, a heatmap of the top 5 most variable features, a dendrogram
+(hopefully as soon as it works) and box-plots of the expression of the top 5 most variable
+features with respect to the batches.
+
+Variance Assessment: Diverse methods are applied to calculate the proportion of variance that
+is explainable by the CoI. Linear (Mixed) Models with user supplied covariates are fit to the
+data-set, partial Redundancy Analysis (CCA or pRDA) and Principal Variance Component Analysis
+(PVCA) use different approaches to compute proportions of variance as well. Finally, the
+Silhouette Coefficient is a representation for the goodness of fit. Which is how good grouping
+covariates such as treatment or batch are represented in the clustering of samples.
+}
+\examples{
+This will return the data.frame for plotting.
+\dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
+model.vars=c("treatment","batches"), return.data=TRUE)}
+
+This will return the ggplot2 object for display, saving and modification.
+\dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
+return.data=FALSE)}
+}
+\keyword{Comparative}
+\keyword{Preliminary}
+\keyword{Report}

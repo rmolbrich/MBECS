@@ -1,12 +1,51 @@
 # MBECS REPORT FUNCTIONS --------------------------------------------------
 
 
-#' Wrapper function for the analyses required to construct preliminary or post-correction reports.
-#' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
-#' @param model.vars, required covariates to build models
-#' @param return.plot, TRUE will return a list of all produced plots, FALSE will start rendering the report
+#' MBECS Report Pipeline
+#'
+#' A wrapper for the generation of preliminary and comparative reports. The function will call the
+#' appropriate sub-routines based on the given input. The subsequent sections will assume that the
+#' covariates 'treatment' and 'batch' are the effects of interest (CoI). Other variables can be
+#' chosen via the functions 'model.vars' parameter. Accepted inputs are MbecData-objects,
+#' phyloseq-objects or a list that contains counts and covariate data. Multiple MbecData and
+#' phyloseq objects in a list will produce a comparative report and single objects generate a
+#' preliminary report.
+#'
+#' The reports are partitioned into three sections for both types of reports.
+#'
+#' Study Summary: This section provides a general overview of study design with a summary of
+#' covariate variables, distribution of samples with respect to grouping, e.g., case/control or
+#' un-treated/different treatment levels, and known batches as well as an ordination-plot for
+#' the first two principal components.
+#'
+#' Visualization: This section aims to provide a visual assessment of the batch-effect. It provides
+#' a plot of relative log-expression, a heatmap of the top 5 most variable features, a dendrogram
+#' (hopefully as soon as it works) and box-plots of the expression of the top 5 most variable
+#' features with respect to the batches.
+#'
+#' Variance Assessment: Diverse methods are applied to calculate the proportion of variance that
+#' is explainable by the CoI. Linear (Mixed) Models with user supplied covariates are fit to the
+#' data-set, partial Redundancy Analysis (CCA or pRDA) and Principal Variance Component Analysis
+#' (PVCA) use different approaches to compute proportions of variance as well. Finally, the
+#' Silhouette Coefficient is a representation for the goodness of fit. Which is how good grouping
+#' covariates such as treatment or batch are represented in the clustering of samples.
+#'
+#' @keywords Comparative Preliminary Report
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
+#' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
-mbecReport <- function(input.obj, model.vars=c("group","batch"), return.plot=FALSE) {
+#'
+#' @examples
+#' This will return the data.frame for plotting.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), return.data=TRUE)}
+#'
+#' This will return the ggplot2 object for display, saving and modification.
+#' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
+#' return.data=FALSE)}
+mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   ## first determine whether this is a post- or a preliminary-report and then call the appropriate function
 
@@ -15,34 +54,36 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.plot=FAL
     if( length(input.obj) == 2 & !any(sapply(input.obj, class) %in% c("MbecData", "phyloseq")) ) {
       # prelim-report from cnts + meta
       message("We have a preliminary report from cnts+meta-input!")
-      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.plot)
+      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
 
     } else {
       message("We have a comparative post-report!")
       # post-report from multiple phyloseq or MbecData objects
-      # tmp.report <- mbecReportPost(input.obj, model.vars, return.plot)
+      # tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
     }
   } else {
     if( class(input.obj) %in% "phyloseq" ) {
       # no list and class phyloseq means preliminary report
       message("We have a preliminary report from phyloseq-input!")
 
-      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.plot)
+      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
 
     } else if( class(input.obj) %in% "MbecData" ) {
       # if only 'raw' MbecData --> call Prelim else Post
       if( length(attr(input.obj, "transformations")) >= 1 ) {
         message("We have a comparative post-report!")
 
-        # tmp.report <- mbecReportPost(input.obj, model.vars, return.plot)
+        # tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
 
       } else {
         # if 'transformations' list is empty - only preliminary report
         # (technically, this can also be Post-correction.. I guess ToDo)
-        tmp.report <- mbecReportPrelim(input.obj, model.vars, return.plot)
+        tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
       }
     }
   }
+
+  return(tmp.report)
 }
 
 
@@ -51,7 +92,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.plot=FAL
 #' @param model.vars, required covariates to build models
 #' @param return.plot, TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @export
-mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.plot = FALSE) {
+mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
   # only three situations here: list with cnts and meta, phyloseq or MbecData
 
   # Prepare the SIX exploratory plots
@@ -88,7 +129,7 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.pl
   prelim.report.list[["pvca"]] <- mbecPVCAStatsPlot(prelim.report.list[["pvca"]])
   prelim.report.list[["scoef"]] <- mbecSCOEFStatsPlot(prelim.report.list[["scoef"]])
 
-  if( return.plot ) {
+  if( return.data ) {
     return(prelim.report.list)
   }
 
@@ -103,116 +144,4 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.pl
                                   report.list=prelim.report.list))
 }
 
-
-
-#' Covariate-Variances as modelled by lm/lmm will be displayed as box-plots. Both preliminary and post statistics.
-#' @param variance.obj, list or single output of 'mbecVarianceStats' with method lm
-#' @export
-mbecVarianceStatsPlot <- function( variance.obj ) {
-
-  plot.df <- variance.obj %>%
-    bind_rows() %>% # this seems to work with single objects and lists
-    gather(., "covariate", "variance", -type) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(variance = as.numeric(as.character(variance)))
-
-  leplot <- ggplot(plot.df, aes(x = covariate, y = variance, fill = covariate)) +
-    geom_boxplot() +
-    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          strip.text = element_text(size = 12), panel.grid = element_blank(),
-          axis.text = element_text(size = 12), axis.title = element_text(size = 15),
-          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
-    labs(x = 'Covariate', y = 'Proportion Variance', name = 'Covariate') + ylim(0,1)
-
-  return(leplot)
-
-}
-
-
-#' Plots variance statistics produced by 'mbecModelVariance' with method 'rda'
-mbecRDAStatsPlot <- function(rda.obj) {
-  # first tidy-magic to create df for plotting
-  leTest <- rda.obj %>%
-    gather(., "covariate", "variance", -type) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
-    mutate(variance = as.numeric(as.character(variance))) %>%
-    mutate(variance.r = round(variance, 2))
-
-  # now plot
-  lePlot <- ggplot(data = leTest, aes(x = covariate, y = variance, fill = covariate)) +
-    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
-    # significance at the top
-    # geom_text(data = leTest, aes(type, 100, label = significance),
-    #           position = position_dodge(width = 0.9), size = 3) +
-    # variance above the bars
-    geom_text(data = leTest, aes(covariate, variance + 2.5, label = variance.r),
-              position = position_dodge(width = 0.9), size = 3) +
-    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
-    theme_bw() +
-    labs(y = "Variance explained (%)") +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          panel.grid = element_blank(), axis.text = element_text(size = 12),
-          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
-          legend.text = element_text(size = 12)) + ylim(0,100)
-
-  return(lePlot)
-  # FIN
-}
-
-
-#' Plots variance statistics produced by 'mbecModelVariance' with method 'pvca'
-mbecPVCAStatsPlot <- function(pvca.obj) {
-  # first tidy-magic to create df for plotting
-  plot.df <- pvca.obj %>%
-    gather(., "covariate", "variance", -type) %>%
-    mutate(covariate=gsub("\\.",":",covariate)) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(variance = as.numeric(as.character(variance))) %>%
-    mutate(variance.r = round(variance, 2)) %>%
-    mutate(variance.p = round(variance*100, 2))
-
-  # now plot
-  lePlot <- ggplot(data = plot.df, aes(x = covariate, y = variance.p, fill = covariate)) +
-    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
-    geom_text(data = plot.df, aes(covariate, variance.p + 2.5, label = variance.p),
-              position = position_dodge(width = 0.9), size = 3) + theme_bw() +
-    facet_grid(cols=vars(type), scales="free", space="free_x", drop=T) +
-    labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          panel.grid = element_blank(), axis.text = element_text(size = 12),
-          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
-          legend.text = element_text(size = 12)) + ylim(0,100)
-
-
-  return(lePlot)
-  # FIN
-}
-
-
-#' Plots variance statistics produced by 'mbecModelVariance' with method silhouette-coefficient
-mbecSCOEFStatsPlot <- function(scoef.obj) {
-
-  # first tidy-magic to create df for plotting
-  plot.df <- scoef.obj %>%
-    mutate(variable=gsub("\\.",":",variable)) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
-    mutate(sil.coefficient.r = round(sil.coefficient, 2))
-
-  # now plot
-  lePlot <- ggplot(plot.df, aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
-    geom_point() + facet_grid(cols = vars(type)) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          strip.text = element_text(size = 12), panel.grid = element_blank(),
-          axis.text = element_text(size = 10), axis.title = element_text(size = 15),
-          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
-    scale_color_manual(values = cols) +
-    labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
-
-  return(lePlot)
-  # FIN
-}
 
