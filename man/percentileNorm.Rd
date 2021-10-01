@@ -27,7 +27,7 @@ The covariate table requires an 'sID' column that contains sample IDs equal to t
 in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return a matrix of normalised counts, according to the covariate information in meta
+# This will return a matrix of normalised counts, according to the covariate information in meta
 \dontrun{mtx.pn_counts <- percentileNorm(cnts=mtx_of_cnts, meta=grouping_info)}
 }
 \keyword{Log}

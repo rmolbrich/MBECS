@@ -1,6 +1,6 @@
 # CORRECTION FUNCTIONS ----------------------------------------------------
 
-####################################################################################################
+
 #' Batch Effect Correction
 #'
 #' Either corrects or accounts for (known) batch effects with one of several algorithms.
@@ -104,12 +104,12 @@
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj
-#' in the output.
+#' # This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj
+#' # in the output.
 #' \dontrun{study.obj <- mbecCorrection(input.obj, model.vars=c("group","batch"), method="bat", update=FALSE)}
 #'
-#' This call will use 'Percentile Normalization' for batch effect correction and replace the old
-#' count matrix.
+#' # This call will use 'Percentile Normalization' for batch effect correction and replace the old
+#' # count matrix.
 #' \dontrun{v <- mbecCorrection(list(cnts, meta), model.vars=c("treatment","sampling.date"), method="pn", update=TRUE)}
 mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc","bat","rbe","fab","pn","svd"),
@@ -156,7 +156,8 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
 
     # 'model.vars[1]' needs to be the experimental grouping; 'model.vars[2]' is the batch vector
     # first estimate the number of surrogate variables, i.e., number of latent factors to account for
-    tmp.formula <- as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
+    # f.terms <- paste("(1|",model.vars,")", sep="")
+    # tmp.formula <- stats::as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
 
     tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]])
     tmp.mod0 <- stats::model.matrix( ~ 1, data=tmp.meta[[model.vars[1]]])
@@ -195,7 +196,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     ## testing things
     # fit = variance_adjust(tmp.ruv2)
     tmp.ruv2.trt_p <- tmp.ruv2$p
-    tmp.ruv2.trt_adjp <- p.adjust(tmp.ruv2.trt_p, method="fdr")
+    tmp.ruv2.trt_adjp <- stats::p.adjust(tmp.ruv2.trt_p, method="fdr")
 
     # RESULT is: tmp.ruv2.trt_adjp
 
@@ -220,7 +221,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
 
     tmp.ruv4 <- ruv::RUV4(Y = tmp.cnts, X = tmp.meta$group, ctl = tmp.nc, k = tmp.k)
     tmp.ruv4.trt_p <- tmp.ruv4$p
-    tmp.ruv4.trt_adjp <- p.adjust(tmp.ruv4.trt_p, method="fdr")
+    tmp.ruv4.trt_adjp <- stats::p.adjust(tmp.ruv4.trt_p, method="fdr")
 
     ## RESULT is: tmp.ruv4.trt_adjp
 
@@ -286,7 +287,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
     # ToDo: tmp model
-    tmp.mod <- model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
+    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
 
     corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[2]]],
                                   mod = tmp.mod, par.prior = F, prior.plots = F)
@@ -298,7 +299,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
     # ToDo: tmp model
-    tmp.mod <- model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
+    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
 
     corrected.cnts <- limma::removeBatchEffect(tmp.cnts, batch = tmp.meta[[model.vars[2]]],
                                                design = tmp.mod)
@@ -326,7 +327,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     # check/adjust for zero-values
     if( any(tmp.cnts == 0) ) {
       warning("Abundances contain zero values. Adding small uniform offset.")
-      tmp.cnts <- apply(tmp.cnts, c(1,2), function(x) ifelse(x == 0, runif(1,0,10^-9),x))
+      tmp.cnts <- apply(tmp.cnts, c(1,2), function(x) ifelse(x == 0, stats::runif(1,0,10^-9),x))
     }
 
     # do normalisation
@@ -338,7 +339,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     tmp <- mbecGetData(input.obj, orientation="sxf")
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
     # sd, mean, scale
-    tmp.sd <- apply(tmp.cnts, 2, sd)
+    tmp.sd <- apply(tmp.cnts, 2, stats::sd)
     tmp.mean <- apply(tmp.cnts, 2, mean)
     # center and scale
     tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)

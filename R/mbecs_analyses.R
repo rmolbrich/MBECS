@@ -22,11 +22,11 @@
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification.
+#' # This will return the ggplot2 object for display, saving and modification.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
 #' return.data=FALSE)}
 mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
@@ -102,12 +102,12 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' # x-axis and PC2 on y-axis.
 #' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setGeneric("mbecPCA", signature="input.obj",
@@ -175,20 +175,20 @@ setGeneric("mbecPCA", signature="input.obj",
       theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ylab('Density') +
+      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() +
       ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = element_text(size = rel(0.8)),
-                     plot.title = element_text(hjust = 0.5, size = rel(1.5)))
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                     plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  coord_flip() + ylab('Density') +
+      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() +
-      ggplot2::theme(axis.title.x = element_text(size = rel(0.8)),
+      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
 
@@ -204,20 +204,20 @@ setGeneric("mbecPCA", signature="input.obj",
       theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[1]))) +
-      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ylab('Density') +
+      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() +
       ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = element_text(size = rel(0.8)),
-                     plot.title = element_text(hjust = 0.5, size = rel(1.5)))
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                     plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
 
-    pRight <- ggplot(data = plot.df, ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])), fill = get(model.vars[1]))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  coord_flip() + ylab('Density') +
+    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])), fill = get(model.vars[1]))) +
+      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() +
-      ggplot2::theme(axis.title.x = element_text(size = rel(0.8)),
+      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
   }
@@ -276,11 +276,11 @@ setMethod("mbecPCA", "list",
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features i the data-set.
 #' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch",
 #' return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the top 15 most variable features.
+#' # This will return the ggplot2 object of the top 15 most variable features.
 #' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15,
 #' model.var="batch", return.data=FALSE)}
 mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", return.data=FALSE) {
@@ -293,7 +293,7 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
   # needs sxf orientation
   tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.var))
-  tmp[[2]] <- rownames_to_column(tmp[[2]], var = "specimen")
+  tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
   otu.idx <- colnames(tmp[[1]])
 
@@ -381,11 +381,11 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features i the data-set.
 #' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE,
 #' scale=TRUE, method="ALL", return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the top 15 most variable features.
+#' # This will return the ggplot2 object of the top 15 most variable features.
 #' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"),
 #' center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=10, return.data=FALSE) {
@@ -469,11 +469,11 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of for the samples grouped by treatment and sex
+#' # This will return the plot-frame of for the samples grouped by treatment and sex
 #' \dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"),
 #' return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the samples grouped by group and batch
+#' # This will return the ggplot2 object of the samples grouped by group and batch
 #' \dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates),
 #' model.vars=c("group","batch"), return.data=FALSE)}
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
@@ -506,7 +506,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
   study.summary <- base::table(tmp.meta[,eval(model.vars[1])], tmp.meta[,eval(model.vars[2])]) %>%
     as.data.frame(.) %>%
-    mutate("Freq.scaled"=Freq / n.observations)
+    dplyr::mutate("Freq.scaled"=Freq / n.observations)
 
   # prepare plot-annotation
   vars.axes <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars,perl = TRUE)
@@ -610,16 +610,18 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @param method select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)
 #' @param model.form string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"
 #' @param type creates a column with that string in the output df - to keep track of cnt-source
+#' @param no.warning BOOLEAN that should turn of singularity warnings, but it doesn't quite work
+#' @param na.action (OPTIONAL) set NA handling, will take global option if not supplied
 #' @return df that contains proportions of variance for given covariates in every feature
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a data-frame that contains the variance attributable to group and batch
-#' according to linear additive model.
+#' # This will return a data-frame that contains the variance attributable to group and batch
+#' # according to linear additive model.
 #' \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="lm", type="RAW")}
-#' This will return a data-frame that contains the variance attributable to group and batch
-#' according to linear additive model.
+#' # This will return a data-frame that contains the variance attributable to group and batch
+#' # according to linear additive model.
 #' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="pvca")}
 mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), model.form=NULL, type="NONE", no.warning=TRUE) {
@@ -634,6 +636,14 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     options(warn = -1)
   }
   on.exit(options(warn = oldw))
+
+  # handle optional parameters
+  opt.arg <- list(...)
+  if( !is.null(opt.arg$na.action)) {
+    na.action = opt.arg$na.action
+  } else {
+    na.action = getOption("na.action")
+  }
 
   ## PVCA stuff
   pct_threshold = .5876   # threshold for explained variances
@@ -656,7 +666,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     if( !is.null(model.form) ) {
       message("Use provided model formula.")
       # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
-      tmp.formula <- as.formula(model.form)
+      tmp.formula <- stats::as.formula(model.form)
     } else {
       message("Construct formula from covariates.")
       tmp.formula = stats::as.formula(paste("y", " ~ ",
@@ -743,7 +753,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
       tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
 
       # estimate significance of
-      tmp.sig <- anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>F)`[1]
+      tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>F)`[1]
 
       # calculate proportion of variance for this covariate as quotient of its eigenvalue and the sum of eigenvalues
       # partial.chi denotes the variance in the 'CONDITION'
@@ -753,7 +763,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     modelType = "rda"
     # make-up some return format
-    res <- data.frame(t(model.variances)) %>% mutate(type = eval(type))
+    res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
     attr(res, "modelType") <- modelType
 
     return(res)
@@ -773,7 +783,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     colnames(tmp.cnts) <- s.names
 
     # calculate correlation - fxs
-    tmp.cor <- cor(tmp.cnts)
+    tmp.cor <- stats::cor(tmp.cnts)
 
     # get eigen-values/vectors of the correlation matrix
     eCor <- eigen(tmp.cor)
@@ -792,7 +802,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # create a long-df that contains a column for all selected eigen-vectors and the required covariates (which obviously repeat for all vectors)
     # join selected eigenvectors and covariate data in a single df
-    lmm.df <- eVec %>% tibble::as_tibble(., .name_repair = "unique") %>% select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
+    lmm.df <- eVec %>% tibble::as_tibble(., .name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
     #lmm.df <- eVec %>% cbind(., tmp.meta)  %>% as_tibble(.) %>% select_at(1:eval(n.PCs))
 
     # # figure out how many effects there are - it is a random effect for every covariate - plus an interaction term for
@@ -820,7 +830,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # for every selected eigen-vector, fit an lmm with random and interaction terms - calculate and extract the associated variances
     for( vec.idx in 1:n.PCs ) {
-      randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula, lmm.df, REML = TRUE, verbose = FALSE, na.action = na.omit)))
+      randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula, lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
       # and put into result at the respective row
       randomEffectsMatrix[vec.idx,] <- as.numeric(randomEffects[,4])
     }
@@ -849,10 +859,10 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   } else if( method == "s.coef" ) {
 
     ### prcomp and selection cutoff??!
-    tmp.prcomp <- prcomp(tmp.cnts, center = TRUE, scale = FALSE)
+    tmp.prcomp <- stats::prcomp(tmp.cnts, center = TRUE, scale = FALSE)
 
     # get sample-wise distances
-    tmp.dist <- dist(tmp.prcomp$x, method = "euclidian")
+    tmp.dist <- stats::dist(tmp.prcomp$x, method = "euclidian")
 
     # iterate over variables, calculate silhouette, compute avg. silhouette coefficient,
     # merge in neat little dataframe
@@ -868,14 +878,14 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     }
 
-    res <- avg.sil.df %>% mutate(type = eval(type))
+    res <- avg.sil.df %>% dplyr::mutate(type = eval(type))
     attr(res, "modelType") <- "s.coef"
 
     return(res)
   }
 
   # transpose result and add column with correction/transformation type.. maybe more later though
-  res <- mutate(model.variances, type = eval(type))
+  res <- dplyr::mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- modelType
 
   ### fancy return type from variancePart package - wait if we need that
@@ -905,7 +915,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
 mbecVarianceStats <- function( model.fit ) {
 
@@ -1003,7 +1013,7 @@ mbecVarianceStats <- function( model.fit ) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{list.variance <- mbecMixedVariance(model.fit=MyMixedModel-obj)}
 mbecMixedVariance <- function(model.fit) {
   # remember: sd == sqrt(var)
@@ -1033,12 +1043,12 @@ mbecMixedVariance <- function(model.fit) {
     # 2. row-sums for all effects - can calculate total variance
     dplyr::mutate("total.var"=apply(., 1, sum)) %>%
     # 3. apply to get the scaled variance in each column
-    apply(., 2, function(effect) var(effect) * n.scaling)
+    apply(., 2, function(effect) stats::var(effect) * n.scaling)
 
   # maybe fancy later, but for now this works
   fixedVar <- lapply(split(
-    head(fixedVar, -1) / sum(head(fixedVar, -1)) * tail(fixedVar, 1),
-    names(head(fixedVar, -1))),unname)
+    utils::head(fixedVar, -1) / sum(utils::head(fixedVar, -1)) * utils::tail(fixedVar, 1),
+    names(utils::head(fixedVar, -1))),unname)
 
   # add attribute for total.var to every list element - to make the following steps less of a pita
 
@@ -1060,7 +1070,7 @@ mbecMixedVariance <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{mbecValidateModel(model.fit=MyMixedModel-obj, colinearityThreshold=0.999)}
 mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
   ## ToDo: health & Safety
@@ -1137,18 +1147,18 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
 colinScore <- function(model.fit) {
   # get variance-covariance matrix
-  V <- vcov(model.fit)
+  V <- stats::vcov(model.fit)
   # 'NA' values or non-square matrix
   if( any(is.na(V)) || nrow(V) == 0 ) {
     score <- ifelse(any(is.na(V)), 1,0)
     attr( score, "vcor") = NA
   } else {
     # scale to correlation
-    C <- cov2cor(as.matrix(V))
+    C <- stats::cov2cor(as.matrix(V))
     # get largest correlation
     score = max(abs(C[lower.tri(C)]))
     attr( score, "vcor") = C
@@ -1174,15 +1184,15 @@ colinScore <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.lmm <- mbecVarianceStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecVarianceStatsPlot <- function( variance.obj ) {
 
   plot.df <- variance.obj %>%
     bind_rows() %>% # this seems to work with single objects and lists
     gather(., "covariate", "variance", -type) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(variance = as.numeric(as.character(variance)))
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(variance = as.numeric(as.character(variance)))
 
   leplot <- ggplot(plot.df, aes(x = covariate, y = variance, fill = covariate)) +
     geom_boxplot() +
@@ -1213,16 +1223,16 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
   leTest <- rda.obj %>%
     gather(., "covariate", "variance", -type) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
-    mutate(variance = as.numeric(as.character(variance))) %>%
-    mutate(variance.r = round(variance, 2))
+    dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
+    dplyr::mutate(variance.r = round(variance, 2))
 
   # now plot
   lePlot <- ggplot(data = leTest, aes(x = covariate, y = variance, fill = covariate)) +
@@ -1260,17 +1270,17 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.pvca <- mbecPVCAStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
   plot.df <- pvca.obj %>%
     gather(., "covariate", "variance", -type) %>%
-    mutate(covariate=gsub("\\.",":",covariate)) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(variance = as.numeric(as.character(variance))) %>%
-    mutate(variance.r = round(variance, 2)) %>%
-    mutate(variance.p = round(variance*100, 2))
+    dplyr::mutate(covariate=gsub("\\.",":",covariate)) %>%
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
+    dplyr::mutate(variance.r = round(variance, 2)) %>%
+    dplyr::mutate(variance.p = round(variance*100, 2))
 
   # now plot
   lePlot <- ggplot(data = plot.df, aes(x = covariate, y = variance.p, fill = covariate)) +
@@ -1303,16 +1313,16 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.sc <- mbecSCOEFStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecSCOEFStatsPlot <- function(scoef.obj) {
 
   # first tidy-magic to create df for plotting
   plot.df <- scoef.obj %>%
-    mutate(variable=gsub("\\.",":",variable)) %>%
-    mutate(type = factor(type, levels = unique(type))) %>%
-    mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
-    mutate(sil.coefficient.r = round(sil.coefficient, 2))
+    dplyr::mutate(variable=gsub("\\.",":",variable)) %>%
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
+    dplyr::mutate(sil.coefficient.r = round(sil.coefficient, 2))
 
   # now plot
   lePlot <- ggplot(plot.df, aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +

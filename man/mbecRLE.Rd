@@ -30,11 +30,11 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return the data.frame for plotting.
+# This will return the data.frame for plotting.
 \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
 model.vars=c("treatment","batches"), return.data=TRUE)}
 
-This will return the ggplot2 object for display, saving and modification.
+# This will return the ggplot2 object for display, saving and modification.
 \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
 return.data=FALSE)}
 }

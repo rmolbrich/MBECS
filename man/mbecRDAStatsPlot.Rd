@@ -18,7 +18,7 @@ a list - IF the data.frames contain a column named 'type', this function will us
 to display side-by-side panels to enable easy comparison.
 }
 \examples{
-This will return a paneled plot that shows results for three variance assessments.
+# This will return a paneled plot that shows results for three variance assessments.
 \dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
 }
 \keyword{Analysis}

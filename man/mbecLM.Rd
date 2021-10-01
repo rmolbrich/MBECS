@@ -29,7 +29,7 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return p-value for the linear model fit
+# This will return p-value for the linear model fit
 \dontrun{val.score <- mbecLM(input.obj, model.vars=c("group","batch"), method="lm")}
 }
 \keyword{Batch}

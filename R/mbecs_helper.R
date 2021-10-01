@@ -21,7 +21,7 @@
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return p-value for the linear model fit
+#' # This will return p-value for the linear model fit
 #' \dontrun{val.score <- mbecLM(input.obj, model.vars=c("group","batch"), method="lm")}
 mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch")) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
@@ -48,11 +48,11 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 
   } else if( method == "lmm" ) {
     # overkill, but just keep it for now
-    r.terms <- paste("(1|",model.vars[2],")", sep="")
+    f.terms <- paste("(1|",model.vars[2],")", sep="")
 
     tmp.group.p <- apply(tmp.cnts, 2, FUN = function(x) {
 
-      tmp.formula <- as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
+      tmp.formula <- stats::as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
       nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula), data = tmp.meta)))
       nc.lmm.summary <- summary(nc.lmm)
       p <- nc.lmm.summary$coefficients[2,5]
@@ -61,7 +61,7 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
   }
 
   # correct for multiple testing
-  tmp.group.p <- p.adjust(tmp.group.p, method = 'fdr')
+  tmp.group.p <- stats::p.adjust(tmp.group.p, method = 'fdr')
 
   return(tmp.group.p)
 }
@@ -90,11 +90,11 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the cumulative log-ratio transformed counts in an MbecData object
+#' # This will return the cumulative log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="CLR", offset=0)}
 #'
-#' This will return the inverse log-ratio transformed counts in an MbecData object
+#' # This will return the inverse log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
 LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...) {
@@ -152,7 +152,7 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a matrix of normalised counts, according to the covariate information in meta
+#' # This will return a matrix of normalised counts, according to the covariate information in meta
 #' \dontrun{mtx.pn_counts <- percentileNorm(cnts=mtx_of_cnts, meta=grouping_info)}
 percentileNorm <- function(cnts, meta) {
 
@@ -206,7 +206,7 @@ percentileNorm <- function(cnts, meta) {
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a score for the supplied vector with default evaluation (strict).
+#' # This will return a score for the supplied vector with default evaluation (strict).
 #' \dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
 poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
   # check argument

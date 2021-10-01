@@ -38,11 +38,11 @@
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification.
+#' # This will return the ggplot2 object for display, saving and modification.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
 #' return.data=FALSE)}
 mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {

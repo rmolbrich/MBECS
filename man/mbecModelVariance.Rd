@@ -23,6 +23,10 @@ mbecModelVariance(
 \item{model.form}{string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"}
 
 \item{type}{creates a column with that string in the output df - to keep track of cnt-source}
+
+\item{no.warning}{BOOLEAN that should turn of singularity warnings, but it doesn't quite work}
+
+\item{na.action}{(OPTIONAL) set NA handling, will take global option if not supplied}
 }
 \value{
 df that contains proportions of variance for given covariates in every feature
@@ -91,12 +95,12 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return a data-frame that contains the variance attributable to group and batch
-according to linear additive model.
+# This will return a data-frame that contains the variance attributable to group and batch
+# according to linear additive model.
 \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 method="lm", type="RAW")}
-This will return a data-frame that contains the variance attributable to group and batch
-according to linear additive model.
+# This will return a data-frame that contains the variance attributable to group and batch
+# according to linear additive model.
 \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 method="pvca")}
 }
