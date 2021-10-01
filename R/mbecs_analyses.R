@@ -78,7 +78,6 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 }
 
 
-
 #' Principal Component Analysis Plot
 #'
 #' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
@@ -93,7 +92,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
 #' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
 #' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
@@ -108,7 +107,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
 #' # x-axis and PC2 on y-axis.
-#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+#' \dontrun{p.PCA <- mbecPCA(input.obj=MbecData.obj,
 #' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setGeneric("mbecPCA", signature="input.obj",
            function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE)
@@ -233,19 +232,115 @@ setGeneric("mbecPCA", signature="input.obj",
 
 }
 
+
+#' Principal Component Analysis Plot for MbecData
+#'
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
+#' principal components. Covariates determine sample-shape and color and can be switched to shift
+#' the emphasis on either group. In addition to the ordination-plot, the function will show the
+#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' components.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+#' is an MbecData-object. The covariate table requires an 'sID' column that contains sample IDs
+#' equal to the sample naming in the counts table. Correct orientation of counts will be handled
+#' internally.
+#'
+#' @keywords PCA principal component analysis
+#' @param input.obj MbecData object (correct orientation is handled internally)
+#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' @export
 #' @include mbecs_classes.R
+#'
+#' @examples
+#' # This will return the data.frame for plotting.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=MbecData.obj,
+#' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+#'
+#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' # x-axis and PC2 on y-axis.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=MbecData.obj,
+#' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setMethod("mbecPCA", "MbecData",
           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
             .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
           }
 )
 
+
+#' Principal Component Analysis Plot for Phyloseq Objects
+#'
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
+#' principal components. Covariates determine sample-shape and color and can be switched to shift
+#' the emphasis on either group. In addition to the ordination-plot, the function will show the
+#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' components.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+#' is a phyloseq-object. The covariate table requires an 'sID' column that contains sample IDs
+#' equal to the sample naming in the counts table. Correct orientation of counts will be handled
+#' internally.
+#'
+#' @keywords PCA principal component analysis
+#' @param input.obj phyloseq object
+#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' @export
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' # This will return the data.frame for plotting.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=phyloseq.obj,
+#' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+#'
+#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' # x-axis and PC2 on y-axis.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=phyloseq.obj,
+#' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setMethod("mbecPCA", "phyloseq",
           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
             .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
           }
 )
 
+
+
+#' Principal Component Analysis Plot for List-Input
+#'
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
+#' principal components. Covariates determine sample-shape and color and can be switched to shift
+#' the emphasis on either group. In addition to the ordination-plot, the function will show the
+#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' components.
+#'
+#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
+#' is a list that contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts table. Correct
+#' orientation of counts will be handled internally.
+#'
+#' @keywords PCA principal component analysis
+#' @param input.obj List that contains counts and covariate data (correct orientation is handled internally)
+#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' @export
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' # This will return the data.frame for plotting.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+#'
+#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' # x-axis and PC2 on y-axis.
+#' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
+#' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setMethod("mbecPCA", "list",
           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
             .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
