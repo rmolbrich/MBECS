@@ -23,7 +23,7 @@ python.
 }
 \details{
 Calculates the number of values that bigger than reference (left) and the number of values that
-are smaller than the reference (right). Percentiles of scores are given in the interval I:\link{0,100}.
+are smaller than the reference (right). Percentiles of scores are given in the interval \eqn{I:[0,100]}.
 Depending on type of calculation, the score will be computed as follows:
 
 \code{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}

@@ -4,8 +4,8 @@
 #'
 #' Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
 #' data-set. Returns the fdr corrected significance value for the "treatment" variable. The method
-#' 'lm' will fit the linear model y ~ model.vars[1] + model.vars[2] and the linear mixed model
-#' will consider the second term as random effect, i.e., y ~ model.vars[1] + (1|model.vars[2]).
+#' 'lm' will fit the linear model\code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model
+#' will consider the second term as random effect, i.e., \code{y ~ model.vars[1] + (1|model.vars[2])}.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
 #' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
@@ -186,7 +186,7 @@ percentileNorm <- function(cnts, meta) {
 #' python.
 #'
 #' Calculates the number of values that bigger than reference (left) and the number of values that
-#' are smaller than the reference (right). Percentiles of scores are given in the interval I:[0,100].
+#' are smaller than the reference (right). Percentiles of scores are given in the interval \eqn{I:[0,100]}.
 #' Depending on type of calculation, the score will be computed as follows:
 #'
 #' \code{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}

@@ -1,13 +1,20 @@
 # Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
 
 
-### define mbec storage object - inherit from phyloseq
+#' Define MbecData-class
+#'
+#' An extension of phyloseq-class that contains the additional fields 'type', 'log' and
+#' 'transformations' to accommodate MBECS functionality.
+#' @keywords MBECS Class
 #' @export
 #' @import phyloseq
 MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character", log="character", transformations="list"))
 
+#' Mbec-Data Constructor
+#'
 #' Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
-#' and a dataframe of covaraite variables for model-building.
+#' and a data-frame of covariate variables for model-building.
+#' @keywords MBECS Constructor
 #' @param type string type that describes the data, e.g., raw, processed, ..
 #' @param log log that will be filled by the other package functions
 #' @param input.obj either class phyloseq or a matrix of counts
@@ -61,13 +68,29 @@ MbecData <- function(type=character(),
 }
 
 
-#' This function either updates counts, type and log attributes or adds a matrix of transformed counts to the input
+#' Mbec-Data Setter
+#'
+#' This function either updates counts, type and log attributes (DEFAULT) or adds a matrix of
+#' transformed counts to the input (update=FALSE).
+#' @keywords MBECS Setter
 #' @param input.obj MbecData object to change
 #' @param new.cnts matrix-like object with same dimension as 'otu_table' in input.obj
 #' @param log character to add to the log string
 #' @param type character to replace type-attribute or as name tag for added count-matrix
 #' @param update logical (TRUE) replace input fields (FALSE) add to the input.obj
 #' @export
+#'
+#' @examples
+#' # This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
+#' # log and change the type to 'rbe' to indicate current status.
+#' \dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
+#' type='corrected', update=TRUE)}
+#'
+#' # This will add the corrected data to the list of transformations named like the type argument.
+#' # The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
+#' # matrix wasn't replaced.
+#' \dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
+#' type='corrected', update=FALSE)}
 mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=character(), update=TRUE) {
 
   if( is.null(new.cnts) ) {
@@ -120,6 +143,36 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 #' @param orientation, select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @return list(), containing count.matrix in first and meta-data in second slot
 #' @export
+
+####################################################################################################
+#' Mbec-Data Getter
+#'
+#' This function extracts abundance matrix and meta-data in the chosen orientation from the input.
+#'
+#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
+#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
+#' the different analysis and correction functions.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' metadata, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Getter
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will return the abundance matrix with samples as rows and check for the presence of
+#' # variables 'group' and 'batch' in the meta-data.
+#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=list(counts, covariates),
+#' orientation="sxf", required.col=c("group","batch"))}
+#'
+#' # This will return the abundance matrix with samples as columns and check for the presence
+#' # of variables 'Treatment' and 'Sex' in the meta-data.
+#' \dontrun{p.RLE <- mbecGetData(input.obj=input.obj,
+#' orientation="fxs", required.col=c("Treatment","Sex"))}
 setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL)
              standardGeneric("mbecGetData")

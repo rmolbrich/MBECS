@@ -19,8 +19,8 @@ vector of fdr corrected p-values that show significance of treatment for every f
 \description{
 Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
 data-set. Returns the fdr corrected significance value for the "treatment" variable. The method
-'lm' will fit the linear model y ~ model.vars\link{1} + model.vars\link{2} and the linear mixed model
-will consider the second term as random effect, i.e., y ~ model.vars\link{1} + (1|model.vars\link{2}).
+'lm' will fit the linear model\code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model
+will consider the second term as random effect, i.e., \code{y ~ model.vars[1] + (1|model.vars[2])}.
 }
 \details{
 The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
