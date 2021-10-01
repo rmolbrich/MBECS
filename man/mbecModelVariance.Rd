@@ -10,7 +10,8 @@ mbecModelVariance(
   method = c("lm", "lmm", "rda", "pvca"),
   model.form = NULL,
   type = "NONE",
-  no.warning = TRUE
+  no.warning = TRUE,
+  ...
 )
 }
 \arguments{
