@@ -189,13 +189,13 @@ percentileNorm <- function(cnts, meta) {
 #' are smaller than the reference (right). Percentiles of scores are given in the interval I:[0,100].
 #' Depending on type of calculation, the score will be computed as follows:
 #'
-#' \dontrun{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}
+#' \code{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}
 #'
-#' \dontrun{weak = right / n*100}
+#' \code{weak = right / n*100}
 #'
-#' \dontrun{strict = left / n*100}
+#' \code{strict = left / n*100}
 #'
-#' \dontrun{mean = (right + left) * 50/n)}
+#' \code{mean = (right + left) * 50/n)}
 #'
 #' @keywords Log Ratio Transformation
 #' @param cnt.vec, vector of cnts that acts as reference for score calculation
