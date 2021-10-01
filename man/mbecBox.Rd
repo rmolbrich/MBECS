@@ -39,11 +39,11 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return the plot-frame of all features i the data-set.
+# This will return the plot-frame of all features i the data-set.
 \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch",
 return.data=TRUE)}
 
-This will return the ggplot2 object of the top 15 most variable features.
+# This will return the ggplot2 object of the top 15 most variable features.
 \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15,
 model.var="batch", return.data=FALSE)}
 }

@@ -91,12 +91,12 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return a data-frame that contains the variance attributable to group and batch
-according to linear additive model.
+# This will return a data-frame that contains the variance attributable to group and batch
+# according to linear additive model.
 \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 method="lm", type="RAW")}
-This will return a data-frame that contains the variance attributable to group and batch
-according to linear additive model.
+# This will return a data-frame that contains the variance attributable to group and batch
+# according to linear additive model.
 \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 method="pvca")}
 }

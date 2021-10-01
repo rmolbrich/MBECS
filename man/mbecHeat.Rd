@@ -45,11 +45,11 @@ The covariate table requires an 'sID' column that contains sample IDs equal to t
 in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return the plot-frame of all features i the data-set.
+# This will return the plot-frame of all features i the data-set.
 \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE,
 scale=TRUE, method="ALL", return.data=TRUE)}
 
-This will return the ggplot2 object of the top 15 most variable features.
+# This will return the ggplot2 object of the top 15 most variable features.
 \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"),
 center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 }

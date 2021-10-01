@@ -27,7 +27,7 @@ The function implements transformation for varying coefficients as well, but
 NO ADJUSTMENT for single or multiple coefficients at this point.
 }
 \examples{
-This will return the data.frame for plotting.
+# This will return the data.frame for plotting.
 \dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
 }
 \keyword{lm}

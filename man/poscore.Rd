@@ -35,7 +35,7 @@ Depending on type of calculation, the score will be computed as follows:
 \dontrun{mean = (right + left) * 50/n)}
 }
 \examples{
-This will return a score for the supplied vector with default evaluation (strict).
+# This will return a score for the supplied vector with default evaluation (strict).
 \dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
 }
 \keyword{Log}

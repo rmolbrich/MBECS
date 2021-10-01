@@ -17,7 +17,7 @@ Return value contains actual correlation-matrix as 'vcor' attribute.
 ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
-This will return the data.frame for plotting.
+# This will return the data.frame for plotting.
 \dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
 }
 \keyword{collinearity}

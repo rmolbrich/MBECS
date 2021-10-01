@@ -28,11 +28,11 @@ The covariate table requires an 'sID' column that contains sample IDs equal to t
 in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return the plot-frame of for the samples grouped by treatment and sex
+# This will return the plot-frame of for the samples grouped by treatment and sex
 \dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"),
 return.data=TRUE)}
 
-This will return the ggplot2 object of the samples grouped by group and batch
+# This will return the ggplot2 object of the samples grouped by group and batch
 \dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates),
 model.vars=c("group","batch"), return.data=FALSE)}
 }

@@ -21,7 +21,7 @@
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return p-value for the linear model fit
+#' # This will return p-value for the linear model fit
 #' \dontrun{val.score <- mbecLM(input.obj, model.vars=c("group","batch"), method="lm")}
 mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch")) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
@@ -90,11 +90,11 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the cumulative log-ratio transformed counts in an MbecData object
+#' # This will return the cumulative log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="CLR", offset=0)}
 #'
-#' This will return the inverse log-ratio transformed counts in an MbecData object
+#' # This will return the inverse log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
 LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...) {
@@ -152,7 +152,7 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a matrix of normalised counts, according to the covariate information in meta
+#' # This will return a matrix of normalised counts, according to the covariate information in meta
 #' \dontrun{mtx.pn_counts <- percentileNorm(cnts=mtx_of_cnts, meta=grouping_info)}
 percentileNorm <- function(cnts, meta) {
 
@@ -206,7 +206,7 @@ percentileNorm <- function(cnts, meta) {
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a score for the supplied vector with default evaluation (strict).
+#' # This will return a score for the supplied vector with default evaluation (strict).
 #' \dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
 poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
   # check argument

@@ -22,11 +22,11 @@
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification.
+#' # This will return the ggplot2 object for display, saving and modification.
 #' \dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
 #' return.data=FALSE)}
 mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
@@ -102,12 +102,12 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
 #'
-#' This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
+#' # x-axis and PC2 on y-axis.
 #' \dontrun{p.PCA <- mbecPCA(input.obj=list(counts, covariates),
 #' model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
 setGeneric("mbecPCA", signature="input.obj",
@@ -276,11 +276,11 @@ setMethod("mbecPCA", "list",
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features i the data-set.
 #' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="ALL", model.var="batch",
 #' return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the top 15 most variable features.
+#' # This will return the ggplot2 object of the top 15 most variable features.
 #' \dontrun{p.Box <- mbecBox(input.obj=list(counts, covariates), method="TOP", n=15,
 #' model.var="batch", return.data=FALSE)}
 mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", return.data=FALSE) {
@@ -381,11 +381,11 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features i the data-set.
 #' \dontrun{p.Heat <- mbecHeat(input.obj=phyloseq.obj, model.vars=c("group","batch"), center=TRUE,
 #' scale=TRUE, method="ALL", return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the top 15 most variable features.
+#' # This will return the ggplot2 object of the top 15 most variable features.
 #' \dontrun{p.Heat <- mbecHeat(input.obj=list(counts, covariates), model.vars=c("group","batch"),
 #' center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)}
 mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=10, return.data=FALSE) {
@@ -469,11 +469,11 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the plot-frame of for the samples grouped by treatment and sex
+#' # This will return the plot-frame of for the samples grouped by treatment and sex
 #' \dontrun{p.Mosaic <- mbecMosaic(input.obj=phyloseq.obj, model.vars=c("treatment","sex"),
 #' return.data=TRUE)}
 #'
-#' This will return the ggplot2 object of the samples grouped by group and batch
+#' # This will return the ggplot2 object of the samples grouped by group and batch
 #' \dontrun{p.Mosaic <- mbecMosaic(input.obj=list(counts, covariates),
 #' model.vars=c("group","batch"), return.data=FALSE)}
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
@@ -614,12 +614,12 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return a data-frame that contains the variance attributable to group and batch
-#' according to linear additive model.
+#' # This will return a data-frame that contains the variance attributable to group and batch
+#' # according to linear additive model.
 #' \dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="lm", type="RAW")}
-#' This will return a data-frame that contains the variance attributable to group and batch
-#' according to linear additive model.
+#' # This will return a data-frame that contains the variance attributable to group and batch
+#' # according to linear additive model.
 #' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="pvca")}
 mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), model.form=NULL, type="NONE", no.warning=TRUE) {
@@ -905,7 +905,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
 mbecVarianceStats <- function( model.fit ) {
 
@@ -1003,7 +1003,7 @@ mbecVarianceStats <- function( model.fit ) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{list.variance <- mbecMixedVariance(model.fit=MyMixedModel-obj)}
 mbecMixedVariance <- function(model.fit) {
   # remember: sd == sqrt(var)
@@ -1060,7 +1060,7 @@ mbecMixedVariance <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{mbecValidateModel(model.fit=MyMixedModel-obj, colinearityThreshold=0.999)}
 mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
   ## ToDo: health & Safety
@@ -1137,7 +1137,7 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 #' @export
 #'
 #' @examples
-#' This will return the data.frame for plotting.
+#' # This will return the data.frame for plotting.
 #' \dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
 colinScore <- function(model.fit) {
   # get variance-covariance matrix
@@ -1174,7 +1174,7 @@ colinScore <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.lmm <- mbecVarianceStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecVarianceStatsPlot <- function( variance.obj ) {
 
@@ -1213,7 +1213,7 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
@@ -1260,7 +1260,7 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.pvca <- mbecPVCAStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
@@ -1303,7 +1303,7 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' @export
 #'
 #' @examples
-#' This will return a paneled plot that shows results for three variance assessments.
+#' # This will return a paneled plot that shows results for three variance assessments.
 #' \dontrun{p.sc <- mbecSCOEFStatsPlot(variance.obj=list(df1, df2, df3))}
 mbecSCOEFStatsPlot <- function(scoef.obj) {
 
