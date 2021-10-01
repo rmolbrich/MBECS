@@ -35,7 +35,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 
   ## check for correct inputs
   tmp <- mbecGetData(input.obj=input.obj, orientation="fxs", required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>% rownames_to_column(., var = "specimen")
+  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var = "specimen")
 
   ## SPLIT - COMPUTE - MERGE
   tmp.long <- NULL
@@ -45,7 +45,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,eval(model.vars[1])] %in% g.idx])
 
     # Median per feature in this group
-    feature.med = apply(tmp.cnts.group, 1, median)
+    feature.med = apply(tmp.cnts.group, 1, stats::median)
 
     tmp.group.long <- apply(tmp.cnts.group, 2, function(sample.col) sample.col - feature.med) %>% # subtract feature-median from sample
       as.data.frame(.) %>%
@@ -69,10 +69,10 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     ggplot2::stat_boxplot(color="black",notch = TRUE,
                  outlier.colour = "#E42032", outlier.fill = "white",outlier.shape = 1, outlier.stroke = .5) +
     #facet_wrap(~Strain, ncol=2) +
-    ggplot2::facet_grid(cols=vars(get(model.vars[1])), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=T) +
     ggplot2::scale_fill_manual(values = cols) +
     theme_rle() +
-    ggplot2::guides(fill=guide_legend(title=element_blank()))
+    ggplot2::guides(fill=ggplot2::guide_legend(title=element_blank()))
 
   return(rle.plot)
 }
@@ -517,9 +517,9 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
   # split by batch
   plot.v2 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var1, y= Freq.scaled, group = Var2, fill=Var1)) +
-    ggplot2::facet_grid(cols=vars(Var2), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=ggplot2::vars(Var2), scales="free", space="free_x", drop=T) +
     ggplot2::geom_bar(stat = "identity", width = 0.9) +
-    ggplot2::guides(fill = guide_legend(title=eval(vars.axes[1]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
+    ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[1]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
     theme_mosaic(legend_position = "bottom")
 
@@ -701,11 +701,11 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     if( !is.null(model.form) ) {
       message("Use provided model formula.")
       # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
-      tmp.formula <- as.formula(model.form)
+      tmp.formula <- stats::as.formula(model.form)
     } else {
       message("Construct formula from covariates.")
       f.terms <- paste("(1|",model.vars,")", sep="")
-      tmp.formula <- as.formula(paste(paste("y", model.vars[1], sep=" ~ "), paste(f.terms[-1], collapse=" + "), sep=" + "))
+      tmp.formula <- stats::as.formula(paste(paste("y", model.vars[1], sep=" ~ "), paste(f.terms[-1], collapse=" + "), sep=" + "))
 
     }
     # now fit a model to every feature
@@ -1189,20 +1189,20 @@ colinScore <- function(model.fit) {
 mbecVarianceStatsPlot <- function( variance.obj ) {
 
   plot.df <- variance.obj %>%
-    bind_rows() %>% # this seems to work with single objects and lists
-    gather(., "covariate", "variance", -type) %>%
+    dplyr::bind_rows() %>% # this seems to work with single objects and lists
+    tidyr::gather(., "covariate", "variance", -type) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     dplyr::mutate(variance = as.numeric(as.character(variance)))
 
-  leplot <- ggplot(plot.df, aes(x = covariate, y = variance, fill = covariate)) +
-    geom_boxplot() +
-    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          strip.text = element_text(size = 12), panel.grid = element_blank(),
-          axis.text = element_text(size = 12), axis.title = element_text(size = 15),
-          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
-    labs(x = 'Covariate', y = 'Proportion Variance', name = 'Covariate') + ylim(0,1)
+  leplot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = covariate, y = variance, fill = covariate)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::facet_grid(cols = ggplot2::vars(type)) + ## this is the magic for comparative plotting
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+          strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
+          axis.text = ggplot2::element_text(size = 12), axis.title = ggplot2::element_text(size = 15),
+          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::labs(x = 'Covariate', y = 'Proportion Variance', name = 'Covariate') + ggplot2::ylim(0,1)
 
   return(leplot)
 
@@ -1228,28 +1228,28 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
   leTest <- rda.obj %>%
-    gather(., "covariate", "variance", -type) %>%
+    tidyr::gather(., "covariate", "variance", -type) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
     dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
     dplyr::mutate(variance.r = round(variance, 2))
 
   # now plot
-  lePlot <- ggplot(data = leTest, aes(x = covariate, y = variance, fill = covariate)) +
-    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
+  lePlot <- ggplot2::ggplot(data = leTest, ggplot2::aes(x = covariate, y = variance, fill = covariate)) +
+    ggplot2::geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
     # significance at the top
     # geom_text(data = leTest, aes(type, 100, label = significance),
     #           position = position_dodge(width = 0.9), size = 3) +
     # variance above the bars
-    geom_text(data = leTest, aes(covariate, variance + 2.5, label = variance.r),
-              position = position_dodge(width = 0.9), size = 3) +
-    facet_grid(cols = vars(type)) + ## this is the magic for comparative plotting
-    theme_bw() +
-    labs(y = "Variance explained (%)") +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          panel.grid = element_blank(), axis.text = element_text(size = 12),
-          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
-          legend.text = element_text(size = 12)) + ylim(0,100)
+    ggplot2::geom_text(data = leTest, ggplot2::aes(covariate, variance + 2.5, label = variance.r),
+              position = ggplot2::position_dodge(width = 0.9), size = 3) +
+    ggplot2::facet_grid(cols = ggplot2::vars(type)) + ## this is the magic for comparative plotting
+    ggplot2::theme_bw() +
+    ggplot2::labs(y = "Variance explained (%)") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+          panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
+          axis.title = ggplot2::element_text(size = 15), legend.title = ggplot2::element_text(size = 15),
+          legend.text = ggplot2::element_text(size = 12)) + ggplot2::ylim(0,100)
 
   return(lePlot)
   # FIN
@@ -1275,7 +1275,7 @@ mbecRDAStatsPlot <- function(rda.obj) {
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
   plot.df <- pvca.obj %>%
-    gather(., "covariate", "variance", -type) %>%
+    tidyr::gather(., "covariate", "variance", -type) %>%
     dplyr::mutate(covariate=gsub("\\.",":",covariate)) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
@@ -1283,16 +1283,16 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
     dplyr::mutate(variance.p = round(variance*100, 2))
 
   # now plot
-  lePlot <- ggplot(data = plot.df, aes(x = covariate, y = variance.p, fill = covariate)) +
-    geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
-    geom_text(data = plot.df, aes(covariate, variance.p + 2.5, label = variance.p),
-              position = position_dodge(width = 0.9), size = 3) + theme_bw() +
-    facet_grid(cols=vars(type), scales="free", space="free_x", drop=T) +
-    labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          panel.grid = element_blank(), axis.text = element_text(size = 12),
-          axis.title = element_text(size = 15), legend.title = element_text(size = 15),
-          legend.text = element_text(size = 12)) + ylim(0,100)
+  lePlot <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = covariate, y = variance.p, fill = covariate)) +
+    ggplot2::geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
+    ggplot2::geom_text(data = plot.df, ggplot2::aes(covariate, variance.p + 2.5, label = variance.p),
+              position = ggplot2::position_dodge(width = 0.9), size = 3) + ggplot2::theme_bw() +
+    ggplot2::facet_grid(cols=ggplot2::vars(type), scales="free", space="free_x", drop=T) +
+    ggplot2::labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+          panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
+          axis.title = ggplot2::element_text(size = 15), legend.title = ggplot2::element_text(size = 15),
+          legend.text = ggplot2::element_text(size = 12)) + ggplot2::ylim(0,100)
 
   return(lePlot)
   # FIN
@@ -1325,14 +1325,14 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
     dplyr::mutate(sil.coefficient.r = round(sil.coefficient, 2))
 
   # now plot
-  lePlot <- ggplot(plot.df, aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
-    geom_point() + facet_grid(cols = vars(type)) + theme_bw() +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1),
-          strip.text = element_text(size = 12), panel.grid = element_blank(),
-          axis.text = element_text(size = 10), axis.title = element_text(size = 15),
-          legend.title = element_text(size = 15), legend.text = element_text(size = 12)) +
-    scale_color_manual(values = cols) +
-    labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
+  lePlot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
+    ggplot2::geom_point() + ggplot2::facet_grid(cols = ggplot2::vars(type)) + ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+          strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
+          axis.text = ggplot2::element_text(size = 10), axis.title = ggplot2::element_text(size = 15),
+          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::scale_color_manual(values = cols) +
+    ggplot2::labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
 
   return(lePlot)
   # FIN
