@@ -81,27 +81,33 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #' in the counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Log Ratio Transformation
-#' @param input.obj, either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)
-#' @param method, one of 'CLR' or 'ILR'
-#' @param offset, optional offset in case of sparse matrix
+#' @param input.obj either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)
+#' @param method one of 'CLR' or 'ILR'
+#' @param offset optional offset in case of sparse matrix
+#' @param required.col (OPTIONAL) A vector of column names in the meta-data that need to be present. Sanity check for subsequent steps.
 #' @return MbecDataObject with transformed counts
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This will return the cumulative log-ratio tansformed counts in an MbecData object
+#' This will return the cumulative log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="CLR", offset=0)}
 #'
 #' This will return the inverse log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
-LRTransform <- function(input.obj, meta.obj=NULL, method = c("none", "CLR", "ILR"), offset = 0) {
-  ## 00. Check if 'method' was chosen correctly.
+LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...) {
+  ## 00. Check if 'method' was chosen correctly and get optional arguments
   method <- match.arg(method)
+  opt.arg <- list(...)
 
   ## VALIDATE input and change to 'MbecData' if needed
-  input.obj <- mbecProcessInput(input.obj, meta.obj, required.col=eval(grouping))
+  if( !is.null(opt.arg$required.col) ) {
+    input.obj <- mbecProcessInput(input.obj, required.col=eval(grouping))
+  } else {
+    input.obj <- mbecProcessInput(input.obj)
+  }
 
   ## needs sxf orientation
   tmp <- mbecGetData(input.obj, orientation="sxf")
@@ -233,7 +239,7 @@ poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
 # https://github.com/matthias-da/robCompositions/blob/master/R/isomLR.R
 # ---
 
-# KA changed the function to add a min value when many zeroes in data (prob with log and division by 0 otherwise)
+#' KA changed the function to add a min value when many zeroes in data (prob with log and division by 0 otherwise)
 #' @param fast if TRUE, it is approx. 10 times faster but numerical problems may occur for high dimensional data
 #' @noRd
 ilr.transfo = function(x, fast = TRUE, offset = 0) {

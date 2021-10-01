@@ -120,10 +120,12 @@ covariate table requires an 'sID' column that contains sample IDs equal to the s
 the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj in the output.
+This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj
+in the output.
 \dontrun{study.obj <- mbecCorrection(input.obj, model.vars=c("group","batch"), method="bat", update=FALSE)}
 
-This call will use 'Percentile Normalization' for batch effect correction and replace the old count matrix.
+This call will use 'Percentile Normalization' for batch effect correction and replace the old
+count matrix.
 \dontrun{v <- mbecCorrection(list(cnts, meta), model.vars=c("treatment","sampling.date"), method="pn", update=TRUE)}
 }
 \keyword{Assessment}

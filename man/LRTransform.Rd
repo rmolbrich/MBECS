@@ -4,19 +4,16 @@
 \alias{LRTransform}
 \title{Log-Ratio Transformation}
 \usage{
-LRTransform(
-  input.obj,
-  meta.obj = NULL,
-  method = c("none", "CLR", "ILR"),
-  offset = 0
-)
+LRTransform(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...)
 }
 \arguments{
-\item{input.obj, }{either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)}
+\item{input.obj}{either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)}
 
-\item{method, }{one of 'CLR' or 'ILR'}
+\item{method}{one of 'CLR' or 'ILR'}
 
-\item{offset, }{optional offset in case of sparse matrix}
+\item{offset}{optional offset in case of sparse matrix}
+
+\item{required.col}{(OPTIONAL) A vector of column names in the meta-data that need to be present. Sanity check for subsequent steps.}
 }
 \value{
 MbecDataObject with transformed counts
@@ -32,7 +29,7 @@ The covariate table requires an 'sID' column that contains sample IDs equal to t
 in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
-This will return the cumulative log-ratio tansformed counts in an MbecData object
+This will return the cumulative log-ratio transformed counts in an MbecData object
 \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 method="CLR", offset=0)}
 

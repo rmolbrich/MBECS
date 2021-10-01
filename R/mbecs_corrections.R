@@ -104,10 +104,12 @@
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj in the output.
+#' This call will use 'ComBat' for batch effect correction and store the new counts in a list-obj
+#' in the output.
 #' \dontrun{study.obj <- mbecCorrection(input.obj, model.vars=c("group","batch"), method="bat", update=FALSE)}
 #'
-#' This call will use 'Percentile Normalization' for batch effect correction and replace the old count matrix.
+#' This call will use 'Percentile Normalization' for batch effect correction and replace the old
+#' count matrix.
 #' \dontrun{v <- mbecCorrection(list(cnts, meta), model.vars=c("treatment","sampling.date"), method="pn", update=TRUE)}
 mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc","bat","rbe","fab","pn","svd"),
