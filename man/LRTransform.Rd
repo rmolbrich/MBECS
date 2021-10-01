@@ -4,7 +4,12 @@
 \alias{LRTransform}
 \title{Log-Ratio Transformation}
 \usage{
-LRTransform(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...)
+LRTransform(
+  input.obj,
+  method = c("none", "CLR", "ILR"),
+  offset = 0,
+  required.col = NULL
+)
 }
 \arguments{
 \item{input.obj}{either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)}

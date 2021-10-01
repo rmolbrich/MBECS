@@ -15,7 +15,7 @@ mbecReportPrelim(
 
 \item{model.vars, }{required covariates to build models}
 
-\item{return.plot, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
+\item{return.data, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
 }
 \description{
 Constructs an initial report of a single data-set without comparative analyses.

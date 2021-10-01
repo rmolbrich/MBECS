@@ -11,7 +11,7 @@ mbecModelVariance(
   model.form = NULL,
   type = "NONE",
   no.warning = TRUE,
-  ...
+  na.action = NULL
 )
 }
 \arguments{
@@ -25,7 +25,7 @@ mbecModelVariance(
 
 \item{type}{creates a column with that string in the output df - to keep track of cnt-source}
 
-\item{no.warning}{BOOLEAN that should turn of singularity warnings, but it doesn't quite work}
+\item{no.warning}{(OPTIONAL) True/False-flag that should turn of singularity warnings, but it doesn't quite work}
 
 \item{na.action}{(OPTIONAL) set NA handling, will take global option if not supplied}
 }

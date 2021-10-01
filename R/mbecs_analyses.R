@@ -705,7 +705,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @param method select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)
 #' @param model.form string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"
 #' @param type creates a column with that string in the output df - to keep track of cnt-source
-#' @param no.warning BOOLEAN that should turn of singularity warnings, but it doesn't quite work
+#' @param no.warning (OPTIONAL) True/False-flag that should turn of singularity warnings, but it doesn't quite work
 #' @param na.action (OPTIONAL) set NA handling, will take global option if not supplied
 #' @return df that contains proportions of variance for given covariates in every feature
 #' @include mbecs_classes.R
@@ -719,7 +719,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' # according to linear additive model.
 #' \dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
 #' method="pvca")}
-mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), model.form=NULL, type="NONE", no.warning=TRUE, ...) {
+mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca"), model.form=NULL, type="NONE", no.warning=TRUE, na.action=NULL) {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
   ### ToDo: safety checks and logic to distinguish model types and also take care of this matrix-input issue
@@ -734,9 +734,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
   # handle optional parameters
   opt.arg <- list(...)
-  if( !is.null(opt.arg$na.action)) {
-    na.action = opt.arg$na.action
-  } else {
+  if( is.null(na.action)) {
     na.action = getOption("na.action")
   }
 

@@ -90,7 +90,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' Constructs an initial report of a single data-set without comparative analyses.
 #' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
 #' @param model.vars, required covariates to build models
-#' @param return.plot, TRUE will return a list of all produced plots, FALSE will start rendering the report
+#' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
   # only three situations here: list with cnts and meta, phyloseq or MbecData

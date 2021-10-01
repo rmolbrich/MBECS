@@ -23,6 +23,7 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @param tax_table taxonomic table from phyloseq as optional input
 #' @param phy_tree phylogenetic tree as optional input
 #' @param refseq reference sequences as optional input
+#' @param transformations list to be filled with the result of different correction methods
 #' @return produces an R-object of type MbecData
 #' @export
 MbecData <- function(type=character(),
@@ -33,7 +34,7 @@ MbecData <- function(type=character(),
                      tax_table=NULL,
                      phy_tree=NULL,
                      refseq=NULL,
-                     list=list()) {
+                     transformations=list()) {
 
   # if input is of class phyloseq - just include the type and done.
   if( "phyloseq" %in% class(input.obj) ) {

@@ -115,7 +115,7 @@
 #' model.vars=c("treatment","sampling.date"), method="pn", update=TRUE)}
 mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc","bat","rbe","fab","pn","svd"),
-                           update=TRUE, ...) {
+                           update=TRUE, nc.features=NULL) {
 
   ## ToDo:
   # - implement the whole 'sID' thingy
@@ -124,7 +124,6 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
   # - think about percentile normalization --> maybe the percentiles can be used to improve lm/lmm?!
 
   # ruv-3 optional negative ctrls may be given as nc.features=c("name1","name2","name3",...)
-  opt.arg <- list(...)
 
   ## VALIDATE input and change to 'MbecData' if needed
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
@@ -250,8 +249,8 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     }
 
     # if names for negative-control features were supplied
-    if( !is.null(opt.arg$nc.features) ) {
-      tmp.nc <- colnames(tmp.cnts) %in% opt.arg$nc.features # get all the feature names
+    if( !is.null(nc.features) ) {
+      tmp.nc <- colnames(tmp.cnts) %in% nc.features # get all the feature names
       names(tmp.nc) <- colnames(tmp.cnts)
     } else {
       message("Not negative control features provided. Using pseudo-negative controls.")

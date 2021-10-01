@@ -97,14 +97,13 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #' # This will return the inverse log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
-LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, ...) {
+LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments
   method <- match.arg(method)
-  opt.arg <- list(...)
 
   ## VALIDATE input and change to 'MbecData' if needed
-  if( !is.null(opt.arg$required.col) ) {
-    input.obj <- mbecProcessInput(input.obj, required.col=eval(grouping))
+  if( !is.null(required.col) ) {
+    input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
   } else {
     input.obj <- mbecProcessInput(input.obj)
   }

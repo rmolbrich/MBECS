@@ -13,7 +13,7 @@ MbecData(
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
-  list = list()
+  transformations = list()
 )
 
 MbecData(
@@ -25,7 +25,7 @@ MbecData(
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
-  list = list()
+  transformations = list()
 )
 }
 \arguments{
@@ -44,6 +44,8 @@ MbecData(
 \item{phy_tree}{phylogenetic tree as optional input}
 
 \item{refseq}{reference sequences as optional input}
+
+\item{transformations}{list to be filled with the result of different correction methods}
 }
 \value{
 produces an R-object of type MbecData

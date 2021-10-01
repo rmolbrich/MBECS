@@ -10,7 +10,7 @@ mbecCorrection(
   method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "fab",
     "pn", "svd"),
   update = TRUE,
-  ...
+  nc.features = NULL
 )
 }
 \arguments{
