@@ -137,14 +137,6 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 }
 
 
-#' This function is a helper tor retrieve cnts (otu_table) in desired orientation,
-#' i.e., features in rows (fxs) or in columns (sxf).
-#' @param input.obj, can be either 'phyloseq' or 'MbecData' class
-#' @param orientation, select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
-#' @return list(), containing count.matrix in first and meta-data in second slot
-#' @export
-
-####################################################################################################
 #' Mbec-Data Getter
 #'
 #' This function extracts abundance matrix and meta-data in the chosen orientation from the input.
@@ -212,12 +204,72 @@ setGeneric("mbecGetData", signature="input.obj",
 
 }
 
+
+#' Mbec-Data Getter Phyloseq
+#'
+#' This function extracts abundance matrix and meta-data in the chosen orientation from input of
+#' class phyloseq.
+#'
+#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
+#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
+#' the different analysis and correction functions.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' metadata, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Getter
+#' @param input.obj phyloseq-object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will return the abundance matrix with samples as rows and check for the presence of
+#' # variables 'group' and 'batch' in the meta-data.
+#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=phyloseq.obj,
+#' orientation="sxf", required.col=c("group","batch"))}
+#'
+#' # This will return the abundance matrix with samples as columns and check for the presence
+#' # of variables 'Treatment' and 'Sex' in the meta-data.
+#' \dontrun{p.RLE <- mbecGetData(input.obj=phyloseq.obj,
+#' orientation="fxs", required.col=c("Treatment","Sex"))}
 setMethod("mbecGetData", "phyloseq",
           function(input.obj, orientation="fxs", required.col=NULL) {
             .mbecGetData(input.obj, orientation=orientation, required.col=required.col)
           }
 )
 
+
+#' Mbec-Data Getter MbecDdata
+#'
+#' This function extracts abundance matrix and meta-data in the chosen orientation from input of
+#' class MbecData
+#'
+#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
+#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
+#' the different analysis and correction functions.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' metadata, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Getter
+#' @param input.obj MbecData-object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will return the abundance matrix with samples as rows and check for the presence of
+#' # variables 'group' and 'batch' in the meta-data.
+#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=MbecDdata.obj,
+#' orientation="sxf", required.col=c("group","batch"))}
+#'
+#' # This will return the abundance matrix with samples as columns and check for the presence
+#' # of variables 'Treatment' and 'Sex' in the meta-data.
+#' \dontrun{p.RLE <- mbecGetData(input.obj=MbecData.obj,
+#' orientation="fxs", required.col=c("Treatment","Sex"))}
 setMethod("mbecGetData", "MbecData",
           function(input.obj, orientation="fxs", required.col=NULL) {
             .mbecGetData(input.obj, orientation=orientation, required.col=required.col)
@@ -225,6 +277,37 @@ setMethod("mbecGetData", "MbecData",
 )
 
 
+#' Mbec-Data Getter List
+#'
+#' This function extracts abundance matrix and meta-data in the chosen orientation from list input.
+#' The implementation for lists basically performs some type checks on the input and then compares
+#' col/row-names of abundance table and meta-data to infer orientation and return the user specified
+#' direction
+#'
+#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
+#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
+#' the different analysis and correction functions.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' meta-data, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Getter
+#' @param input.obj phyloseq-object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will return the abundance matrix with samples as rows and check for the presence of
+#' # variables 'group' and 'batch' in the meta-data.
+#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=list(counts, covariates),
+#' orientation="sxf", required.col=c("group","batch"))}
+#'
+#' # This will return the abundance matrix with samples as columns and check for the presence
+#' # of variables 'Treatment' and 'Sex' in the meta-data.
+#' \dontrun{p.RLE <- mbecGetData(input.obj=list(counts, covariates),
+#' orientation="fxs", required.col=c("Treatment","Sex"))}
 setMethod("mbecGetData", "list",
           function(input.obj, orientation="fxs", required.col=NULL) {
             message("It is a list!")
@@ -268,11 +351,31 @@ setMethod("mbecGetData", "list",
 )
 
 
-#' This function checks if the required covariate columns exist in the sample-data
-#' @param input.obj, can be either 'phyloseq' or 'MbecData' class
-#' @param orientation, select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
-#' @return list(), containing count.matrix in first and meta-data in second slot
+#' Mbec-Data Constructor Wrapper
+#'
+#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
+#' 'required.col', the function will check if the required columns are present in the data and then
+#' return it as an MbecData-object.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' meta-data, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Constructor Wrapper
+#' @param input.obj phyloseq-object
+#' @param required.col Vector of column names that are required from the covariate-table.
 #' @export
+#'
+#' @examples
+#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
+#' # an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
+#' required.col=c("group","batch"))}
+#'
+#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
+#' # return an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
+#' required.col=c("Treatment","Sex"))}
 setGeneric("mbecProcessInput", signature="input.obj",
            function(input.obj, required.col=NULL)
              standardGeneric("mbecProcessInput")
@@ -294,14 +397,68 @@ setGeneric("mbecProcessInput", signature="input.obj",
   return(input.obj)
 }
 
+
+#' Mbec-Data Constructor Wrapper for MbecData
+#'
+#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
+#' 'required.col', the function will check if the required columns are present in the data and then
+#' return it as an MbecData-object.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' meta-data, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' For existing MbecData objects this function serves as sanity check within correction and analysis
+#' functions. Also kind of required to enable the input of different data classes at any point in
+#' the MBECS pipeline.
+#'
+#' @keywords MBECS Constructor Wrapper MbecData
+#' @param input.obj phyloseq-object
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
+#' # an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=MbecData,
+#' required.col=c("group","batch"))}
+#'
+#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
+#' # return an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=MbecData,
+#' required.col=c("Treatment","Sex"))}
 setMethod("mbecProcessInput", "MbecData",
           function(input.obj, required.col=NULL) {
             .mbecProcessInput(input.obj, required.col=required.col)
           }
 )
 
-# SPECIFY versions for other classes
-# class phyloseq requires use of the MbecData-constructor
+
+#' Mbec-Data Constructor Wrapper for Phyloseq
+#'
+#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
+#' 'required.col', the function will check if the required columns are present in the data and then
+#' return it as an MbecData-object.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' meta-data, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Constructor Wrapper Phyloseq
+#' @param input.obj phyloseq-object
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
+#' # an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
+#' required.col=c("group","batch"))}
+#'
+#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
+#' # return an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
+#' required.col=c("Treatment","Sex"))}
 setMethod("mbecProcessInput", "phyloseq",
           function(input.obj, required.col=NULL) {
 
@@ -325,7 +482,32 @@ setMethod("mbecProcessInput", "phyloseq",
           }
 )
 
-# class phyloseq requires use of the MbecData-constructor
+
+#' Mbec-Data Constructor Wrapper for List Input
+#'
+#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
+#' 'required.col', the function will check if the required columns are present in the data and then
+#' return it as an MbecData-object.
+#'
+#' The parameter 'required.col' is a vector of column names (technically positions would work) from
+#' meta-data, that are required for the analysis at hand. The function actually only checks if
+#' they are present in the data, but it will return the whole meta-frame.
+#'
+#' @keywords MBECS Constructor Wrapper Phyloseq
+#' @param input.obj a list that contains an abundance matrix and a data.frame of covaraite information
+#' @param required.col Vector of column names that are required from the covariate-table.
+#' @export
+#'
+#' @examples
+#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
+#' # an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
+#' required.col=c("group","batch"))}
+#'
+#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
+#' # return an object of class 'MbecData'.
+#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
+#' required.col=c("Treatment","Sex"))}
 setMethod("mbecProcessInput", "list",
           function(input.obj, required.col=NULL) {
 

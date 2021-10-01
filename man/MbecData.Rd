@@ -2,9 +2,20 @@
 % Please edit documentation in R/mbecs_classes.R
 \name{MbecData}
 \alias{MbecData}
-\title{Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
-and a dataframe of covaraite variables for model-building.}
+\title{Define MbecData-class}
 \usage{
+MbecData(
+  type = character(),
+  log = character(),
+  input.obj,
+  meta.obj = NULL,
+  required.col = c("sample", "group", "batch"),
+  tax_table = NULL,
+  phy_tree = NULL,
+  refseq = NULL,
+  list = list()
+)
+
 MbecData(
   type = character(),
   log = character(),
@@ -38,6 +49,12 @@ MbecData(
 produces an R-object of type MbecData
 }
 \description{
+An extension of phyloseq-class that contains the additional fields 'type', 'log' and
+'transformations' to accommodate MBECS functionality.
+
 Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
-and a dataframe of covaraite variables for model-building.
+and a data-frame of covariate variables for model-building.
 }
+\keyword{Class}
+\keyword{Constructor}
+\keyword{MBECS}

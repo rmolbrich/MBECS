@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_classes.R
 \name{mbecSetData}
 \alias{mbecSetData}
-\title{This function either updates counts, type and log attributes or adds a matrix of transformed counts to the input}
+\title{Mbec-Data Setter}
 \usage{
 mbecSetData(
   input.obj,
@@ -24,5 +24,20 @@ mbecSetData(
 \item{update}{logical (TRUE) replace input fields (FALSE) add to the input.obj}
 }
 \description{
-This function either updates counts, type and log attributes or adds a matrix of transformed counts to the input
+This function either updates counts, type and log attributes (DEFAULT) or adds a matrix of
+transformed counts to the input (update=FALSE).
 }
+\examples{
+# This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
+# log and change the type to 'rbe' to indicate current status.
+\dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
+type='corrected', update=TRUE)}
+
+# This will add the corrected data to the list of transformations named like the type argument.
+# The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
+# matrix wasn't replaced.
+\dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
+type='corrected', update=FALSE)}
+}
+\keyword{MBECS}
+\keyword{Setter}
