@@ -8,8 +8,7 @@ Authors@R:
            email = "m.olbrich@uni-luebeck.de",
            comment = c(ORCID = "0000-0003-2789-3382"))
 Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -17,6 +16,24 @@ RoxygenNote: 7.1.2
 Imports: 
     magrittr,
     phyloseq
+Suggests: 
+    bapred,
+    cluster, 
+    dplyr,
+    ggplot2,
+    gridExtra,
+    limma,
+    lme4,
+    lmerTest,
+    pals,
+    permute,
+    pheatmap,
+    rmarkdown,
+    ruv,
+    sva,
+    tibble,
+    tidyr,
+    vegan
 Depends: 
     R (>= 2.10)
 Collate: 

@@ -1,3 +1,6 @@
+# Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
+
+
 ### define mbec storage object - inherit from phyloseq
 #' @export
 #' @import phyloseq
