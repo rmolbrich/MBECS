@@ -38,6 +38,7 @@ Suggests:
 Depends: 
     R (>= 2.10)
 Collate: 
+    'README_script.R'
     'mbecs_classes.R'
     'mbecs_analyses.R'
     'mbecs_corrections.R'

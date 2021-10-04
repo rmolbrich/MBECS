@@ -95,40 +95,127 @@ packages though.
 
     ## Put a table with dependency packages and their minimal version?!
 
-# Correction Methods
+# Batch Effect Correction Algorithms (BECA)
 
 -   bascially an outline of all provided methods, followed by an
     explanatory-section for every one
 
-## correction 1
+<!-- -->
 
--   prbl RUV-3 ?
+    ## Outline characteristics, sources and implications of batch effects.
 
-## correction 2
+## BE Assessment
 
-Center/Scale both features and samples. Select ‘ALL’, ‘TOPxx’ (by IQR
-value) or list of features to display in a heatmap with covariates of
-interest.
+-   basically just measure how strong the BE is and get significance
+    values for the effect on each feature respectively.
 
-## correction 3
+assessments: “lm”,“lmm”,“sva”,“ruv2”,“ruv4”
 
-    ## Comes with the next update.
+## BE Correction
 
-## correction 4
+The Batch-Effect Correction methods comprise algorithms that actually
+change the abundance tables by attempting to partial out the variability
+between batches.
 
-Select ‘ALL’ or ‘TOP’ xx features based on IQR, i.e., variability over
-all samples. Produce box-plot showing expression with respect to a
-covariate of interest (CoI)
+correction methods are: “ruv3”,“bmc”,“bat”,“rbe”,“fab”,“pn”,“svd”
+
+### Remove Unwanted Variation (RUV-3)
+
+-   bla bla this is it and it can do that + ref
+-   include strengths and weaknesses maybe?
+
+### Batch Mean Centering (BMC)
+
+-   bla bla this is it and it can do that + ref
+-   include strengths and weaknesses maybe?
+
+### Combatting batch effects when combining batches of microarray data (ComBat)
+
+-   bla bla this is it and it can do that + ref
+-   include strengths and weaknesses maybe?
+
+### Remove Batch Effects (RBE)
+
+-   bla bla this is it and it can do that + ref
+-   include strengths and weaknesses maybe?
+
+### FABatch (FAB)
+
+-   this is from Hornung, R., Boulesteix, A.-L., Causeur, D. (2016)
+    Combining location-and-scale batch effect adjustment with data
+    cleaning by latent factor adjustment. BMC Bioinformatics
+
+-   but it doesn’t converge, so maybe leave it out? –&gt; or keep it in
+    in case some non-microbiome data is used
+
+### Percentile Normalization (PN)
+
+-   essentially designed to integrate different studies for common
+    analysis, but since batches could be considered as different
+    studies/experiments this can also be used to integrate batches
+    within a single experiment.
+-   is limited to case control studies because it takes the control
+    group as reference (technically it makes no difference which group
+    becomes reference as the difference between the groups is the same -
+    only the direction (sign) is different) and adjusts the values of
+    the other group to be percentiles of the control distribution.
+-   also removes a lot of information because the abundance value are
+    transformed into percentiles
+
+### Singular Value Decomposition (SVD)
+
+basically PCA + significance testing + deflation of PCs from the
+original data
 
 # reporting tools
 
 -   same as with correction methods - outline all - then section with
     detailed description
--   also maybe split between varaince assessment and the other methods
+-   also maybe split between variance assessment and the other methods
     –&gt; no stringent catagorization though -.-
 -   best case scenario –&gt; most of the text goes into thesis
 
-## Linear Model (LM)
+## Study Summary
+
+-   methods that produce tables and plots to give an overview of sample
+    space and covariates
+
+### Relative Log-Ratio Expression (RLE)
+
+With respect to study grouping and known-batch effects, this plot shows
+the relative log expression for each sample, split by group and colored
+by batch. –&gt; eyeballing for BE detection
+
+### Heatmap (HEAT)
+
+-   selected features (most variable OTUs) are depicted in a heatmap
+    with respect to batch effect + all other supplied covariates
+
+### Principal Component Analysis (PCA)
+
+-   unsupervised fire and forget method to project and ordinate samples
+    from feature space to less dimensions and display select PC-axes
+
+### Box-plots (BOX)
+
+-   abundances of selected features (most variable OTUs) are averaged
+    over their respective batches and displayed as box-plot.
+
+### Study Design (MOSAIC)
+
+-   comprises covariate summary and mosaic plots
+-   mosaic plots: basically a plot of the distribution of samples over
+    batches and study grouping respectively
+-   covariate summary: some nice tabular format that displays all
+    relevant infos &lt;– ALSO, maybe split into two sections?
+
+## Variance Assessment
+
+-   different methods that produce estimated values for the proportion
+    of variance that can be attributed to covariates in general and
+    batch-grouping in particular.
+
+### Linear Model (LM)
 
 This method fits a linear model to every feature respectively and
 estimates the proportion of variance that the modelled covariates of
@@ -139,9 +226,9 @@ function will create panels that show the resulting boxes for the
 respective transformations (count-matrices since meta is the same -
 therefore same covariates and so on)
 
-## Linear (Mixed) Model (LMM)
+### Linear (Mixed) Model (LMM)
 
-## Redundancy Analysis (pRDA)
+### Redundancy Analysis (pRDA)
 
 pRDA / pCCA: (Legendre & Legendre (2012), Table 11.5 (p. 650)) The
 Redundancy Analysis (RDA) A linear regression model is fitted to the
@@ -175,7 +262,7 @@ RDA. - Inertia = sum(eigenvalues of all axes) –&gt; proportion for one
 axis\_1 equals (eigenvalue\_1 / intertia) - The PCA axes represent the
 unconstrained (i.e. residual uncharacterised factors)
 
-## PrincipalVariance Component Analysis (PVCA)
+### PrincipalVariance Component Analysis (PVCA)
 
 Algorithm - calculate the correlation of the fxs count-matrix - from
 there extract the eigenvectors and eigenvalues and calculate the
@@ -195,7 +282,7 @@ of PCs to take (but obviously not the cutoff but rather the actual
 values for the selected PCs). Finally take the average over each random
 variable and interaction term and display in a nice plot
 
-## Silhouette Coefficient
+### Silhouette Coefficient
 
 Calculate principal components and get samplewise distances on the
 resulting sxPC matrix. Then iterate over all the covariates and

@@ -41,7 +41,11 @@ message("figure out what to put here - just leave out - or put on top of the int
 ```
 
 
-## Installation
+## How To
+
+This section provides an overview of how to install and use the MBECS package.
+
+### Installation
 
 As of now the package is only available through github. To install form that source type:
 
@@ -58,9 +62,53 @@ message("ToDo: include devtools installation commands and everything else that i
 ```
 
 
+### Usage
+
+just some lines of code to describe the most basic functionality
+
+#### IO Stuff  
+
+- outline list(cnts,meta), phyloseq and MbecData input types
+- requirements for inputs
+- outputs 
+
+
+```{r IO}
+
+# Input/output requirements and such
+
+message("ToDo: add code and testdata(?) to show usage.")
+
+```
+
+
+#### Preliminary Report Pipeline (PRP)
+
+```{r PRP}
+
+# How-to produce preliminary report
+
+message("ToDo: add code and testdata(?) to show usage.")
+
+```
+
+
+#### Comparative Report Pipeline (CRP)
+
+```{r CRP}
+
+# How-to produce comparative report
+
+message("ToDo: add code and testdata(?) to show usage.")
+
+```
+
+
+
 ## Pipeline
 
 The package provides two pipelines that incorporate the different functions. The Preliminary Report Pipeline (PRP) takes the pre-processed data and presents summary and plots with regards to covariates of interest, e.g., treatment or case/control-grouping, and known batch-effects. The output is summarized in a html-markdown document. The comparative report pipeline (CRP) applies selected BECAs to the input data and creates a comparison that incorporates all the features of the PRP with the addition that all plots and tables are now displayed as panels that facilitate easy comparison between the different correction methods.
+
 
 ```{r PIPELINES, comment=''}
 
@@ -105,78 +153,196 @@ message("Put a table with dependency packages and their minimal version?!")
 ```
 
 
-# Correction Methods {.tabset}
+# Batch Effect Correction Algorithms (BECA) {.tabset}
 
 - bascially an outline of all provided methods, followed by an explanatory-section for every one
 
-```{r VISUALIZATION}
+```{r BECA}
 
-# ToDo: come up with sth. to write/show here
+# Description/Explanation of BEs and their charactersitics?
 
-```
-
-
-## correction 1
-
-- prbl RUV-3 ?
-
-```{r RLE}
-
-# RLE plot and description.
-#plot(params$report.list$rle)
+message("Outline characteristics, sources and implications of batch effects.")
 
 ```
 
 
-## correction 2
+## BE Assessment
 
-Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or list of features to display in a heatmap with covariates of interest.
+- basically just measure how strong the BE is and get significance values for the effect on each feature respectively.
+
+assessments: "lm","lmm","sva","ruv2","ruv4"
 
 
-```{r HEAT}
 
-# Heatmap features of interest and description.
-#print(params$report.list$heat)
+## BE Correction
+
+The Batch-Effect Correction methods comprise algorithms that actually change the abundance tables by attempting to partial out the variability between batches. 
+
+
+correction methods are: "ruv3","bmc","bat","rbe","fab","pn","svd"
+
+
+### Remove Unwanted Variation (RUV-3)
+
+- bla bla this is it and it can do that + ref
+- include strengths and weaknesses maybe?
+
+```{r RUV-3}
+
+# 
+
+```
+
+
+### Batch Mean Centering (BMC)
+
+- bla bla this is it and it can do that + ref
+- include strengths and weaknesses maybe?
+
+```{r BMC}
+
+# 
 
 ```
 
 
+### Combatting batch effects when combining batches of microarray data (ComBat)
 
-## correction 3
+- bla bla this is it and it can do that + ref
+- include strengths and weaknesses maybe?
 
-```{r DENDROGRAM}
+```{r ComBat}
 
-# ToDo: add le dendrogram
+# 
 
-message("Comes with the next update.")
+```
 
+
+### Remove Batch Effects (RBE)
+
+- bla bla this is it and it can do that + ref
+- include strengths and weaknesses maybe?
+
+```{r RBE}
+
+# 
 
 ```
 
 
-## correction 4
+### FABatch (FAB)
 
-Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all samples. Produce box-plot showing expression with respect to a covariate of interest (CoI) 
+- this is from Hornung, R., Boulesteix, A.-L., Causeur, D. (2016) Combining location-and-scale batch effect adjustment with data cleaning by latent factor adjustment. BMC Bioinformatics 
 
-```{r BOX}
+- but it doesn't converge, so maybe leave it out? --> or keep it in in case some non-microbiome data is used
 
-# ToDo: implement some logic to organize and format these plots
-# for( p.idx in params$report.list$box ) {
-#   
-#   plot(p.idx)
-#   
-# }
+```{r FAB}
+
+# 
 
 ```
+
+
+### Percentile Normalization (PN)
+
+- essentially designed to integrate different studies for common analysis, but since batches could be considered as different studies/experiments this can also be used to integrate batches within a single experiment.
+- is limited to case control studies because it takes the control group as reference (technically it makes no difference which group becomes reference as the difference between the groups is the same - only the direction (sign) is different) and adjusts the values of the other group to be percentiles of the control distribution.
+- also removes a lot of information because the abundance value are transformed into percentiles
+
+```{r PN}
+
+# 
+
+```
+
+
+### Singular Value Decomposition (SVD)
+
+basically PCA + significance testing + deflation of PCs from the original data
+
+```{r SVD}
+
+# 
+
+```
+
 
 # reporting tools {.tabset}
 
 
 - same as with correction methods - outline all - then section with detailed description
-- also maybe split between varaince assessment and the other methods --> no stringent catagorization though -.-
+- also maybe split between variance assessment and the other methods --> no stringent catagorization though -.-
 - best case scenario --> most of the text goes into thesis
 
-## Linear Model (LM)
+
+
+## Study Summary 
+
+- methods that produce tables and plots to give an overview of sample space and covariates
+
+
+### Relative Log-Ratio Expression (RLE)
+
+With respect to study grouping and known-batch effects, this plot shows the relative log expression for each sample, split by group and colored by batch. --> eyeballing for BE detection
+
+```{r RLE}
+
+# 
+
+```
+
+
+### Heatmap (HEAT)
+
+- selected features (most variable OTUs) are depicted in a heatmap with respect to batch effect + all other supplied covariates
+
+```{r HEAT}
+
+# 
+
+```
+
+
+### Principal Component Analysis (PCA)
+
+- unsupervised fire and forget method to project and ordinate samples from feature space to less dimensions and display select PC-axes
+
+```{r PCA}
+
+# 
+
+```
+
+
+### Box-plots (BOX)
+
+- abundances of selected features (most variable OTUs) are averaged over their respective batches and displayed as box-plot.
+
+```{r BOX}
+
+# 
+
+```
+
+
+### Study Design (MOSAIC)
+
+- comprises covariate summary and mosaic plots
+- mosaic plots: basically a plot of the distribution of samples over batches and study grouping respectively
+- covariate summary: some nice tabular format that displays all relevant infos <-- ALSO, maybe split into two sections?
+
+```{r MOSAIC}
+
+# 
+
+```
+
+
+## Variance Assessment
+
+- different methods that produce estimated values for the proportion of variance that can be attributed to covariates in general and batch-grouping in particular.
+
+### Linear Model (LM)
 
 This method fits a linear model to every feature respectively and estimates the proportion of variance that the modelled covariates of interest (coi) account for. The results are visualized in a box-plot that shows the coi and the residual values. In case of the comparative analysis between two correction methods or transformations, the plot function will create panels that show the resulting boxes for the respective transformations (count-matrices since meta is the same - therefore same covariates and so on)  
 
@@ -188,7 +354,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```
 
 
-## Linear (Mixed) Model (LMM)
+### Linear (Mixed) Model (LMM)
 
 ```{r LINMIXMOD}
 
@@ -198,7 +364,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```
 
 
-## Redundancy Analysis (pRDA)
+### Redundancy Analysis (pRDA)
 
 pRDA / pCCA: (Legendre & Legendre (2012), Table 11.5 (p. 650))
 The Redundancy Analysis (RDA) 
@@ -227,7 +393,7 @@ Information concerning a number of constrained axes (RDA axes) and unconstrained
 ```
 
 
-## PrincipalVariance Component Analysis (PVCA)
+### PrincipalVariance Component Analysis (PVCA)
 
 Algorithm - calculate the correlation of the fxs count-matrix - from there extract the eigenvectors and eigenvalues and calculate the proportion of explained variance per eigenvector (i.e. principal component) by dividing the eigenvalues by the sum of eigenvalues. Now select as many PCs as required to fill a chosen quota for the total proportion of explained variance. Iterate over all PCs and fit a linear mixed model that contains all covariates as random effect and all unique interactions between two covariates. Compute variance covariance components form the resulting model --> From there we get the Variance that each covariate(variable) contributes to this particular PC.
 Then just standardize variance by dividing it through the sum of variance for that model.
@@ -242,7 +408,7 @@ Scale each PCs results by the proportion this PC accounted for in the first plac
 
 
 
-## Silhouette Coefficient
+### Silhouette Coefficient
 
 Calculate principal components and get samplewise distances on the resulting sxPC matrix.
 Then iterate over all the covariates and calculate the cluster silhouette (which is basically either zero, if the cluster contains only a single element, or it is the distance to the closest different cluster minus the distance of the sample within its own cluster divided (scaled) by the maximum distance). Average over each element in a cluster for all clusters and there is the representation of how good the clustering is.
