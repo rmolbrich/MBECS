@@ -2,7 +2,12 @@
 title: "MBECS - Microbiome Batch-Effect Correction Suite"
 author: "Michael Olbrich"
 date: "9/20/2021"
-output: github_document
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    pandoc_args: --webtex
 ---
 
 
@@ -15,6 +20,11 @@ knitr::opts_chunk$set(echo = TRUE)
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+$$
+E = \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
+$$
+
 
 ```{r cars}
 summary(cars)

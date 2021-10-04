@@ -3,7 +3,27 @@ MBECS - Microbiome Batch-Effect Correction Suite
 Michael Olbrich
 9/20/2021
 
-## R Markdown
+-   [0.1 R Markdown](#r-markdown)
+-   [0.2 Including Plots](#including-plots)
+-   [1 Study Summary](#study-summary)
+    -   [1.1 Covariates](#covariates)
+    -   [1.2 Sample Distribution](#sample-distribution)
+    -   [1.3 Sample Separation](#sample-separation)
+-   [2 Visualization](#visualization)
+    -   [2.1 Relative Log Expression
+        (RLE)](#relative-log-expression-rle)
+    -   [2.2 Heatmap](#heatmap)
+    -   [2.3 Dendrogram](#dendrogram)
+    -   [2.4 BOX-plot](#box-plot)
+-   [3 Variance Assessment](#variance-assessment)
+    -   [3.1 Linear Model (LM)](#linear-model-lm)
+    -   [3.2 Linear (Mixed) Model (LMM)](#linear-mixed-model-lmm)
+    -   [3.3 Redundancy Analysis (pRDA)](#redundancy-analysis-prda)
+    -   [3.4 PrincipalVariance Component Analysis
+        (PVCA)](#principalvariance-component-analysis-pvca)
+    -   [3.5 Silhouette Coefficient](#silhouette-coefficient)
+
+## 0.1 R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax
 for authoring HTML, PDF, and MS Word documents. For more details on
@@ -12,6 +32,12 @@ using R Markdown see <http://rmarkdown.rstudio.com>.
 When you click the **Knit** button a document will be generated that
 includes both content as well as the output of any embedded R code
 chunks within the document. You can embed an R code chunk like this:
+
+![
+E = \\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
+](https://latex.codecogs.com/png.latex?%0AE%20%3D%20%5Cfrac%7Bmc%5E2%7D%7B%5Csqrt%7B1-%5Cfrac%7Bv%5E2%7D%7Bc%5E2%7D%7D%7D%0A "
+E = \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
+")
 
 ``` r
 summary(cars)
@@ -25,7 +51,7 @@ summary(cars)
     ##  3rd Qu.:19.0   3rd Qu.: 56.00  
     ##  Max.   :25.0   Max.   :120.00
 
-## Including Plots
+## 0.2 Including Plots
 
 You can also embed plots, for example:
 
@@ -34,23 +60,23 @@ You can also embed plots, for example:
 Note that the `echo = FALSE` parameter was added to the code chunk to
 prevent printing of the R code that generated the plot.
 
-# Study Summary
+# 1 Study Summary
 
 This section will contain all the information about this data-set.
 Starting off with a literal summary, e.g., \#samples, \#samples per
 group/treatment/other factor, \#covariates and \#factors, etc…
 
-## Covariates
+## 1.1 Covariates
 
 some sort of table to have an overview of the meta-data.
 
-## Sample Distribution
+## 1.2 Sample Distribution
 
 Select two covariates of interest, e.g., ‘treatment’ and ‘batch’, and
 display bars for the number of samples from one covariate grouping that
 fall into the categories of the grouping.
 
-## Sample Separation
+## 1.3 Sample Separation
 
 Technically, the function ‘prcomp’ performs a singular value
 decomposition to retrieve the eigenvectors for projection. Computes
@@ -60,11 +86,11 @@ a grid, using selected eigenvectors as axes. This shows
 sample-relatedness (clustering) and can help identify the presence of
 confounding factors.
 
-# Visualization
+# 2 Visualization
 
 Aka some more plots here.
 
-## Relative Log Expression (RLE)
+## 2.1 Relative Log Expression (RLE)
 
 Separate samples by covariate of interest (CoI), e.g., treatment or
 study group, calculate the median value for every feature count and
@@ -74,28 +100,28 @@ median values, whiskers, the whole shabang) and color them by batch
 membership. Repeat for all factors in the CoI and use ‘facet\_grid’ to
 display side-by-side.
 
-## Heatmap
+## 2.2 Heatmap
 
 Center/Scale both features and samples. Select ‘ALL’, ‘TOPxx’ (by IQR
 value) or list of features to display in a heatmap with covariates of
 interest.
 
-## Dendrogram
+## 2.3 Dendrogram
 
     ## Comes with the next update.
 
-## BOX-plot
+## 2.4 BOX-plot
 
 Select ‘ALL’ or ‘TOP’ xx features based on IQR, i.e., variability over
 all samples. Produce box-plot showing expression with respect to a
 covariate of interest (CoI)
 
-# Variance Assessment
+# 3 Variance Assessment
 
 Several different approaches are used to estimate the amount of
 variability attributable to covaraites of interest.
 
-## Linear Model (LM)
+## 3.1 Linear Model (LM)
 
 This method fits a linear model to every feature respectively and
 estimates the proportion of variance that the modelled covariates of
@@ -106,9 +132,9 @@ function will create panels that show the resulting boxes for the
 respective transformations (count-matrices since meta is the same -
 therefore same covariates and so on)
 
-## Linear (Mixed) Model (LMM)
+## 3.2 Linear (Mixed) Model (LMM)
 
-## Redundancy Analysis (pRDA)
+## 3.3 Redundancy Analysis (pRDA)
 
 pRDA / pCCA: (Legendre & Legendre (2012), Table 11.5 (p. 650)) The
 Redundancy Analysis (RDA) A linear regression model is fitted to the
@@ -142,7 +168,7 @@ RDA. - Inertia = sum(eigenvalues of all axes) –&gt; proportion for one
 axis\_1 equals (eigenvalue\_1 / intertia) - The PCA axes represent the
 unconstrained (i.e. residual uncharacterised factors)
 
-## PrincipalVariance Component Analysis (PVCA)
+## 3.4 PrincipalVariance Component Analysis (PVCA)
 
 Algorithm - calculate the correlation of the fxs count-matrix - from
 there extract the eigenvectors and eigenvalues and calculate the
@@ -162,7 +188,7 @@ of PCs to take (but obviously not the cutoff but rather the actual
 values for the selected PCs). Finally take the average over each random
 variable and interaction term and display in a nice plot
 
-## Silhouette Coefficient
+## 3.5 Silhouette Coefficient
 
 Calculate principal components and get samplewise distances on the
 resulting sxPC matrix. Then iterate over all the covariates and
