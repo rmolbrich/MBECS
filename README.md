@@ -3,125 +3,58 @@ MBECS - Microbiome Batch-Effect Correction Suite
 Michael Olbrich
 9/20/2021
 
--   [0.1 R Markdown](#r-markdown)
--   [0.2 Including Plots](#including-plots)
--   [1 Study Summary](#study-summary)
-    -   [1.1 Covariates](#covariates)
-    -   [1.2 Sample Distribution](#sample-distribution)
-    -   [1.3 Sample Separation](#sample-separation)
--   [2 Visualization](#visualization)
-    -   [2.1 Relative Log Expression
-        (RLE)](#relative-log-expression-rle)
-    -   [2.2 Heatmap](#heatmap)
-    -   [2.3 Dendrogram](#dendrogram)
-    -   [2.4 BOX-plot](#box-plot)
--   [3 Variance Assessment](#variance-assessment)
-    -   [3.1 Linear Model (LM)](#linear-model-lm)
-    -   [3.2 Linear (Mixed) Model (LMM)](#linear-mixed-model-lmm)
-    -   [3.3 Redundancy Analysis (pRDA)](#redundancy-analysis-prda)
-    -   [3.4 PrincipalVariance Component Analysis
-        (PVCA)](#principalvariance-component-analysis-pvca)
-    -   [3.5 Silhouette Coefficient](#silhouette-coefficient)
+# Introduction
 
-## 0.1 R Markdown
+-   outline the purpose
 
-This is an R Markdown document. Markdown is a simple formatting syntax
-for authoring HTML, PDF, and MS Word documents. For more details on
-using R Markdown see <http://rmarkdown.rstudio.com>.
+## Pipeline
 
-When you click the **Knit** button a document will be generated that
-includes both content as well as the output of any embedded R code
-chunks within the document. You can embed an R code chunk like this:
+-   preliminary report and comparative report
 
-![
-E = \\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
-](https://latex.codecogs.com/png.latex?%0AE%20%3D%20%5Cfrac%7Bmc%5E2%7D%7B%5Csqrt%7B1-%5Cfrac%7Bv%5E2%7D%7Bc%5E2%7D%7D%7D%0A "
-E = \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
-")
+## Simulation
 
-``` r
-summary(cars)
-```
+-   unclear if I really want to do that - min. is a month to implement
+    and is not obvious what the benfit would be
+-   also level of sophistication
 
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
+## Third section??
 
-## 0.2 Including Plots
+-   sth. more to describe here?
 
-You can also embed plots, for example:
+# Correction Methods
 
-![](README_files/figure-gfm/pressure-1.png)<!-- -->
+-   bascially an outline of all provided methods, followed by an
+    explanatory-section for every one
 
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+## correction 1
 
-# 1 Study Summary
+-   prbl RUV-3 ?
 
-This section will contain all the information about this data-set.
-Starting off with a literal summary, e.g., \#samples, \#samples per
-group/treatment/other factor, \#covariates and \#factors, etc…
-
-## 1.1 Covariates
-
-some sort of table to have an overview of the meta-data.
-
-## 1.2 Sample Distribution
-
-Select two covariates of interest, e.g., ‘treatment’ and ‘batch’, and
-display bars for the number of samples from one covariate grouping that
-fall into the categories of the grouping.
-
-## 1.3 Sample Separation
-
-Technically, the function ‘prcomp’ performs a singular value
-decomposition to retrieve the eigenvectors for projection. Computes
-covariance-matrix on counts, extract the orthogonal eigenvectors and
-rank them by amount of variance they correspond to. Plot the samples on
-a grid, using selected eigenvectors as axes. This shows
-sample-relatedness (clustering) and can help identify the presence of
-confounding factors.
-
-# 2 Visualization
-
-Aka some more plots here.
-
-## 2.1 Relative Log Expression (RLE)
-
-Separate samples by covariate of interest (CoI), e.g., treatment or
-study group, calculate the median value for every feature count and
-subtract it from all samples respectively. Express the remaining
-variability in counts per sample in a box-plot (including outliers,
-median values, whiskers, the whole shabang) and color them by batch
-membership. Repeat for all factors in the CoI and use ‘facet\_grid’ to
-display side-by-side.
-
-## 2.2 Heatmap
+## correction 2
 
 Center/Scale both features and samples. Select ‘ALL’, ‘TOPxx’ (by IQR
 value) or list of features to display in a heatmap with covariates of
 interest.
 
-## 2.3 Dendrogram
+## correction 3
 
     ## Comes with the next update.
 
-## 2.4 BOX-plot
+## correction 4
 
 Select ‘ALL’ or ‘TOP’ xx features based on IQR, i.e., variability over
 all samples. Produce box-plot showing expression with respect to a
 covariate of interest (CoI)
 
-# 3 Variance Assessment
+# reporting tools
 
-Several different approaches are used to estimate the amount of
-variability attributable to covaraites of interest.
+-   same as with correction methods - outline all - then section with
+    detailed description
+-   also maybe split between varaince assessment and the other methods
+    –&gt; no stringent catagorization though -.-
+-   best case scenario –&gt; most of the text goes into thesis
 
-## 3.1 Linear Model (LM)
+## Linear Model (LM)
 
 This method fits a linear model to every feature respectively and
 estimates the proportion of variance that the modelled covariates of
@@ -132,9 +65,9 @@ function will create panels that show the resulting boxes for the
 respective transformations (count-matrices since meta is the same -
 therefore same covariates and so on)
 
-## 3.2 Linear (Mixed) Model (LMM)
+## Linear (Mixed) Model (LMM)
 
-## 3.3 Redundancy Analysis (pRDA)
+## Redundancy Analysis (pRDA)
 
 pRDA / pCCA: (Legendre & Legendre (2012), Table 11.5 (p. 650)) The
 Redundancy Analysis (RDA) A linear regression model is fitted to the
@@ -168,7 +101,7 @@ RDA. - Inertia = sum(eigenvalues of all axes) –&gt; proportion for one
 axis\_1 equals (eigenvalue\_1 / intertia) - The PCA axes represent the
 unconstrained (i.e. residual uncharacterised factors)
 
-## 3.4 PrincipalVariance Component Analysis (PVCA)
+## PrincipalVariance Component Analysis (PVCA)
 
 Algorithm - calculate the correlation of the fxs count-matrix - from
 there extract the eigenvectors and eigenvalues and calculate the
@@ -188,7 +121,7 @@ of PCs to take (but obviously not the cutoff but rather the actual
 values for the selected PCs). Finally take the average over each random
 variable and interaction term and display in a nice plot
 
-## 3.5 Silhouette Coefficient
+## Silhouette Coefficient
 
 Calculate principal components and get samplewise distances on the
 resulting sxPC matrix. Then iterate over all the covariates and

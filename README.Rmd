@@ -4,41 +4,20 @@ author: "Michael Olbrich"
 date: "9/20/2021"
 output: 
   github_document:
-    toc: true
-    toc_depth: 2
-    number_sections: true
+    toc: FALSE
+    toc_depth: 3
+    number_sections: FALSE
+    fig_width: 7
+    fig_height: 5
+    dev: "png"
+    df_print: "default"
+    includes: NULL
+    md_extensions: NULL
+    hard_line_breaks: TRUE
     pandoc_args: --webtex
+    html_preview: TRUE
+    keep_html: FALSE
 ---
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-$$
-E = \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
-$$
-
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 
 
@@ -48,9 +27,9 @@ knitr::opts_chunk$set(echo=FALSE)
 ```
 
 
-# Study Summary {.tabset}
+# Introduction {.tabset}
 
-This section will contain all the information about this data-set. Starting off with a literal summary, e.g., #samples, #samples per group/treatment/other factor, #covariates and #factors, etc...
+- outline the purpose 
 
 ```{r STUDY_SUMMARY}
 
@@ -59,9 +38,9 @@ This section will contain all the information about this data-set. Starting off 
 ```
 
 
-## Covariates
+## Pipeline
 
-some sort of table to have an overview of the meta-data.
+- preliminary report and comparative report
 
 ```{r COVARIATES, comment=''}
 
@@ -72,9 +51,10 @@ some sort of table to have an overview of the meta-data.
 ```
 
 
-## Sample Distribution
+## Simulation
 
-Select two covariates of interest, e.g., 'treatment' and 'batch', and display bars for the number of samples from one covariate grouping that fall into the categories of the grouping.
+- unclear if I really want to do that - min. is a month to implement and is not obvious what the benfit would be 
+- also level of sophistication
 
 ```{r MOSAIC}
 # Mosaic style plots (and maybe pie-charts)
@@ -83,9 +63,9 @@ Select two covariates of interest, e.g., 'treatment' and 'batch', and display ba
 ```
 
 
-## Sample Separation
+## Third section??
 
-Technically, the function 'prcomp' performs a singular value decomposition to retrieve the eigenvectors for projection. Computes covariance-matrix on counts, extract the orthogonal eigenvectors and rank them by amount of variance they correspond to. Plot the samples on a grid, using selected eigenvectors as axes. This shows sample-relatedness (clustering) and can help identify the presence of confounding factors.
+- sth. more to describe here?
 
 ```{r PCA}
 
@@ -95,9 +75,9 @@ Technically, the function 'prcomp' performs a singular value decomposition to re
 ```
 
 
-# Visualization {.tabset}
+# Correction Methods {.tabset}
 
-Aka some more plots here.
+- bascially an outline of all provided methods, followed by an explanatory-section for every one
 
 ```{r VISUALIZATION}
 
@@ -106,9 +86,9 @@ Aka some more plots here.
 ```
 
 
-## Relative Log Expression (RLE)
+## correction 1
 
-Separate samples by covariate of interest (CoI), e.g., treatment or study group, calculate the median value for every feature count and subtract it from all samples respectively. Express the remaining variability in counts per sample in a box-plot (including outliers, median values, whiskers, the whole shabang) and color them by batch membership. Repeat for all factors in the CoI and use 'facet_grid' to display side-by-side.
+- prbl RUV-3 ?
 
 ```{r RLE}
 
@@ -118,7 +98,7 @@ Separate samples by covariate of interest (CoI), e.g., treatment or study group,
 ```
 
 
-## Heatmap
+## correction 2
 
 Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or list of features to display in a heatmap with covariates of interest.
 
@@ -132,7 +112,7 @@ Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or 
 
 
 
-## Dendrogram
+## correction 3
 
 ```{r DENDROGRAM}
 
@@ -144,7 +124,7 @@ message("Comes with the next update.")
 ```
 
 
-## BOX-plot
+## correction 4
 
 Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all samples. Produce box-plot showing expression with respect to a covariate of interest (CoI) 
 
@@ -159,11 +139,12 @@ Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all sampl
 
 ```
 
-# Variance Assessment {.tabset}
+# reporting tools {.tabset}
 
 
-Several different approaches are used to estimate the amount of variability attributable to covaraites of interest.
-
+- same as with correction methods - outline all - then section with detailed description
+- also maybe split between varaince assessment and the other methods --> no stringent catagorization though -.-
+- best case scenario --> most of the text goes into thesis
 
 ## Linear Model (LM)
 
