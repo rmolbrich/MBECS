@@ -1,35 +1,25 @@
 ---
-title: "MBECS - Microbiome Batch-Effect Correction Suite"
+title: "PreliminaryReport"
 author: "Michael Olbrich"
-date: "9/20/2021"
-output: github_document
+# output: pdf_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cerulean
+    highlight: kate
+params:
+  date: !r Sys.Date()
+  region: Europe
+  printcode: TRUE
+  data: file.csv
+  report.data: !r list()
+  report.vars: !r character()
+  report.list: !r list()
+  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","linmod","linmixmod,"rda","pvca","scoef"))))
+  something: !r c(1,2,3)
+
 ---
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
 
 
 ```{r SETUP, echo=FALSE}
@@ -56,7 +46,7 @@ some sort of table to have an overview of the meta-data.
 ```{r COVARIATES, comment=''}
 
 # Some nicely formatted table here
-#summary(params$report.data[[2]])
+summary(params$report.data[[2]])
 
 
 ```
@@ -68,7 +58,7 @@ Select two covariates of interest, e.g., 'treatment' and 'batch', and display ba
 
 ```{r MOSAIC}
 # Mosaic style plots (and maybe pie-charts)
-#plot(params$report.list$mosaic)
+plot(params$report.list$mosaic)
 
 ```
 
@@ -80,7 +70,7 @@ Technically, the function 'prcomp' performs a singular value decomposition to re
 ```{r PCA}
 
 # PCA plot and description.
-#plot(params$report.list$pca)
+plot(params$report.list$pca)
 
 ```
 
@@ -103,7 +93,7 @@ Separate samples by covariate of interest (CoI), e.g., treatment or study group,
 ```{r RLE}
 
 # RLE plot and description.
-#plot(params$report.list$rle)
+plot(params$report.list$rle)
 
 ```
 
@@ -116,7 +106,7 @@ Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or 
 ```{r HEAT}
 
 # Heatmap features of interest and description.
-#print(params$report.list$heat)
+print(params$report.list$heat)
 
 ```
 
@@ -141,11 +131,11 @@ Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all sampl
 ```{r BOX}
 
 # ToDo: implement some logic to organize and format these plots
-# for( p.idx in params$report.list$box ) {
-#   
-#   plot(p.idx)
-#   
-# }
+for( p.idx in params$report.list$box ) {
+  
+  plot(p.idx)
+  
+}
 
 ```
 
@@ -162,7 +152,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```{r LINMOD}
 
 # avg. variance in linear model plot and description.
-#print(params$report.list$linmod)
+print(params$report.list$linmod)
 
 ```
 
@@ -172,7 +162,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```{r LINMIXMOD}
 
 # avg. variance in linear model plot and description.
-#print(params$report.list$linmixmod)
+print(params$report.list$linmixmod)
 
 ```
 
@@ -201,7 +191,7 @@ Information concerning a number of constrained axes (RDA axes) and unconstrained
 ```{r RDA}
 
 # RDA plot and description.
-#print(params$report.list$rda)
+print(params$report.list$rda)
 
 ```
 
@@ -215,7 +205,7 @@ Scale each PCs results by the proportion this PC accounted for in the first plac
 ```{r PVCA}
 
 # PVCA plot and description.
-#print(params$report.list$pvca)
+print(params$report.list$pvca)
 
 ```
 
@@ -229,6 +219,7 @@ Then iterate over all the covariates and calculate the cluster silhouette (which
 ```{r SCOEF}
 
 # Average silhouette-coef plot and description.
-#print(params$report.list$scoef)
+print(params$report.list$scoef)
 
 ```
+

@@ -48,8 +48,8 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
     tmp.group.long <- apply(tmp.cnts.group, 2, function(sample.col) sample.col - feature.med) %>% # subtract feature-median from sample
-      as.data.frame(.) %>%
-      tidyr::pivot_longer(., cols = colnames(.), names_to = "specimen", values_to = "values") # re-arrange to long format
+      as.data.frame() %>%
+      tidyr::pivot_longer(cols = everything(), names_to = "specimen", values_to = "values") # re-arrange to long format
 
     tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
   }
@@ -58,7 +58,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
   # order by group_batch and then set factor levels for samples and batches in that order
   tmp.long <- dplyr::left_join(tmp.long, tmp.meta, by = "specimen") %>% # merge with sample data
     dplyr::mutate(plot.order = paste(get(model.vars[1]), get(model.vars[2]), sep="_")) %>%
-    dplyr::arrange(., plot.order) %>%
+    dplyr::arrange(plot.order) %>%
     dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
 
   if( return.data ) {
@@ -67,7 +67,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 
   rle.plot <- ggplot2::ggplot(tmp.long, ggplot2::aes(x = specimen, y = values, fill = get(model.vars[2]))) +
     ggplot2::stat_boxplot(color="black",notch = TRUE,
-                 outlier.colour = "#E42032", outlier.fill = "white",outlier.shape = 1, outlier.stroke = .5) +
+                          outlier.colour = "#E42032", outlier.fill = "white",outlier.shape = 1, outlier.stroke = .5) +
     #facet_wrap(~Strain, ncol=2) +
     ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=T) +
     ggplot2::scale_fill_manual(values = cols) +
@@ -130,10 +130,10 @@ setGeneric("mbecPCA", signature="input.obj",
   axes.names <- paste("PC",1:axes.number, sep="")
 
   plot.df <- PCA$x %>%
-    data.frame(., stringsAsFactors = FALSE) %>%
+    data.frame(stringsAsFactors = FALSE) %>%
     dplyr::rename_at(1:axes.number, ~ axes.names) %>%
-    tibble::rownames_to_column(., var = "sample") %>%
-    dplyr::left_join(., tmp.meta, by = "sample")
+    tibble::rownames_to_column(var = "sample") %>%
+    dplyr::left_join(tmp.meta, by = "sample")
 
   metric.df <- data.frame("var.explained"=round((100*PCA$sdev^2) / (sum(PCA$x^2 / max(1, nrow(PCA$x)-1))),2),row.names = axes.names) %>%
     dplyr::mutate("axis.min"=floor(apply(PCA$x, 2, function(col) min(col))))%>%
@@ -394,7 +394,7 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
   tmp <- tmp[[1]] %>%
     tibble::rownames_to_column(var = "specimen") %>%
-    dplyr::left_join(., tmp[[2]], by = c("specimen" = "specimen"))
+    dplyr::left_join(tmp[[2]], by = c("specimen" = "specimen"))
 
   if( method[1] == "TOP" ) {
     # calculate IQR and order from largest to smallest
@@ -403,14 +403,14 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     otu.idx <- names(iqr)[1:min(length(otu.idx), n)]
 
     tmp <- tmp %>%
-      dplyr::select(., c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
+      dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
   } else if( length(method) >= 2 ) {
     message("'Method' parameter contains multiple elements - using to select features.")
     # calculate IQR and sort as well
     otu.idx <- method
     tmp <- tmp %>%
-      dplyr::select(., c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
+      dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
   } # else is 'select-all-mode'
 
@@ -600,7 +600,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
   n.observations <- base::dim(tmp.meta)[1]
 
   study.summary <- base::table(tmp.meta[,eval(model.vars[1])], tmp.meta[,eval(model.vars[2])]) %>%
-    as.data.frame(.) %>%
+    as.data.frame() %>%
     dplyr::mutate("Freq.scaled"=Freq / n.observations)
 
   # prepare plot-annotation
@@ -733,7 +733,6 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   on.exit(options(warn = oldw))
 
   # handle optional parameters
-  opt.arg <- list(...)
   if( is.null(na.action)) {
     na.action = getOption("na.action")
   }
@@ -870,7 +869,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # center and/or scale the counts - if both arguments are set to false, it will just transpose the matrix for the subsequent steps
     tmp.cnts = apply(tmp.cnts, 2, scale, center = T, scale = FALSE) %>%
-      t(.)
+      t()
 
     #reset the sample-names
     colnames(tmp.cnts) <- s.names
@@ -895,7 +894,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # create a long-df that contains a column for all selected eigen-vectors and the required covariates (which obviously repeat for all vectors)
     # join selected eigenvectors and covariate data in a single df
-    lmm.df <- eVec %>% tibble::as_tibble(., .name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
+    lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
     #lmm.df <- eVec %>% cbind(., tmp.meta)  %>% as_tibble(.) %>% select_at(1:eval(n.PCs))
 
     # # figure out how many effects there are - it is a random effect for every covariate - plus an interaction term for
@@ -1025,7 +1024,7 @@ mbecVarianceStats <- function( model.fit ) {
 
     vp = stats::anova(model.fit) %>%
       data.frame() %>%
-      dplyr::mutate("variance" = dplyr::select(.,"Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
+      dplyr::mutate("variance" = dplyr::select("Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
       t()
 
   } else if( class(model.fit) %in% "lmerMod" ) {  # linear-mixed model
@@ -1134,9 +1133,9 @@ mbecMixedVariance <- function(model.fit) {
     # 1. drop intercept
     dplyr::select(!"(Intercept)") %>%
     # 2. row-sums for all effects - can calculate total variance
-    dplyr::mutate("total.var"=apply(., 1, sum)) %>%
+    dplyr::mutate("total.var"=apply(1, sum)) %>%
     # 3. apply to get the scaled variance in each column
-    apply(., 2, function(effect) stats::var(effect) * n.scaling)
+    apply(2, function(effect) stats::var(effect) * n.scaling)
 
   # maybe fancy later, but for now this works
   fixedVar <- lapply(split(
@@ -1283,7 +1282,7 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 
   plot.df <- variance.obj %>%
     dplyr::bind_rows() %>% # this seems to work with single objects and lists
-    tidyr::gather(., "covariate", "variance", -type) %>%
+    tidyr::gather("covariate", "variance", -type) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     dplyr::mutate(variance = as.numeric(as.character(variance)))
 
@@ -1321,7 +1320,7 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
   leTest <- rda.obj %>%
-    tidyr::gather(., "covariate", "variance", -type) %>%
+    tidyr::gather("covariate", "variance", -type) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
     dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
@@ -1368,7 +1367,7 @@ mbecRDAStatsPlot <- function(rda.obj) {
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
   plot.df <- pvca.obj %>%
-    tidyr::gather(., "covariate", "variance", -type) %>%
+    tidyr::gather("covariate", "variance", -type) %>%
     dplyr::mutate(covariate=gsub("\\.",":",covariate)) %>%
     dplyr::mutate(type = factor(type, levels = unique(type))) %>%
     dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
