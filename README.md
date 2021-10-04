@@ -5,21 +5,95 @@ Michael Olbrich
 
 # Introduction
 
--   outline the purpose
+The Microbiome Batch-Effect Correction Suite aims to provide a toolkit
+for stringent assessment and correction of batch-effects in microbiome
+data sets. To that end, the package offers wrapper-functions to
+summarize study-design and data, e.g., PCA, Heatmap and Mosaic-plots,
+and to estimate the proportion of variance that can be attributed to the
+batch effect. The ‘mbecsCorrection’ function acts as a wrapper for
+various batch effects correction algorithms (BECA) and in conjunction
+with the aforementioned tools, it can be used to compare the
+effectiveness of correction methods on particular sets of data. All
+functions of this package are accessible on their own or within the
+preliminary and comparative report pipelines respectively.
+
+    ## figure out what to put here - just leave out - or put on top of the introductory text
+
+## Installation
+
+As of now the package is only available through github. To install form
+that source type:
+
+Text from ‘acknowledgements’ - ToDo: fix this and acknowledgements to be
+separate.
+
+The package is designed to rely on as little dependencies as possible to
+hopefully improve its longevity. To that end, some functions of smaller,
+less well know packages (basically everything that I don’t trust to be
+maintained and supported over the coming years AND everything that is
+just one function of a much larger package AND sth. like Percentile
+normalization which is available as python code and probably also for R
+in some git, but it is well described in the respective publication and
+thus very easy to implement). The packages still relies on a host of
+packages though.
+
+    ## ToDo: include devtools installation commands and everything else that is required? Also, update once other sources become available.
 
 ## Pipeline
 
--   preliminary report and comparative report
+The package provides two pipelines that incorporate the different
+functions. The Preliminary Report Pipeline (PRP) takes the pre-processed
+data and presents summary and plots with regards to covariates of
+interest, e.g., treatment or case/control-grouping, and known
+batch-effects. The output is summarized in a html-markdown document. The
+comparative report pipeline (CRP) applies selected BECAs to the input
+data and creates a comparison that incorporates all the features of the
+PRP with the addition that all plots and tables are now displayed as
+panels that facilitate easy comparison between the different correction
+methods.
+
+    Figure 1. preliminary pipeline
+
+    Figure 2. comparative pipeline
 
 ## Simulation
 
 -   unclear if I really want to do that - min. is a month to implement
     and is not obvious what the benfit would be
--   also level of sophistication
+-   also level of sophistication is unclear –&gt; because this could
+    technically go to sequence level detail with compositional-profile
+    templates and a bunch of distributions to select for simulation
+    –&gt; but then it would take probably like 2months to implement and
+    test that..
+-   IF this will be done:
 
-## Third section??
+The simulation functions offer the ability to create mockup data for
+algorithm testing. The general idea is to provide a tool that is able to
+create ‘life-like’ data, i.e., SO!!! the best possible option would be
+to feed existing microbial communal-composition profiles and create the
+‘RAW’ sequencing files, i.e., before assigning taxonomy. That way one
+can control aspects such as sample-/group-wise compositions, level of
+noise, type and size of biological effects (‘type’ meaning how it
+affects which features) and especially type and size of the actual
+batche effect. And since the data prior to all the processing steps is
+perfectly characterized - it would be straightforward to assess the
+quality of different BECAs for this particular data-set.
 
--   sth. more to describe here?
+    ## IF simulation is included - put a flow diagram of the process here
+
+## Acknowledgements and References
+
+The package is designed to rely on as little dependencies as possible to
+hopefully improve its longevity. To that end, some functions of smaller,
+less well know packages (basically everything that I don’t trust to be
+maintained and supported over the coming years AND everything that is
+just one function of a much larger package AND sth. like Percentile
+normalization which is available as python code and probably also for R
+in some git, but it is well described in the respective publication and
+thus very easy to implement). The packages still relies on a host of
+packages though.
+
+    ## Put a table with dependency packages and their minimal version?!
 
 # Correction Methods
 
