@@ -19,10 +19,17 @@ preliminary and comparative report pipelines respectively.
 
     ## figure out what to put here - just leave out - or put on top of the introductory text
 
-## Installation
+## How To
+
+This section provides an overview of how to install and use the MBECS
+package.
+
+### Installation
 
 As of now the package is only available through github. To install form
 that source type:
+
+    ## ToDo: provide installation instructions - last thing in pkg-dev.
 
 Text from ‘acknowledgements’ - ToDo: fix this and acknowledgements to be
 separate.
@@ -37,7 +44,50 @@ in some git, but it is well described in the respective publication and
 thus very easy to implement). The packages still relies on a host of
 packages though.
 
-    ## ToDo: include devtools installation commands and everything else that is required? Also, update once other sources become available.
+|  Package  | Version  |    Date    | Repository |
+|:---------:|:--------:|:----------:|:----------:|
+|  bapred   |   1.0    | 2016-06-02 |    CRAN    |
+|  cluster  |  2.1.2   | 2021-04-16 |    CRAN    |
+|   dplyr   |  1.0.7   |    NULL    |    CRAN    |
+|  ggplot2  |  3.3.5   |    NULL    |    CRAN    |
+| gridExtra |   2.3    |    NULL    |    CRAN    |
+|   limma   |  3.44.3  | 2020-06-12 |    NULL    |
+|   lme4    | 1.1.27.1 |    NULL    |    CRAN    |
+| lmerTest  |  3.1.3   |    NULL    |    CRAN    |
+|   pals    |   1.7    | 2021-04-16 |    CRAN    |
+|  permute  |  0.9.5   | 2019-03-10 |    CRAN    |
+| pheatmap  |  1.0.12  | 2018-12-26 |    CRAN    |
+| rmarkdown |   2.10   |    NULL    |    CRAN    |
+|    ruv    | 0.9.7.1  | 2019-08-30 |    CRAN    |
+|    sva    |  3.36.0  |    NULL    |    NULL    |
+|  tibble   |  3.1.2   |    NULL    |    CRAN    |
+|   tidyr   |  1.1.3   |    NULL    |    CRAN    |
+|   vegan   |  2.5.7   |    NULL    |    CRAN    |
+|  methods  |  4.0.2   |    NULL    |    NULL    |
+
+MBECS package dependencies
+
+### Usage
+
+just some lines of code to describe the most basic functionality
+
+#### IO Stuff
+
+-   outline list(cnts,meta), phyloseq and MbecData input types
+-   requirements for inputs
+-   outputs
+
+<!-- -->
+
+    ## ToDo: add code and testdata(?) to show usage.
+
+#### Preliminary Report Pipeline (PRP)
+
+    ## ToDo: add code and testdata(?) to show usage.
+
+#### Comparative Report Pipeline (CRP)
+
+    ## ToDo: add code and testdata(?) to show usage.
 
 ## Pipeline
 
