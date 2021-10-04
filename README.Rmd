@@ -49,15 +49,43 @@ This section provides an overview of how to install and use the MBECS package.
 
 As of now the package is only available through github. To install form that source type:
 
+
+
+```{r INSTALLATION, echo=FALSE, results='asis'}
+
+# Install instructions
+
+message("ToDo: provide installation instructions - last thing in pkg-dev.")
+
+```
+
 Text from 'acknowledgements' - ToDo: fix this and acknowledgements to be separate. 
 
 The package is designed to rely on as little dependencies as possible to hopefully improve its longevity. To that end, some functions of smaller, less well know packages (basically everything that I don't trust to be maintained and supported over the coming years AND everything that is just one function of a much larger package AND sth. like Percentile normalization which is available as python code and probably also for R in some git, but it is well described in the respective publication and thus very easy to implement). The packages still relies on a host of packages though.
 
-```{r INSTALLATION}
 
-# Install instructions
+```{r DEPENDENCIES, echo=FALSE, results='asis'}
+# Dependency table
+pkg_dependencies <- data.frame("Package"=c("bapred","cluster","dplyr","ggplot2","gridExtra","limma",
+                                           "lme4","lmerTest","pals","permute","pheatmap","rmarkdown",
+                                           "ruv","sva","tibble","tidyr","vegan","methods"),
+                               "Version"=NA,
+                               "Date"=NA,
+                               "Repository"=NA)
 
-message("ToDo: include devtools installation commands and everything else that is required? Also, update once other sources become available.")
+for( pkg in 1:length(pkg_dependencies$Package) ) {
+  pkg_dependencies$Version[pkg] <- toString(utils::packageVersion(eval(pkg_dependencies$Package[pkg])))
+  tmp_description <- utils::packageDescription(eval(pkg_dependencies$Package[pkg]))
+  pkg_dependencies$Date[pkg] <- toString(tmp_description["Date"])
+  pkg_dependencies$Repository[pkg] <- toString(tmp_description["Repository"])
+}
+
+
+knitr::kable(pkg_dependencies, 
+             align = 'c', 
+             caption = "MBECS package dependencies",
+             label = 'mbecs_dependencies_table')
+
 
 ```
 
