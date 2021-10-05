@@ -17,14 +17,14 @@ effectiveness of correction methods on particular sets of data. All
 functions of this package are accessible on their own or within the
 preliminary and comparative report pipelines respectively.
 
-    ## figure out what to put here - just leave out - or put on top of the introductory text
+([Gloor et al. 2017](#ref-gloor2017))
 
-## How To
+    ## figure out what to put here - just leave out - or put on top of the introductory text
 
 This section provides an overview of how to install and use the MBECS
 package.
 
-### Installation
+## Installation
 
 As of now the package is only available through github. To install form
 that source type:
@@ -67,11 +67,9 @@ packages though.
 
 MBECS package dependencies
 
-### Usage
+## Usage
 
 just some lines of code to describe the most basic functionality
-
-#### IO Stuff
 
 -   outline list(cnts,meta), phyloseq and MbecData input types
 -   requirements for inputs
@@ -81,87 +79,11 @@ just some lines of code to describe the most basic functionality
 
     ## ToDo: add code and testdata(?) to show usage.
 
-#### Preliminary Report Pipeline (PRP)
+### Preliminary Report Pipeline (PRP)
 
     ## ToDo: add code and testdata(?) to show usage.
 
-#### Comparative Report Pipeline (CRP)
-
-    ## ToDo: add code and testdata(?) to show usage.
-
-|                   |  mpg | cyl | disp |  hp | drat |    wt |  qsec |  vs |  am | gear | carb |
-|:------------------|-----:|----:|-----:|----:|-----:|------:|------:|----:|----:|-----:|-----:|
-| Mazda RX4         | 21.0 |   6 |  160 | 110 | 3.90 | 2.620 | 16.46 |   0 |   1 |    4 |    4 |
-| Mazda RX4 Wag     | 21.0 |   6 |  160 | 110 | 3.90 | 2.875 | 17.02 |   0 |   1 |    4 |    4 |
-| Datsun 710        | 22.8 |   4 |  108 |  93 | 3.85 | 2.320 | 18.61 |   1 |   1 |    4 |    1 |
-| Hornet 4 Drive    | 21.4 |   6 |  258 | 110 | 3.08 | 3.215 | 19.44 |   1 |   0 |    3 |    1 |
-| Hornet Sportabout | 18.7 |   8 |  360 | 175 | 3.15 | 3.440 | 17.02 |   0 |   0 |    3 |    2 |
-
-R version 4.0.2 (2020-06-22) Platform: x86\_64-apple-darwin17.0 (64-bit)
-Running under: macOS 10.16
-
-Matrix products: default BLAS:
-/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-LAPACK:
-/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
-
-locale: \[1\]
-en\_US.UTF-8/en\_US.UTF-8/en\_US.UTF-8/C/en\_US.UTF-8/en\_US.UTF-8
-
-attached base packages: \[1\] stats graphics grDevices utils datasets
-methods base
-
-other attached packages: \[1\] knitr\_1.34
-
-loaded via a namespace (and not attached): \[1\] compiler\_4.0.2
-magrittr\_2.0.1 tools\_4.0.2 htmltools\_0.5.1.1 \[5\] yaml\_2.2.1
-stringi\_1.7.4 rmarkdown\_2.10 highr\_0.9  
-\[9\] stringr\_1.4.0 xfun\_0.26 digest\_0.6.27 rlang\_0.4.11  
-\[13\] evaluate\_0.14  
-\[1\] ‘3.3.5’
-
-|  Package  | Version  |    Date    | Repository |
-|:---------:|:--------:|:----------:|:----------:|
-|  bapred   |   1.0    | 2016-06-02 |    CRAN    |
-|  cluster  |  2.1.2   | 2021-04-16 |    CRAN    |
-|   dplyr   |  1.0.7   |    NULL    |    CRAN    |
-|  ggplot2  |  3.3.5   |    NULL    |    CRAN    |
-| gridExtra |   2.3    |    NULL    |    CRAN    |
-|   limma   |  3.44.3  | 2020-06-12 |    NULL    |
-|   lme4    | 1.1.27.1 |    NULL    |    CRAN    |
-| lmerTest  |  3.1.3   |    NULL    |    CRAN    |
-|   pals    |   1.7    | 2021-04-16 |    CRAN    |
-|  permute  |  0.9.5   | 2019-03-10 |    CRAN    |
-| pheatmap  |  1.0.12  | 2018-12-26 |    CRAN    |
-| rmarkdown |   2.10   |    NULL    |    CRAN    |
-|    ruv    | 0.9.7.1  | 2019-08-30 |    CRAN    |
-|    sva    |  3.36.0  |    NULL    |    NULL    |
-|  tibble   |  3.1.2   |    NULL    |    CRAN    |
-|   tidyr   |  1.1.3   |    NULL    |    CRAN    |
-|   vegan   |  2.5.7   |    NULL    |    CRAN    |
-|  methods  |  4.0.2   |    NULL    |    NULL    |
-
-MBECS package dependencies
-
-### Usage
-
-just some lines of code to describe the most basic functionality
-
-#### IO Stuff
-
--   outline list(cnts,meta), phyloseq and MbecData input types
--   requirements for inputs
--   outputs
-
-<!-- -->
-
-    ## ToDo: add code and testdata(?) to show usage.
-
-#### Preliminary Report Pipeline (PRP)
-
-    ## ToDo: add code and testdata(?) to show usage.
-
-#### Comparative Report Pipeline (CRP)
+### Comparative Report Pipeline (CRP)
 
     ## ToDo: add code and testdata(?) to show usage.
 
@@ -235,7 +157,44 @@ packages though.
 -   basically just measure how strong the BE is and get significance
     values for the effect on each feature respectively.
 
-assessments: “lm”,“lmm”,“sva”,“ruv2”,“ruv4”
+assessments: “lm,”“lmm,”“sva,”“ruv2,”“ruv4”
+
+### Linear (Mixed) Models
+
+### Surrogate Variable Analysis (SVA)
+
+### Remove Unwanted Variation (RUV)
+
+-   based on bla bla - here are two version that can assess
+    known/unknown BEs
+
+#### RUV-2
+
+Estimates unknown BEs by using negative control variables that, in
+principle, are unaffected by treatment/study/biological effect (aka the
+effect of interest in an experiment). These variables are generally
+determined prior to the experiment. An approach to RUV-2 without the
+presence of negative control variables is the estimation of
+pseudo-negative controls. To that end an lm or lmm (depending on whether
+or not the study design is balanced) with treatment is fitted to each
+feature and the significance calculated. The features that are not
+significantly affected by treatment are considered as pseudo-negative
+control variables. Subsequently, the actual RUV-2 function is applied to
+the data and returns the p-values for treatment, considering unwanted
+BEs (whatever that means). Also includes a somewhat arbitrarily chosen
+parameter ‘k’ for the number of latent factors to be estimated.
+
+#### RUV-4
+
+The updated version of RUV-2 also incorporates the residual matrix (w/o
+treatment effect) to estimate the unknown BEs. To that end it follows
+the same procedure in case there are no negative control variables and
+computes pseudo-controls from the data via l(m)m. As RUV-2, this
+algorithm also uses the parameter ‘k’ for the number of latent factors.
+RUV-4 brings the function ‘getK()’ that estimates this factor from the
+data itself. The calculated values are however not always reliable. A
+value of k=0 fo example can occur and should be set to 1 instead. The
+output is the same as with RUV-2.
 
 ## BE Correction
 
@@ -243,12 +202,15 @@ The Batch-Effect Correction methods comprise algorithms that actually
 change the abundance tables by attempting to partial out the variability
 between batches.
 
-correction methods are: “ruv3”,“bmc”,“bat”,“rbe”,“fab”,“pn”,“svd”
+correction methods are: “ruv3,”“bmc,”“bat,”“rbe,”“fab,”“pn,”“svd”
 
 ### Remove Unwanted Variation (RUV-3)
 
--   bla bla this is it and it can do that + ref
--   include strengths and weaknesses maybe?
+This algorithm requires negative control-features, i.e., OTUs that are
+known to be unaffected by the batch effect, as well as technical
+replicates. The algorithm will check for the existence of a replicate
+column in the covariate data. If the column is not present, the
+execution stops and a warning message will be displayed.
 
 ### Batch Mean Centering (BMC)
 
@@ -267,9 +229,11 @@ correction methods are: “ruv3”,“bmc”,“bat”,“rbe”,“fab”,“pn
 
 ### FABatch (FAB)
 
--   this is from Hornung, R., Boulesteix, A.-L., Causeur, D. (2016)
-    Combining location-and-scale batch effect adjustment with data
-    cleaning by latent factor adjustment. BMC Bioinformatics
+-   this is from Hornung, R., Boulesteix, A.-L., Causeur, D.
+
+    ![2016](https://latex.codecogs.com/png.latex?2016 "2016") Combining
+    location-and-scale batch effect adjustment with data cleaning by
+    latent factor adjustment. BMC Bioinformatics
 
 -   but it doesn’t converge, so maybe leave it out? –&gt; or keep it in
     in case some non-microbiome data is used
@@ -293,18 +257,20 @@ correction methods are: “ruv3”,“bmc”,“bat”,“rbe”,“fab”,“pn
 basically PCA + significance testing + deflation of PCs from the
 original data
 
-# reporting tools
+# Reporting Tools
 
 -   same as with correction methods - outline all - then section with
     detailed description
 -   also maybe split between variance assessment and the other methods
-    –&gt; no stringent catagorization though -.-
+    –&gt; no stringent categorization though -.-
 -   best case scenario –&gt; most of the text goes into thesis
 
 ## Study Summary
 
 -   methods that produce tables and plots to give an overview of sample
     space and covariates
+-   also, come up with some function that summarazes meta-data - like
+    summary() but pretty for markdown
 
 ### Relative Log-Ratio Expression (RLE)
 
@@ -384,9 +350,12 @@ exactly the total amount of explained variance!
 
 Information concerning a number of constrained axes (RDA axes) and
 unconstrained axes (PCA axes) are often presented in the results of an
-RDA. - Inertia = sum(eigenvalues of all axes) –&gt; proportion for one
-axis\_1 equals (eigenvalue\_1 / intertia) - The PCA axes represent the
-unconstrained (i.e. residual uncharacterised factors)
+RDA.
+
+-   Inertia = sum(eigenvalues of all axes) –&gt; proportion for one
+    axis\_1 equals (eigenvalue\_1 / intertia)
+-   The PCA axes represent the unconstrained (i.e. residual
+    uncharacterised factors)
 
 ### PrincipalVariance Component Analysis (PVCA)
 
@@ -418,3 +387,16 @@ closest different cluster minus the distance of the sample within its
 own cluster divided (scaled) by the maximum distance). Average over each
 element in a cluster for all clusters and there is the representation of
 how good the clustering is.
+
+<div id="refs" class="references csl-bib-body hanging-indent">
+
+<div id="ref-gloor2017" class="csl-entry">
+
+Gloor, Gregory B., Jean M. Macklaim, Vera Pawlowsky-Glahn, and Juan J.
+Egozcue. 2017. “Microbiome Datasets Are Compositional: And This Is Not
+Optional.” *Frontiers in Microbiology* 8 (November): 2224.
+<https://doi.org/10.3389/fmicb.2017.02224>.
+
+</div>
+
+</div>
