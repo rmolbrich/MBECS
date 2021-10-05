@@ -52,6 +52,12 @@ Michael Olbrich
         -   [Silhouette Coefficient](#silhouette-coefficient)
 -   [Bibliography](#bibliography)
 
+<br><br>
+
+<img align="left" width="206" height="83" src="README_files/figure-gfm/logo_LIED.png" alt="Luebeck Institute for Experimental Dermatology">
+
+<img align="right" width="206" height="83" src="README_files/figure-gfm/logo_Uni.png" alt="University of Luebeck"><br><br><br>
+
 # Introduction
 
 The Microbiome Batch-Effect Correction Suite aims to provide a toolkit
