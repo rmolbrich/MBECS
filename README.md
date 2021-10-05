@@ -404,7 +404,7 @@ THESIS METHODS for Dummies
 
     ## Outline characteristics, sources and implications of batch effects.
 
-<img src="../../Thesis/figures/BatchEffect_Venn.png" width="1029" />
+<img src="README_files/figure-gfm/BatchEffect_Venn.png" width="1029" />
 
 ## BE Assessment
 

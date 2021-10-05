@@ -290,7 +290,8 @@ THESIS METHODS for Dummies
 
 message("Outline characteristics, sources and implications of batch effects.")
 
-knitr::include_graphics("../../Thesis/figures/BatchEffect_Venn.png")
+
+knitr::include_graphics("README_files/figure-gfm/BatchEffect_Venn.png")
 
 ```
 
