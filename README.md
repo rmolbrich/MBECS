@@ -3,6 +3,55 @@ MBECS - Microbiome Batch-Effect Correction Suite
 Michael Olbrich
 9/20/2021
 
+-   [Introduction](#introduction)
+    -   [Installation](#installation)
+    -   [Usage](#usage)
+        -   [Preliminary Report Pipeline
+            (PRP)](#preliminary-report-pipeline-prp)
+        -   [Comparative Report Pipeline
+            (CRP)](#comparative-report-pipeline-crp)
+    -   [Pipeline](#pipeline)
+    -   [Simulation](#simulation)
+    -   [Acknowledgements](#acknowledgements)
+-   [Batch Effect Correction Algorithms
+    (BECA)](#batch-effect-correction-algorithms-beca)
+    -   [BE Assessment](#be-assessment)
+        -   [Linear (Mixed) Models](#linear-mixed-models)
+        -   [Surrogate Variable Analysis
+            (SVA)](#surrogate-variable-analysis-sva)
+        -   [Remove Unwanted Variation
+            (RUV)](#remove-unwanted-variation-ruv)
+    -   [BE Correction](#be-correction)
+        -   [Remove Unwanted Variation
+            (RUV-3)](#remove-unwanted-variation-ruv-3)
+        -   [Batch Mean Centering (BMC)](#batch-mean-centering-bmc)
+        -   [Combatting batch effects when combining batches of
+            microarray data
+            (ComBat)](#combatting-batch-effects-when-combining-batches-of-microarray-data-combat)
+        -   [Remove Batch Effects (RBE)](#remove-batch-effects-rbe)
+        -   [FABatch (FAB)](#fabatch-fab)
+        -   [Percentile Normalization
+            (PN)](#percentile-normalization-pn)
+        -   [Singular Value Decomposition
+            (SVD)](#singular-value-decomposition-svd)
+-   [Reporting Tools](#reporting-tools)
+    -   [Study Summary](#study-summary)
+        -   [Relative Log-Ratio Expression
+            (RLE)](#relative-log-ratio-expression-rle)
+        -   [Heatmap (HEAT)](#heatmap-heat)
+        -   [Principal Component Analysis
+            (PCA)](#principal-component-analysis-pca)
+        -   [Box-plots (BOX)](#box-plots-box)
+        -   [Study Design (MOSAIC)](#study-design-mosaic)
+    -   [Variance Assessment](#variance-assessment)
+        -   [Linear Model (LM)](#linear-model-lm)
+        -   [Linear (Mixed) Model (LMM)](#linear-mixed-model-lmm)
+        -   [Redundancy Analysis (pRDA)](#redundancy-analysis-prda)
+        -   [PrincipalVariance Component Analysis
+            (PVCA)](#principalvariance-component-analysis-pvca)
+        -   [Silhouette Coefficient](#silhouette-coefficient)
+-   [Bibliography](#bibliography)
+
 # Introduction
 
 The Microbiome Batch-Effect Correction Suite aims to provide a toolkit
@@ -129,7 +178,7 @@ quality of different BECAs for this particular data-set.
 
     ## IF simulation is included - put a flow diagram of the process here
 
-## Acknowledgements and References
+## Acknowledgements
 
 The package is designed to rely on as little dependencies as possible to
 hopefully improve its longevity. To that end, some functions of smaller,
@@ -141,16 +190,221 @@ in some git, but it is well described in the respective publication and
 thus very easy to implement). The packages still relies on a host of
 packages though.
 
+-   microbiome be tutorial
+-   CLR/ILR (???) maybe just remove from package as transformation
+    functions are not really the goal here
+-   Percentile Norm.. but this will be described in methods again
+
+<!-- -->
+
     ## Put a table with dependency packages and their minimal version?!
 
 # Batch Effect Correction Algorithms (BECA)
 
--   bascially an outline of all provided methods, followed by an
+-   general outline of BE and why they need to be taken care of
+-   and put a more detailed description at the end of this chapter
+    maybe - or sth.
+-   basically an outline of all provided methods, followed by an
     explanatory-section for every one
 
-<!-- -->
+The Batch Effect (BE) is a collective term for cumulative technical
+artefacts that emerge due sampling and processing in distinct batches,
+i.e., sub-populations of the samples that are processed together. In
+conjunction with the noise that is inherent to signal capturing
+processes, the BE can impair the identification of the biological
+effect.
+
+-   ToDo: sources of batch effects: technicians, reagents, environmental
+    conditions, machinery, sampling itself, \*remember the mixed model
+    explanation of variability through different doctors
+
+Processing the samples of a study on two different sequencing machines
+will introduce a batch effect between both sequencing runs. Although the
+manufacturers of sequencing machines guarantee a certain quality, i.e.,
+the range of the noise introduced by a particular system is small and
+clearly defined, it is virtually impossible to attain equal error
+distributions. Wet-lab processing in different batches by different
+technicians will introduce similar errors as each person has their own
+‘error profile.’ Processing samples by the same person on different
+days, will introduce some variability depending on the form of the day,
+e.g., some working steps are handled with different speed or workplace
+distractions may introduce delays. Finally, the integration of two
+data-sets in order to improve statistical significance or detect small
+biological effects is essentially a comparison between two batches
+(existing BEs within the respective data-sets not withstanding). Assume
+that two studies that need to be integrated were processed several years
+apart, the processing-date itself is not directly responsible for the
+inter-study-variability as for example a difference in processing
+temperature (NOTE: better example needed) would be. Considering the
+rapid development/improvement in NGS technology (wet-lab protocols
+included or extra?) and computational approaches it easy to imagine that
+there are differences between the data-sets that are inherent to the
+technological progress at the time of processing. The date of processing
+acts as a surrogate variable for the Batch Effect, i.e., a variable that
+can be measured and is used in place of the actual immeasurable (or hard
+to measure) variable of interest ([“Surrogate Variable - Oxford
+Reference” n.d.](#ref-SurrogateVariableOxford)). Somewhat confusingly,
+BEs are distinguished into known and unknown Batch Effects, which refers
+to the availability of information about the existence of batches within
+the data set. In that sense the aforementioned processing date is a
+known BE as it indicates that there exists a latent segmentation within
+the data-set. Known BEs essentially denote any documented form of
+segmentation during the steps that led to the generation of data.
+Because it is very difficult to keep track of all factors that may be
+(are) causal to the formation of batch effects, surrogate variables like
+processing date, sequencing run or treating physician are used instead.
+The label unknown batch effects refers to the cases when this
+information is missing. With respect to the previous example, imagine
+that only the abundance matrices and the covariate data, e.g., sex,
+treatment, age, pets, nutrition, etc., is available. The expected
+inter-study variability is a known batch effect while (part of) the
+intra-study variability is an unknown BE. This a significantly more
+difficult problem to resolve. As with the known BEs a certain amount of
+variability within a data-set can be attributed to processing in
+batches, but now there is no indication of where to look for
+differences.
+
+-   NEXT on thesis writing for morons:
+
+    microbiome data is compositional and that makes everything more
+    difficult
+
+    established BECAs have been adapted to MB data as this research
+    gained popularity
+
+    Un-/known BEs —&gt; get batches from sequencing data
+
+    Systematic BEs affect all features in the same way, i.e., the
+    introduced errors come from the same distribution for all OTUs in a
+    particular batch. An intuitive example of this sort of Batch Effects
+    is the noise/error/variability by signal capturing process, i.e.,
+    the sequencing procedure. Non-systematic BEs affect only certain
+    features or they affect different features differently. The bias
+    towards more abundant sequences that gets introduced in PCR
+    amplification is one example for non-systematic BEs. A primer design
+    that results in better capturing of certain sequences over others
+    will also introduce non-systematic batch effects. A more accessible
+    example of non-systematic variability is the biological effect. The
+    general assumption is that an illness (or its treatment) only
+    affects a sub-population of all features compared to healthy or
+    untreated control groups.
+
+-   BE formation: Class Effect, Noise and BEs are confounded
+
+-   BEs introduced by everything: temperature, processing speed,
+    experimental design, instruments, technicians, reagents, chips
+
+-   Problems: Biased cross-validation, hidden sub-populations, skewed
+    biological coherences, false positives/negatives, comparability,
+    reproducebility
+
+-   Mitigation of BEs: Training - better design, environmental
+    variables, technicians, …
+
+-   OR BECAs aka computational mitigation through: simple linear models,
+    empirical bayes, factor based analyses
+
+-   challenges: size of feature space, experimental design, Size of
+    data-set(s), desired goal (percentile normalization not suitable if
+    downstream analyses require count values), un-/known class and/or
+    batch factors, biological heterogeneity
+
+-   Contrary to general processing artefacts, which can be modelled,
+    e.g., as Gaussian distributed noise, BEs are heterogeneous and hence
+    lead to an erratic amplification in variation upon pooling. The
+    confounding influence aggravates the utilisation of data sets both
+    in current and subsequent comparative analysis.
+
+-   The steady rise in both sequencing and processing capabilities
+    combined with the recent appreciation for the importance of
+    microbiota increases the significance of batch effects. However, the
+    unique difficulties presented by BEs and their mediation require
+    further advancements in appropriate algorithms as well as the
+    improvement of experimental procedures.
+
+THESIS INTRO for dummies
+
+-Microbiome data is cool, but as with all signal capturing processes we
+need to account for technical variability. This applies to the inherent
+technical noise of the process (which can probably be modeled with some
+form of uniform distribution/depends on the capturing method really) as
+well as variation that gets introduced through processing in different
+batches, i.e., the batch effect.
+
+For the sampling process this means that for example in a clinical study
+the patients are sampled one at a time in routine appointments (maybe
+even by different clinical personnel) and not all at once in a single
+appointment.
+
+This can introduce variation in sampling quality.
+
+Same goes for the post-sampling processing, i.e., the steps that are
+required to start the sequencing runs, processing by different
+technicians, at different times (level of sunlight, temperature,
+humidity) can introduce ever so slight technical variations, e.g., a
+bias in PCR amplification.
+
+And finally the actual sequencing procedure that might be split into
+multiple runs on different/the same machines (size limitations), or for
+longitudinal studies (let’s say sampling time-point T1 is processed in a
+single sequencing run (batch) - and then months later T2 is sampled and
+run in a single batch again) some samples might be put into a run of a
+different study (because theres space in the machine still) to save
+money and make the most of a sequencing run.
+
+All of these situations produce (more/less) severe forms of batch
+effects that confound the biological effect (this is what we are looking
+for, e.g., in a case/control study or the evaluation of a treatment).
+
+The best case scenario (because Batch effects are always generated) are
+clear sampling protocols (handling by one person in clinic and lab for
+example) and a single run on a single machine - might only result in
+mild batch effects that contribute very little to the variability in the
+data set. Thus, we can still find the biological effect. In the worst
+case scenario the actual study groups are sampled, processed and
+sequenced at different time, by different personell (different
+experience, i.e. work quality) and ultimately on different machines
+(reference this human/mouse tissue-gene-expression disaster study).
+Especially the last part introduces potentially huge and almost\*
+unseparable BEs, as the biological groups of interest (case/control) are
+separate on different machines –&gt; consequently the technical
+variation introduced by the machines is confounded with the desired
+biological variation. –&gt; slightly better situation evolves if at
+least some negative control-samples were processed in each run. The idea
+here is the same as with housekeeping genes from WGS/WES - in this case
+we take some mock cultures that are perfectly characterised (with
+respect to contained strains and respective amounts) and include them
+into our sequencing runs as a reference. Since we know what exactly we
+are supposed to find, we have an error estimate of sorts for each batch,
+but also a way to compare the batches to each other. This situation
+(apart from the control samples) is also similar to the problem of
+integrating different studies (multiple data sets; generated possibly
+years apart –&gt; in this case you’ll have to account for improvements
+of technology) which is an annoying problem and thus not in the scope of
+this work.
+
+The previously outlined situations are unreasonable extremes and most
+sitations are a mixture of some of the outlined pitfalls/problems.
+Mostly it’ll be that there is no stringent protocol in place (sampling
+by different clinical personell, processing by inexperienced personell
+with many freeze/un-freeze cycles. And that is where Batch Effect
+Correcting Algorithms (BECAs) come into play - we want to estimate the
+amount of variation that can be attributed to the outlined sources of
+technical variation and then remove them as best as possible.
+
+To that end, we need a statistical/graphical evaluation of the is-state.
+So, PCA, boxplots, …, linear modelling, … Based on this we need a
+mitigation stage where we decide whether to apply BECA and which one
+(which method is best suited). And finally, we need to evaluate the
+effectiveness of our correction - in graphical form to do eyeballing and
+present it to people and with actual statistical measures of
+imporvement.
+
+THESIS METHODS for Dummies
 
     ## Outline characteristics, sources and implications of batch effects.
+
+<img src="../../Thesis/figures/BatchEffect_Venn.png" width="1029" />
 
 ## BE Assessment
 
@@ -264,6 +518,78 @@ original data
 -   also maybe split between variance assessment and the other methods
     –&gt; no stringent categorization though -.-
 -   best case scenario –&gt; most of the text goes into thesis
+
+The preliminary functions are supposed to provide an overview of the
+respective data-set and thus guide the following steps, i.e,
+normalisation, filtering and batch correction. Thus, they are part of
+exploratory data analysis and also the evaluation of success after
+filtering and correction was applied.
+
+%% Preliminary PCA Principal Component \[ordination\] Analysis (PCoA) is
+a commonly used unsupervised statistical method that helps to
+investigate the relation between variables of interest or to build
+predictive models.
+
+Imagine a RNASeq case-control data set that contains 20 samples in each
+group and about 200 significantly differentially expressed genes. Thus,
+every of the 40 samples is characterised by 200 features (expression at
+measurement), which is difficult to depict or evaluate. In addition, the
+expression of different genes (or in the case of the microbiome the
+amount of certain taxa) is intercorrelated (because of biology you
+know). For one there is a 200 dimensional space where the samples are
+located in, but for humans a representation in 2-/3-dimensional space is
+comprehensible. On the other hand, it is paramount to order those
+features by their importance, i.e., which feature characterises the data
+and thus the separation between case and control-samples the best? PCA
+can help with that because it can reduce large feature spaces into a low
+dimensional representation of linearly uncorrelated axes. The basic
+principal (pun intended) concept is to find a linear regression line (i)
+that best explains the data, i.e., minimal average square distance of
+features from the line. With this line (i) the largest amount of
+variability in the data is explained and the samples can be projected
+along this axis in the sense of distances between them. This process is
+then repeated for axes i++ under the premise that each consecutive axis
+is oriented orthogonal to to all previous axes. This constructs an
+orthonormal basis where the axes (individual projected dimension) are
+linearly uncorrelated and hence the features they are based on are now
+uncorrelated as well. It allows to estimate the amount of variability
+(in the data set) that is explained by an axes - providing an indicator
+for the importance. The visual depiction can show which effect (batch,
+biological, covariates) correspond to which axis in the form of
+clustering and separation. With respect to the “guiding” property of
+exploratory analyses it can for example show that some batch effect
+corresponds to the 6th principal component and only accounts for
+2percent of variability - in this case (under the assumption that the
+other axes explain more variability) it is probably not a good idea to
+do batch correction as it is highly probable that any algorithm will
+destroy (confound) more of the desired biological signal (treatment
+effect, case-control differences, ..) than it will mitigate the batch
+effect. In a different case, the PCA can that 20percent of variability
+are explained by the first principal component and it shows a strong
+clustering of batches irrespective of experimental groups. In this case
+it is mandatory to do batch effect correction as it confounds every
+other influence on the data and thus by definition the biological effect
+as well.
+
+Therefore we can order the axes by importance, i.e., amount of explained
+variance in decreasing order and within these axes we can estimate the
+importance of each feature, i.e., which of the features has the most
+influence on the orientation of this axis. This property of PCA can
+inform the selection of features for predictive modelling (imagine
+computing a PCoA; selecting the most important feature in the first axis
+and removing it from the data-set; now repeat until you have the desired
+amount of features or an insignificant amount of variability (threshold
+cutoff) is explained by principal components. I guess one could probably
+also evaluate/inform the feature selection process in
+Ensemble-methods\*.
+
+In summary, PCA transforms a set of correlated features (gene expression
+counts, microbiome abundances, ..) by representing them in the form of
+orthogonal unit vectors that correspond to best fitting regression
+lines. Thus, the method facilitates feature selection and dimensionality
+reduction. In a graphical representation, either 2D or 3D, the PCA can
+show which effects (group, batch, covariates) correspond to differences
+(variability) in the data - and do/not need to be accounted for.
 
 ## Study Summary
 
@@ -388,6 +714,8 @@ own cluster divided (scaled) by the maximum distance). Average over each
 element in a cluster for all clusters and there is the representation of
 how good the clustering is.
 
+# Bibliography
+
 <div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-gloor2017" class="csl-entry">
@@ -396,6 +724,13 @@ Gloor, Gregory B., Jean M. Macklaim, Vera Pawlowsky-Glahn, and Juan J.
 Egozcue. 2017. “Microbiome Datasets Are Compositional: And This Is Not
 Optional.” *Frontiers in Microbiology* 8 (November): 2224.
 <https://doi.org/10.3389/fmicb.2017.02224>.
+
+</div>
+
+<div id="ref-SurrogateVariableOxford" class="csl-entry">
+
+“Surrogate Variable - Oxford Reference.” n.d.
+<https://www.oxfordreference.com/view/10.1093/oi/authority.20110803100544210>.
 
 </div>
 

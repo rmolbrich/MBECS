@@ -92,5 +92,17 @@
         "title-short": "Microbiome Datasets Are Compositional",
         "type": "article-journal",
         "volume": "8"
+    },
+    {
+        "URL": "https://www.oxfordreference.com/view/10.1093/oi/authority.20110803100544210",
+        "accessed": {
+            "date-parts": []
+        },
+        "id": "SurrogateVariableOxford",
+        "key": "9GWB9ENC",
+        "libraryid": "1",
+        "providerkey": "2509FBBE-5BB0-44C4-B119-6083A81ED673",
+        "title": "Surrogate variable - Oxford Reference",
+        "type": "webpage"
     }
 ]
