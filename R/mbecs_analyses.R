@@ -1,6 +1,5 @@
 # ANALYSIS FUNCTIONS ------------------------------------------------------
 
-
 #' Relative Log Expression Plot
 #'
 #' Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the

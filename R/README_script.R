@@ -1,4 +1,3 @@
-
 # README SETUP ------------------------------------------------------------
 
 
@@ -13,8 +12,8 @@
 
 # 1. package 'pacman' can apparently do just that - BUT only after it has been installed
 # so, for now stick with the manually curated list of dependencies, aka copy'n paste
-install.packages("pacman")
-library(pacman)
+#install.packages("pacman")
+#library(pacman)
 pacman::p_depends(mbecs, local=TRUE)
 
 

@@ -210,7 +210,6 @@ print(params$report.list$pvca)
 ```
 
 
-
 ## Silhouette Coefficient
 
 Calculate principal components and get samplewise distances on the resulting sxPC matrix.

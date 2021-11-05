@@ -30,12 +30,12 @@ editor_options:
 knitr::opts_chunk$set(echo=FALSE)
 
 ```
+
 <br><br>
 
-[//]: # (Include the Lied/Uni-Logo before first Section)
-<img align="left" width="206" height="83" src="README_files/figure-gfm/logo_LIED.png" alt="Luebeck Institute for Experimental Dermatology">
+<img src="README_files/figure-gfm/logo_LIED.png" alt="Luebeck Institute for Experimental Dermatology" align="left" width="206" height="83"/>
 
-<img align="right" width="206" height="83" src="README_files/figure-gfm/logo_Uni.png" alt="University of Luebeck"><br><br><br>
+<img src="README_files/figure-gfm/logo_Uni.png" alt="University of Luebeck" align="right" width="206" height="83"/><br><br><br>
 
 # Introduction {.tabset}
 
@@ -44,7 +44,7 @@ To that end, the package offers wrapper-functions to summarize study-design and 
 The 'mbecsCorrection' function acts as a wrapper for various batch effects correction algorithms (BECA) and in conjunction with the aforementioned tools, it can be used to compare the effectiveness of correction methods on particular sets of data.
 All functions of this package are accessible on their own or within the preliminary and comparative report pipelines respectively.
 
-[@gloor2017]
+[\@gloor2017]
 
 ```{r INTRODUCTION}
 
@@ -210,7 +210,7 @@ Processing samples by the same person on different days, will introduce some var
 Finally, the integration of two data-sets in order to improve statistical significance or detect small biological effects is essentially a comparison between two batches (existing BEs within the respective data-sets not withstanding).
 Assume that two studies that need to be integrated were processed several years apart, the processing-date itself is not directly responsible for the inter-study-variability as for example a difference in processing temperature (NOTE: better example needed) would be.
 Considering the rapid development/improvement in NGS technology (wet-lab protocols included or extra?) and computational approaches it easy to imagine that there are differences between the data-sets that are inherent to the technological progress at the time of processing.
-The date of processing acts as a surrogate variable for the Batch Effect, i.e., a variable that can be measured and is used in place of the actual immeasurable (or hard to measure) variable of interest [@SurrogateVariableOxford].
+The date of processing acts as a surrogate variable for the Batch Effect, i.e., a variable that can be measured and is used in place of the actual immeasurable (or hard to measure) variable of interest [\@SurrogateVariableOxford].
 Somewhat confusingly, BEs are distinguished into known and unknown Batch Effects, which refers to the availability of information about the existence of batches within the data set.
 In that sense the aforementioned processing date is a known BE as it indicates that there exists a latent segmentation within the data-set.
 Known BEs essentially denote any documented form of segmentation during the steps that led to the generation of data.
@@ -220,8 +220,6 @@ With respect to the previous example, imagine that only the abundance matrices a
 The expected inter-study variability is a known batch effect while (part of) the intra-study variability is an unknown BE.
 This a significantly more difficult problem to resolve.
 As with the known BEs a certain amount of variability within a data-set can be attributed to processing in batches, but now there is no indication of where to look for differences.
-
-
 
 -   NEXT on thesis writing for morons:
 
@@ -285,7 +283,8 @@ The previously outlined situations are unreasonable extremes and most sitations 
 Mostly it'll be that there is no stringent protocol in place (sampling by different clinical personell, processing by inexperienced personell with many freeze/un-freeze cycles. And that is where Batch Effect Correcting Algorithms (BECAs) come into play - we want to estimate the amount of variation that can be attributed to the outlined sources of technical variation and then remove them as best as possible.
 
 To that end, we need a statistical/graphical evaluation of the is-state.
-So, PCA, boxplots, ..., linear modelling, ... Based on this we need a mitigation stage where we decide whether to apply BECA and which one (which method is best suited).
+So, PCA, boxplots, ..., linear modelling, ...
+Based on this we need a mitigation stage where we decide whether to apply BECA and which one (which method is best suited).
 And finally, we need to evaluate the effectiveness of our correction - in graphical form to do eyeballing and present it to people and with actual statistical measures of imporvement.
 
 THESIS METHODS for Dummies
