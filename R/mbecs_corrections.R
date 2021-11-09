@@ -277,7 +277,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
 
     corrected.cnts <- NULL
     for( batch.idx in input.batches ) {
-      tmp <- scale(tmp.cnts[tmp.meta$sample[tmp.meta[[model.vars[2]]] %in% batch.idx], ], center = T, scale = F)
+      tmp <- scale(tmp.cnts[tmp.meta$sample[tmp.meta[[model.vars[2]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
       corrected.cnts <- rbind.data.frame(corrected.cnts, tmp)
     }
 
@@ -291,7 +291,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
 
     corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[2]]],
-                                  mod = tmp.mod, par.prior = F, prior.plots = F)
+                                  mod = tmp.mod, par.prior = FALSE, prior.plots = FALSE)
 
   } else if( method == "rbe" ) {
     message("Applying 'removeBatchEffect' (limma) for batch-correction.")

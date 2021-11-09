@@ -25,6 +25,7 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @param refseq reference sequences as optional input
 #' @param transformations list to be filled with the result of different correction methods
 #' @return produces an R-object of type MbecData
+#' @import phyloseq
 #' @export
 MbecData <- function(type=character(),
                      log=character(),
@@ -53,13 +54,13 @@ MbecData <- function(type=character(),
     # check orientation of counts for phyloseq-constructor - meta.obj needs to be sxf anyway (if not then FU)
     if( dim(input.obj)[1] == length(meta.obj[,eval(required.col[1])]) ) {
       # taxa are columns
-      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = F),
+      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = FALSE),
                                                                      phyloseq::sample_data(meta.obj),
                                                                      phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
                                                                      phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),
                                                                      phyloseq::refseq(refseq, errorIfNULL = FALSE))) )
     } else {
-      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = T),
+      return( new("MbecData", type=type, log=log, phyloseq::phyloseq(phyloseq::otu_table(input.obj, taxa_are_rows = TRUE),
                                                                      phyloseq::sample_data(meta.obj),
                                                                      phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
                                                                      phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),

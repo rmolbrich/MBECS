@@ -68,9 +68,9 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     ggplot2::stat_boxplot(color="black",notch = TRUE,
                           outlier.colour = "#E42032", outlier.fill = "white",outlier.shape = 1, outlier.stroke = .5) +
     #facet_wrap(~Strain, ncol=2) +
-    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=TRUE) +
     ggplot2::scale_fill_manual(values = cols) +
-    theme_rle() +
+    MBECS::theme_rle() +
     ggplot2::guides(fill=ggplot2::guide_legend(title=element_blank()))
 
   return(rle.plot)
@@ -123,9 +123,9 @@ setGeneric("mbecPCA", signature="input.obj",
 
   # calculate IQR and sort counts in decreasing order
   iqr <- apply(tmp.cnts,2,stats::IQR)
-  tmp.cnts <- tmp.cnts[,order(iqr,decreasing=T)]
+  tmp.cnts <- tmp.cnts[,order(iqr,decreasing=TRUE)]
 
-  PCA <- stats::prcomp(tmp.cnts, scale = F)
+  PCA <- stats::prcomp(tmp.cnts, scale = FALSE)
 
   axes.number <- dim(PCA$x)[2]
   axes.names <- paste("PC",1:axes.number, sep="")
@@ -172,13 +172,13 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
       ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      theme_pca()
+      MBECS::theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
       ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() +
+      MBECS::theme_pca() +
       ggplot2::labs(title = title) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
@@ -187,7 +187,7 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() +
+      MBECS::theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
@@ -201,13 +201,13 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
       ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      theme_pca()
+      MBECS::theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[1]))) +
       ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() +
+      MBECS::theme_pca() +
       ggplot2::labs(title = title) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
@@ -216,7 +216,7 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() +
+      MBECS::theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
@@ -427,13 +427,13 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
   for( idx in otu.idx ) {
     p.box <- ggplot2::ggplot(data = tmp, ggplot2::aes(x = get(model.var), y = get(idx), fill = get(model.var))) + ggplot2::stat_boxplot(geom = "errorbar", width = 0.4) +
       ggplot2::geom_boxplot() + ggplot2::scale_fill_manual(values = cols) + theme_bw() +
-      theme_box() +
+      MBECS::theme_box() +
       ggplot2::labs(fill = legend.title, y = 'value',title = idx)
 
     p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx), fill = get(model.var))) +
       ggplot2::geom_density(alpha = 0.5) + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::labs(title = idx, x = 'Value', fill = legend.title) +
-      theme_box()
+      MBECS::theme_box()
 
     ## Put the plots in grid for plotting
     # modify legend
@@ -529,8 +529,8 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
   p.title <- paste("Heatmap - Centered: ", center, " Scaled: ", scale, sep="")
   heat.plot <- pheatmap::pheatmap(tmp.cnts,
                                   scale = 'none',
-                                  cluster_rows = F,
-                                  cluster_cols = T,
+                                  cluster_rows = FALSE,
+                                  cluster_cols = TRUE,
                                   fontsize_row = 4, fontsize_col = 6,
                                   fontsize = 8,
                                   clustering_distance_rows = 'euclidean',
@@ -613,19 +613,19 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
   # split by batch
   plot.v2 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var1, y= Freq.scaled, group = Var2, fill=Var1)) +
-    ggplot2::facet_grid(cols=ggplot2::vars(Var2), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=ggplot2::vars(Var2), scales="free", space="free_x", drop=TRUE) +
     ggplot2::geom_bar(stat = "identity", width = 0.9) +
     ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[1]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic(legend_position = "bottom")
+    MBECS::theme_mosaic(legend_position = "bottom")
 
   # split by treatment
   plot.v1 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var2, y= Freq.scaled, fill=Var2)) +
-    ggplot2::facet_grid(cols=vars(Var1), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=vars(Var1), scales="free", space="free_x", drop=TRUE) +
     ggplot2::geom_bar(stat = "identity", width = 0.9) +
     ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[2]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic()
+    MBECS::theme_mosaic()
 
   mosaic.plot <- gridExtra::grid.arrange(plot.v2, plot.v1, ncol=1, nrow=2, heights=c(1,1))
 
@@ -846,7 +846,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
       tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
 
       # estimate significance of
-      tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>F)`[1]
+      tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>FALSE)`[1]
 
       # calculate proportion of variance for this covariate as quotient of its eigenvalue and the sum of eigenvalues
       # partial.chi denotes the variance in the 'CONDITION'
@@ -869,7 +869,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     s.names <- rownames(tmp.cnts)
 
     # center and/or scale the counts - if both arguments are set to false, it will just transpose the matrix for the subsequent steps
-    tmp.cnts = apply(tmp.cnts, 2, scale, center = T, scale = FALSE) %>%
+    tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
       t()
 
     #reset the sample-names
@@ -1059,7 +1059,7 @@ mbecVarianceStats <- function( model.fit ) {
         names(var.comp) <- NULL
         var.comp
       }
-    } ), use.names = T, recursive = F)
+    } ), use.names = TRUE, recursive = FALSE)
 
     vp <- list()
     # now just sum total variance from LUT and leave out the current effect
@@ -1380,7 +1380,7 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
     ggplot2::geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
     ggplot2::geom_text(data = plot.df, ggplot2::aes(covariate, variance.p + 2.5, label = variance.p),
               position = ggplot2::position_dodge(width = 0.9), size = 3) + ggplot2::theme_bw() +
-    ggplot2::facet_grid(cols=ggplot2::vars(type), scales="free", space="free_x", drop=T) +
+    ggplot2::facet_grid(cols=ggplot2::vars(type), scales="free", space="free_x", drop=TRUE) +
     ggplot2::labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
           panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
