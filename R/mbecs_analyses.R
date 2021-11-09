@@ -116,6 +116,8 @@ setGeneric("mbecPCA", signature="input.obj",
 ## In this form it works for 'phyloseq' and 'mbecData' objects
 .mbecPCA <- function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
 
+  cols <- pals::tableau20(20)
+
   tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
