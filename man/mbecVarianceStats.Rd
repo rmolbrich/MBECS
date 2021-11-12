@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbecs_analyses.R
 \name{mbecVarianceStats}
 \alias{mbecVarianceStats}
-\title{Model Variable Variance Extraction}
+\title{Wrapper for Model Variable Variance Extraction}
 \usage{
 mbecVarianceStats(model.fit)
 }
@@ -28,7 +28,8 @@ NO ADJUSTMENT for single or multiple coefficients at this point.
 }
 \examples{
 # This will return the data.frame for plotting.
-\dontrun{vec.variance <- mbecVarianceStats(model.fit=MyModel-obj)}
+limo <- stats::lm(datadummy$cnts[,1] ~ group + batch, data=datadummy$meta)
+vec.variance <- mbecVarianceStats(model.fit=limo)
 }
 \keyword{lm}
 \keyword{lmm}

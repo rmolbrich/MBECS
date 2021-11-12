@@ -38,13 +38,13 @@ internally.
 }
 \examples{
 # This will return the data.frame for plotting.
-\dontrun{p.PCA <- mbecPCA(input.obj=phyloseq.obj,
-model.vars=c("treatment","batches"), pca.axes=c(1,2), return.data=TRUE)}
+data.PCA <- mbecPCA(input.obj=datadummy,
+model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 
 # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
 # x-axis and PC2 on y-axis.
-\dontrun{p.PCA <- mbecPCA(input.obj=phyloseq.obj,
-model.vars=c("treatment","batches"), pca.axes=c(3,2), return.data=FALSE)}
+plot.PCA <- mbecPCA(input.obj=datadummy,
+model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 }
 \keyword{PCA}
 \keyword{analysis}

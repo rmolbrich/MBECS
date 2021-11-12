@@ -26,8 +26,9 @@ effects variance, σ2f, is the variance of the matrix-multiplication β∗X (par
 model matrix)
 }
 \examples{
-# This will return the data.frame for plotting.
-\dontrun{list.variance <- mbecMixedVariance(model.fit=MyMixedModel-obj)}
+# This will return the variance components.
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+list.variance <- mbecMixedVariance(model.fit=limimo)
 }
 \keyword{lmm}
 \keyword{proportion}

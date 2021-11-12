@@ -31,12 +31,12 @@ the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return the data.frame for plotting.
-\dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
-model.vars=c("treatment","batches"), return.data=TRUE)}
+data.RLE <- mbecRLE(input.obj=datadummy,
+model.vars=c("group","batch"), return.data=TRUE)
 
 # This will return the ggplot2 object for display, saving and modification.
-\dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
-return.data=FALSE)}
+plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c("group","batch"),
+return.data=FALSE)
 }
 \keyword{RLE}
 \keyword{expression}

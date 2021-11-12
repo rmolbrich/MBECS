@@ -145,19 +145,19 @@ theme_pca <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 
   ggplot2::theme_bw() +
     ggplot2::theme(
-      legend.position=eval(legend_position),
+      #legend.position=eval(legend_position), I am not sure what I was trying to do here..
       panel.background = ggplot2::element_blank(),
       axis.line = ggplot2::element_blank(),
       axis.text = ggplot2::element_blank(),
       axis.ticks = ggplot2::element_blank(),
       legend.position = 'right', legend.box = 'horizontal',
       legend.direction = 'vertical',
-      legend.key.height = unit(0.2, 'cm'),
-      legend.key.width = unit(0.1, 'cm'),
-      legend.title = ggplot2::element_text(size = rel(legend.title.cex)),
-      legend.spacing.x = unit(0.1, 'cm'),
-      legend.spacing.y = unit(0.1, 'cm'),
-      legend.text = ggplot2::element_text(size = rel(legend.cex))
+      legend.key.height = ggplot2::unit(0.2, 'cm'),
+      legend.key.width = ggplot2::unit(0.1, 'cm'),
+      legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+      legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+      legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+      legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))
     )
 }
 
@@ -199,12 +199,12 @@ theme_box <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 
       legend.position = eval(legend_position), legend.box = 'horizontal',
       legend.direction = 'horizontal',
-      legend.key.height = unit(0.8, 'cm'),
-      legend.key.width = unit(0.4, 'cm'),
-      legend.title = ggplot2::element_text(size = rel(legend.title.cex)),
-      legend.spacing.x = unit(0.4, 'cm'),
-      legend.spacing.y = unit(0.4, 'cm'),
-      legend.text = ggplot2::element_text(size = rel(legend.cex))
+      legend.key.height = ggplot2::unit(0.8, 'cm'),
+      legend.key.width = ggplot2::unit(0.4, 'cm'),
+      legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+      legend.spacing.x = ggplot2::unit(0.4, 'cm'),
+      legend.spacing.y = ggplot2::unit(0.4, 'cm'),
+      legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))
     )
 }
 
@@ -228,6 +228,7 @@ theme_box <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 theme_mosaic <- function (base_size = 18, base_family = "Myriad Pro",legend_position = 'top') {
 
   ## ToDo: figure out what to do with these options
+  main_color = "#004B5A"
   x.angle = 0
   x.hjust = 0.5
   density.lwd = 0.2
@@ -235,20 +236,20 @@ theme_mosaic <- function (base_size = 18, base_family = "Myriad Pro",legend_posi
   legend.cex = 0.7
   legend.title.cex =0.75
 
-  theme(
+  ggplot2::theme(
     axis.text.x=ggplot2::element_blank(),
     axis.text.y=ggplot2::element_text(color = eval(main_color), size=12),
     axis.ticks = ggplot2::element_blank(),
     axis.line = ggplot2::element_line(color = "#7F7F7F"),
     axis.title.x = ggplot2::element_blank(),
-    axis.title.y = ggplot2::element_text(size = rel(1), angle = 90),
+    axis.title.y = ggplot2::element_text(size = ggplot2::rel(1), angle = 90),
     legend.position = eval(legend_position), legend.box = 'horizontal',
     legend.direction = 'horizontal',
-    legend.key.height = unit(0.2, 'cm'),
-    legend.key.width = unit(0.1, 'cm'),
-    legend.title = ggplot2::element_text(size = rel(legend.title.cex)),
-    legend.spacing.x = unit(0.1, 'cm'),
-    legend.spacing.y = unit(0.1, 'cm'),
-    legend.text = ggplot2::element_text(size = rel(legend.cex))
+    legend.key.height = ggplot2::unit(0.2, 'cm'),
+    legend.key.width = ggplot2::unit(0.1, 'cm'),
+    legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+    legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+    legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+    legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))
   )
 }

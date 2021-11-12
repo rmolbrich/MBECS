@@ -22,8 +22,9 @@ if the maximum value is bigger than the allowed threshold.
 ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
-# This will return the data.frame for plotting.
-\dontrun{mbecValidateModel(model.fit=MyMixedModel-obj, colinearityThreshold=0.999)}
+# This will just go through if colinearity threshold is met.
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 }
 \keyword{collinearity}
 \keyword{model}

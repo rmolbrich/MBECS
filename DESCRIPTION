@@ -40,6 +40,7 @@ Suggests:
 Depends: 
     R (>= 4.0)
 Collate: 
+    'data.R'
     'mbecs_classes.R'
     'mbecs_analyses.R'
     'mbecs_corrections.R'

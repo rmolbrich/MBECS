@@ -7,7 +7,7 @@
 mbecModelVariance(
   input.obj,
   model.vars = character(),
-  method = c("lm", "lmm", "rda", "pvca"),
+  method = c("lm", "lmm", "rda", "pvca", "s.coef"),
   model.form = NULL,
   type = "NONE",
   no.warning = TRUE,
@@ -98,12 +98,12 @@ the counts table. Correct orientation of counts will be handled internally.
 \examples{
 # This will return a data-frame that contains the variance attributable to group and batch
 # according to linear additive model.
-\dontrun{df.var.lm <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
-method="lm", type="RAW")}
+df.var.lm <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+method="lm", type="RAW")
 # This will return a data-frame that contains the variance attributable to group and batch
 # according to linear additive model.
-\dontrun{df.var.pvca <- mbecModelVariance(input.obj=phyloseq.obj, model.vars=c("group","batch"),
-method="pvca")}
+df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+method="pvca")
 }
 \keyword{Evaluation}
 \keyword{Model}

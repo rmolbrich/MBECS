@@ -20,8 +20,9 @@ Return value contains actual correlation-matrix as 'vcor' attribute.
 ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
-# This will return the data.frame for plotting.
-\dontrun{num.max_corr <- colinScore(model.fit=MyMixedModel-obj)}
+# This will return the maximum colinearity score in the given model
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+num.max_corr <- colinScore(model.fit=limimo)
 }
 \keyword{collinearity}
 \keyword{model}
