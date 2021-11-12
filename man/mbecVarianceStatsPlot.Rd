@@ -9,6 +9,9 @@ mbecVarianceStatsPlot(variance.obj)
 \arguments{
 \item{variance.obj, }{list or single output of 'mbecVarianceStats' with method lm}
 }
+\value{
+A ggplot2 box-plot object.
+}
 \description{
 Covariate-Variances as modeled by linear (mixed) models will be displayed as box-plots.
 It works with the output of 'mbecVarianceStats()' for methods 'lm' and 'lmm'. Format of this

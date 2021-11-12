@@ -1018,7 +1018,7 @@ mbecVarianceStats <- function( model.fit ) {
   mbecValidateModel( model.fit)
 
   # linear model
-  if( class(model.fit) %in% "lm" ) {
+  if( is(model.fit, "lm") ) {
     # get model coefficients
     # model.sum <- summary(model.fit)
     # w.cof2[i] <- model.sum$coefficients[3,1]
@@ -1028,7 +1028,7 @@ mbecVarianceStats <- function( model.fit ) {
       dplyr::mutate("variance" = dplyr::select("Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
       t()
 
-  } else if( class(model.fit) %in% "lmerMod" ) {  # linear-mixed model
+  } else if( is(model.fit, "lmerMod") ) {  # linear-mixed model
 
     # this is the un-adjusted variance --> divide by total variance and done
     vc <- mbecMixedVariance(model.fit)
@@ -1078,7 +1078,7 @@ mbecVarianceStats <- function( model.fit ) {
     names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
     vp <- data.frame(t(vp))
 
-  } else if( class(model.fit) %in% "glm" ) {
+  } else if( is(model.fit, "glm") ) {
 
     ### ToDon't
   }
@@ -1160,6 +1160,7 @@ mbecMixedVariance <- function(model.fit) {
 #' @keywords collinearity model validation
 #' @param model.fit lm() or lmm() output
 #' @param colinearityThreshold cut-off for model rejection
+#' @return No return values. Stops execution if validation fails.
 #' @export
 #'
 #' @examples
@@ -1237,6 +1238,7 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 #'
 #' @keywords collinearity model validation
 #' @param model.fit lm() or lmm() output
+#' @return Maximum amount of correlation for given model variables.
 #' @export
 #'
 #' @examples
@@ -1274,6 +1276,7 @@ colinScore <- function(model.fit) {
 #'
 #' @keywords plot proportion variance linear mixed models
 #' @param variance.obj, list or single output of 'mbecVarianceStats' with method lm
+#' @return A ggplot2 box-plot object.
 #' @export
 #'
 #' @examples
@@ -1313,6 +1316,7 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #'
 #' @keywords plot proportion variance partial Redundancy Analysis
 #' @param rda.obj, list or single output of 'mbecVarianceStats' with method rda
+#' @return A ggplot2 box-plot object.
 #' @export
 #'
 #' @examples
@@ -1360,6 +1364,7 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #'
 #' @keywords plot proportion variance pvca
 #' @param pvca.obj, list or single output of 'mbecVarianceStats' with method pvca
+#' @return A ggplot2 box-plot object.
 #' @export
 #'
 #' @examples
@@ -1403,6 +1408,7 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #'
 #' @keywords plot proportion variance linear mixed models
 #' @param scoef.obj, list or single output of 'mbecVarianceStats' with method s.coef
+#' @return A ggplot2 dot-plot object.
 #' @export
 #'
 #' @examples

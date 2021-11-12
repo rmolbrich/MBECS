@@ -50,7 +50,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
   ## first determine whether this is a post- or a preliminary-report and then call the appropriate function
 
   # if list & !any are ps or mbecData objects --> prelim with cnts,meta input
-  if( class(input.obj) == "list" ) {
+  if( is(input.obj, "list") ) {
     if( length(input.obj) == 2 & !any(sapply(input.obj, class) %in% c("MbecData", "phyloseq")) ) {
       # prelim-report from cnts + meta
       message("We have a preliminary report from cnts+meta-input!")
@@ -91,6 +91,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
 #' @param model.vars, required covariates to build models
 #' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
+#' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
   # only three situations here: list with cnts and meta, phyloseq or MbecData

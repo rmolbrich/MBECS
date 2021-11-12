@@ -9,6 +9,9 @@ mbecSCOEFStatsPlot(scoef.obj)
 \arguments{
 \item{scoef.obj, }{list or single output of 'mbecVarianceStats' with method s.coef}
 }
+\value{
+A ggplot2 dot-plot object.
+}
 \description{
 The goodness of clustering assessed by the silhouette coefficient.
 It works with the output of 'mbecVarianceStats()' for the method 's.coef'. Format of this

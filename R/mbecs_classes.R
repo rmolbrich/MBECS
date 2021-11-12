@@ -38,7 +38,7 @@ MbecData <- function(type=character(),
                      transformations=list()) {
 
   # if input is of class phyloseq - just include the type and done.
-  if( "phyloseq" %in% class(input.obj) ) {
+  if( is(input.obj, "phyloseq") ) {
     return( new("MbecData", type=type, log=log, input.obj) )
   } else {
     # if we got a matrix of counts - the meta object also needs to contain data
@@ -80,6 +80,7 @@ MbecData <- function(type=character(),
 #' @param log character to add to the log string
 #' @param type character to replace type-attribute or as name tag for added count-matrix
 #' @param update logical (TRUE) replace input fields (FALSE) add to the input.obj
+#' @return Input object with updated attributes.
 #' @export
 #'
 #' @examples
@@ -155,6 +156,7 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
 #' @examples
@@ -224,6 +226,7 @@ setGeneric("mbecGetData", signature="input.obj",
 #' @param input.obj phyloseq-object
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
 #' @examples
@@ -260,6 +263,7 @@ setMethod("mbecGetData", "phyloseq",
 #' @param input.obj MbecData-object
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
 #' @examples
@@ -298,6 +302,7 @@ setMethod("mbecGetData", "MbecData",
 #' @param input.obj phyloseq-object
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
 #' @examples
@@ -366,6 +371,7 @@ setMethod("mbecGetData", "list",
 #' @keywords MBECS Constructor Wrapper
 #' @param input.obj phyloseq-object
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
@@ -417,6 +423,7 @@ setGeneric("mbecProcessInput", signature="input.obj",
 #' @keywords MBECS Constructor Wrapper MbecData
 #' @param input.obj phyloseq-object
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
@@ -449,6 +456,7 @@ setMethod("mbecProcessInput", "MbecData",
 #' @keywords MBECS Constructor Wrapper Phyloseq
 #' @param input.obj phyloseq-object
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
@@ -498,6 +506,7 @@ setMethod("mbecProcessInput", "phyloseq",
 #' @keywords MBECS Constructor Wrapper Phyloseq
 #' @param input.obj a list that contains an abundance matrix and a data.frame of covaraite information
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples

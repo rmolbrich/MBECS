@@ -23,6 +23,9 @@ mbecSetData(
 
 \item{update}{logical (TRUE) replace input fields (FALSE) add to the input.obj}
 }
+\value{
+Input object with updated attributes.
+}
 \description{
 This function either updates counts, type and log attributes (DEFAULT) or adds a matrix of
 transformed counts to the input (update=FALSE).

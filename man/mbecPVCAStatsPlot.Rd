@@ -9,6 +9,9 @@ mbecPVCAStatsPlot(pvca.obj)
 \arguments{
 \item{pvca.obj, }{list or single output of 'mbecVarianceStats' with method pvca}
 }
+\value{
+A ggplot2 box-plot object.
+}
 \description{
 Covariate-Variances as modeled by PVCA will be displayed as box-plots.
 It works with the output of 'mbecVarianceStats()' for the method 'pvca'. Format of this

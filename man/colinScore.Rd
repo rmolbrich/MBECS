@@ -9,6 +9,9 @@ colinScore(model.fit)
 \arguments{
 \item{model.fit}{lm() or lmm() output}
 }
+\value{
+Maximum amount of correlation for given model variables.
+}
 \description{
 Takes a fitted model and computes maximum correlation between covariates as return value.
 Return value contains actual correlation-matrix as 'vcor' attribute.

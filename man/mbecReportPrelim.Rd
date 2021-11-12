@@ -17,6 +17,9 @@ mbecReportPrelim(
 
 \item{return.data, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
 }
+\value{
+either a ggplot2 object or a formatted data-frame to plot from
+}
 \description{
 Constructs an initial report of a single data-set without comparative analyses.
 }

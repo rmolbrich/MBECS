@@ -143,8 +143,8 @@ theme_pca <- function(base_size = 18, base_family = "Myriad Pro",legend_position
   legend.cex = 0.7
   legend.title.cex =0.75
 
-  theme_bw() +
-    theme(
+  ggplot2::theme_bw() +
+    ggplot2::theme(
       legend.position=eval(legend_position),
       panel.background = ggplot2::element_blank(),
       axis.line = ggplot2::element_blank(),
@@ -187,8 +187,8 @@ theme_box <- function(base_size = 18, base_family = "Myriad Pro",legend_position
   legend.cex = 0.7
   legend.title.cex =0.75
 
-  theme_bw() +
-    theme(
+  ggplot2::theme_bw() +
+    ggplot2::theme(
       panel.background = ggplot2::element_blank(),
       axis.line = ggplot2::element_blank(),
       axis.ticks = ggplot2::element_blank(),

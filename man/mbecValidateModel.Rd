@@ -11,6 +11,9 @@ mbecValidateModel(model.fit, colinearityThreshold = 0.999)
 
 \item{colinearityThreshold}{cut-off for model rejection}
 }
+\value{
+No return values. Stops execution if validation fails.
+}
 \description{
 A helper function that calculates the collinearity between model variables and stops execution
 if the maximum value is bigger than the allowed threshold.

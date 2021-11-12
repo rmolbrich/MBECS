@@ -13,6 +13,9 @@
 
 \item{required.col}{Vector of column names that are required from the covariate-table.}
 }
+\value{
+A list that contains count-matrix (in chosen orientation) and meta-data table.
+}
 \description{
 This function extracts abundance matrix and meta-data in the chosen orientation from list input.
 The implementation for lists basically performs some type checks on the input and then compares

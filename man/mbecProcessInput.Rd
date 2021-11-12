@@ -11,6 +11,9 @@ mbecProcessInput(input.obj, required.col = NULL)
 
 \item{required.col}{Vector of column names that are required from the covariate-table.}
 }
+\value{
+An object of type MbecData that has been validated.
+}
 \description{
 This function is a wrapper for the constructor of MbecData-objects. Given the parameter
 'required.col', the function will check if the required columns are present in the data and then

@@ -9,6 +9,9 @@ mbecRDAStatsPlot(rda.obj)
 \arguments{
 \item{rda.obj, }{list or single output of 'mbecVarianceStats' with method rda}
 }
+\value{
+A ggplot2 box-plot object.
+}
 \description{
 Covariate-Variances as modeled by pRDA will be displayed as box-plots.
 It works with the output of 'mbecVarianceStats()' for the method 'rda'. Format of this
