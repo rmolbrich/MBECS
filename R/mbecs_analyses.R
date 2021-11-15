@@ -70,7 +70,7 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     #facet_wrap(~Strain, ncol=2) +
     ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=TRUE) +
     ggplot2::scale_fill_manual(values = cols) +
-    MBECS::theme_rle() +
+    theme_rle() +
     ggplot2::guides(fill=ggplot2::guide_legend(title=ggplot2::element_blank()))
 
   return(rle.plot)
@@ -172,13 +172,13 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
       ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      MBECS::theme_pca()
+      theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
       ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      MBECS::theme_pca() +
+      theme_pca() +
       ggplot2::labs(title = title) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
@@ -187,7 +187,7 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      MBECS::theme_pca() +
+      theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
@@ -201,13 +201,13 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
       ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      MBECS::theme_pca()
+      theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[1]))) +
       ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      MBECS::theme_pca() +
+      theme_pca() +
       ggplot2::labs(title = title) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
@@ -216,7 +216,7 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      MBECS::theme_pca() +
+      theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
@@ -428,13 +428,13 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     p.box <- ggplot2::ggplot(data = tmp, ggplot2::aes(x = get(model.var), y = get(idx), fill = get(model.var))) + ggplot2::stat_boxplot(geom = "errorbar", width = 0.4) +
       ggplot2::geom_boxplot() + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::theme_bw() +
-      MBECS::theme_box() +
+      theme_box() +
       ggplot2::labs(fill = legend.title, y = 'value',title = idx)
 
     p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx), fill = get(model.var))) +
       ggplot2::geom_density(alpha = 0.5) + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::labs(title = idx, x = 'Value', fill = legend.title) +
-      MBECS::theme_box()
+      theme_box()
 
     ## Put the plots in grid for plotting
     # modify legend
@@ -618,7 +618,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
     ggplot2::geom_bar(stat = "identity", width = 0.9) +
     ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[1]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    MBECS::theme_mosaic(legend_position = "bottom")
+    theme_mosaic(legend_position = "bottom")
 
   # split by treatment
   plot.v1 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var2, y= Freq.scaled, fill=Var2)) +
@@ -626,7 +626,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
     ggplot2::geom_bar(stat = "identity", width = 0.9) +
     ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[2]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    MBECS::theme_mosaic()
+    theme_mosaic()
 
   mosaic.plot <- gridExtra::grid.arrange(plot.v2, plot.v1, ncol=1, nrow=2, heights=c(1,1))
 

@@ -8,7 +8,7 @@ Authors@R:
        email = "M.Olbrich@protonmail.com",
        comment = c(ORCID = "0000-0003-2789-3382"))
 Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set of functions to evaluate and mitigate unwated noise due to processing in batches.
-biocViews: BatchEffect
+biocViews: BatchEffect, Microbiome
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -38,7 +38,7 @@ Suggests:
     methods,
     knitr
 Depends: 
-    R (>= 4.0)
+    R (>= 4.1.0)
 Collate: 
     'data.R'
     'mbecs_classes.R'

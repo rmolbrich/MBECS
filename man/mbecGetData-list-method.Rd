@@ -34,13 +34,13 @@ they are present in the data, but it will return the whole meta-frame.
 \examples{
 # This will return the abundance matrix with samples as rows and check for the presence of
 # variables 'group' and 'batch' in the meta-data.
-\dontrun{list(counts, covariates) <- mbecGetData(input.obj=list(counts, covariates),
-orientation="sxf", required.col=c("group","batch"))}
+list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
+    required.col=c("group","batch"))
 
 # This will return the abundance matrix with samples as columns and check for the presence
-# of variables 'Treatment' and 'Sex' in the meta-data.
-\dontrun{p.RLE <- mbecGetData(input.obj=list(counts, covariates),
-orientation="fxs", required.col=c("Treatment","Sex"))}
+# of variables 'group' and 'batch' in the meta-data.
+list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
+    required.col=c("group","batch"))
 }
 \keyword{Getter}
 \keyword{MBECS}

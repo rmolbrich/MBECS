@@ -57,6 +57,36 @@ An extension of phyloseq-class that contains the additional fields 'type', 'log'
 Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
 and a data-frame of covariate variables for model-building.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{type}}{User defined denominator for this data, e.g., 'RAW', 'normalized'.}
+
+\item{\code{log}}{log that will be filled by the other package functions}
+
+\item{\code{input.obj}}{either class phyloseq or a matrix of counts}
+
+\item{\code{meta.obj}}{dataframe of covariate variables}
+
+\item{\code{required.col}}{vector of strings that denote required variables in the covariate information}
+
+\item{\code{tax_table}}{taxonomic table from phyloseq as optional input}
+
+\item{\code{phy_tree}}{phylogenetic tree as optional input}
+
+\item{\code{refseq}}{reference sequences as optional input}
+
+\item{\code{transformations}}{list to be filled with the result of different correction methods}
+}}
+
+\examples{
+# use constructor with default parameters to create object from count-matrix
+# and meta-data table.
+mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+# use constructor with default parameters to create object from count-matrix
+# and meta-data table.
+mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+}
 \keyword{Class}
 \keyword{Constructor}
 \keyword{MBECS}

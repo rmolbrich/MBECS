@@ -7,12 +7,7 @@
 #'
 #' @keywords theme_bw
 #' @return A generic theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{plot <- ggplot2::boxplot(data) + theme_new}
 theme_new <- ggplot2::theme_bw() +
   # adjustments for the legend
   ggplot2::theme(legend.position="bottom",
@@ -29,13 +24,7 @@ theme_new <- ggplot2::theme_bw() +
 #' @param base_size set base font size - default is 18
 #' @param base_family set base font family - default is Myriad Pro
 #' @return A poster theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{plot <- ggplot2::boxplot(data) + theme_poster(base_size = 18,
-#' base_family = "Myriad Pro")}
 theme_poster <- function (base_size = 18, base_family = "Myriad Pro") {
   ## dummy ##
   main_color <- "#014B5A"
@@ -95,14 +84,7 @@ theme_poster <- function (base_size = 18, base_family = "Myriad Pro") {
 #' @param base_family set base font family - default is Myriad Pro
 #' @param legend_position on of "top", "bottom", "left", "right" determines legend position
 #' @return A poster theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{plot <- mbecRLE(input.obj, model.vars=c("group","batch"),
-#' return.data=FALSE) + theme_rle(base_size = 18, base_family = "Myriad Pro",
-#' legend_position = 'bottom')}
 theme_rle <- function(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom') {
   ggplot2::theme_bw() +
     # adjustments for the legend
@@ -127,13 +109,7 @@ theme_rle <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 #' @param base_family set base font family - default is Myriad Pro
 #' @param legend_position on of "top", "bottom", "left", "right" determines legend position
 #' @return A poster theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{plot <- mbecPCA(input.obj, model.vars=c("group","batch"), return.data=FALSE) +
-#' theme_pca(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom')}
 theme_pca <- function(base_size = 18, base_family = "Myriad Pro",legend_position = 'top') {
   # ToDo: get rid of this
   x.angle = 0
@@ -171,13 +147,7 @@ theme_pca <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 #' @param base_family set base font family - default is Myriad Pro
 #' @param legend_position on of "top", "bottom", "left", "right" determines legend position
 #' @return A poster theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalized counts, according to the covariate information in meta
-#' \dontrun{plot <- mbecPCA(input.obj, model.vars=c("group","batch"), return.data=FALSE) +
-#' theme_box(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom')}
 theme_box <- function(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom') {
   # ToDo: get rid of this
   x.angle = 0
@@ -218,13 +188,7 @@ theme_box <- function(base_size = 18, base_family = "Myriad Pro",legend_position
 #' @param base_family set base font family - default is Myriad Pro
 #' @param legend_position on of "top", "bottom", "left", "right" determines legend position
 #' @return A poster theme with legend at the bottom.
-#' @export
 #' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{plot <- mbecPCA(input.obj, model.vars=c("group","batch"), return.data=FALSE) +
-#' theme_box(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom')}
 theme_mosaic <- function (base_size = 18, base_family = "Myriad Pro",legend_position = 'top') {
 
   ## ToDo: figure out what to do with these options

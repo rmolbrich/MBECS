@@ -16,8 +16,4 @@ A generic theme with legend at the bottom.
 \description{
 Uses 'theme_bw()' and puts legend at the bottom.
 }
-\examples{
-# This will return a matrix of normalised counts, according to the covariate information in meta
-\dontrun{plot <- ggplot2::boxplot(data) + theme_new}
-}
 \keyword{theme_bw}

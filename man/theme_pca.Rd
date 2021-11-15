@@ -19,10 +19,5 @@ A poster theme with legend at the bottom.
 \description{
 Default theme for plotting the packages PCA-plots.
 }
-\examples{
-# This will return a matrix of normalised counts, according to the covariate information in meta
-\dontrun{plot <- mbecPCA(input.obj, model.vars=c("group","batch"), return.data=FALSE) +
-theme_pca(base_size = 18, base_family = "Myriad Pro",legend_position = 'bottom')}
-}
 \keyword{PCA}
 \keyword{theme}

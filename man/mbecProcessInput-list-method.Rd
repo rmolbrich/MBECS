@@ -27,13 +27,8 @@ they are present in the data, but it will return the whole meta-frame.
 \examples{
 # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
 # an object of class 'MbecData'.
-\dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
-required.col=c("group","batch"))}
-
-# This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
-# return an object of class 'MbecData'.
-\dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
-required.col=c("Treatment","Sex"))}
+MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+    required.col=c("group","batch"))
 }
 \keyword{Constructor}
 \keyword{MBECS}

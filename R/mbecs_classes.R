@@ -6,8 +6,22 @@
 #' An extension of phyloseq-class that contains the additional fields 'type', 'log' and
 #' 'transformations' to accommodate MBECS functionality.
 #' @keywords MBECS Class
-#' @export
+#' @slot type User defined denominator for this data, e.g., 'RAW', 'normalized'.
+#' @slot log log that will be filled by the other package functions
+#' @slot input.obj either class phyloseq or a matrix of counts
+#' @slot meta.obj dataframe of covariate variables
+#' @slot required.col vector of strings that denote required variables in the covariate information
+#' @slot tax_table taxonomic table from phyloseq as optional input
+#' @slot phy_tree phylogenetic tree as optional input
+#' @slot refseq reference sequences as optional input
+#' @slot transformations list to be filled with the result of different correction methods
 #' @import phyloseq
+#' @export
+#'
+#' @examples
+#' # use constructor with default parameters to create object from count-matrix
+#' # and meta-data table.
+#' mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character", log="character", transformations="list"))
 
 #' Mbec-Data Constructor
@@ -27,6 +41,11 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @return produces an R-object of type MbecData
 #' @import phyloseq
 #' @export
+#'
+#' @examples
+#' # use constructor with default parameters to create object from count-matrix
+#' # and meta-data table.
+#' mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
 MbecData <- function(type=character(),
                      log=character(),
                      input.obj,
@@ -86,14 +105,14 @@ MbecData <- function(type=character(),
 #' @examples
 #' # This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
 #' # log and change the type to 'rbe' to indicate current status.
-#' \dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
-#' type='corrected', update=TRUE)}
+#' MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
+#'     log='rbe',type='corrected', update=TRUE)
 #'
 #' # This will add the corrected data to the list of transformations named like the type argument.
 #' # The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
 #' # matrix wasn't replaced.
-#' \dontrun{MBEC.obj <- mbecSetData(input.obj=current.data, new.cnts=corrected.data, log='rbe',
-#' type='corrected', update=FALSE)}
+#' MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
+#'     log='rbe',type='corrected', update=FALSE)
 mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=character(), update=TRUE) {
 
   if( is.null(new.cnts) ) {
@@ -162,13 +181,13 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=list(counts, covariates),
-#' orientation="sxf", required.col=c("group","batch"))}
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
+#'     required.col=c("group","batch"))
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'Treatment' and 'Sex' in the meta-data.
-#' \dontrun{p.RLE <- mbecGetData(input.obj=input.obj,
-#' orientation="fxs", required.col=c("Treatment","Sex"))}
+#' # of variables 'group' and 'batch' in the meta-data.
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
+#'     required.col=c("group","batch"))
 setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL)
              standardGeneric("mbecGetData")
@@ -232,13 +251,13 @@ setGeneric("mbecGetData", signature="input.obj",
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=phyloseq.obj,
-#' orientation="sxf", required.col=c("group","batch"))}
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
+#'     required.col=c("group","batch"))
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'Treatment' and 'Sex' in the meta-data.
-#' \dontrun{p.RLE <- mbecGetData(input.obj=phyloseq.obj,
-#' orientation="fxs", required.col=c("Treatment","Sex"))}
+#' # of variables 'group' and 'batch' in the meta-data.
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
+#'     required.col=c("group","batch"))
 setMethod("mbecGetData", "phyloseq",
           function(input.obj, orientation="fxs", required.col=NULL) {
             .mbecGetData(input.obj, orientation=orientation, required.col=required.col)
@@ -269,13 +288,13 @@ setMethod("mbecGetData", "phyloseq",
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=MbecDdata.obj,
-#' orientation="sxf", required.col=c("group","batch"))}
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
+#'     required.col=c("group","batch"))
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'Treatment' and 'Sex' in the meta-data.
-#' \dontrun{p.RLE <- mbecGetData(input.obj=MbecData.obj,
-#' orientation="fxs", required.col=c("Treatment","Sex"))}
+#' # of variables 'group' and 'batch' in the meta-data.
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
+#'     required.col=c("group","batch"))
 setMethod("mbecGetData", "MbecData",
           function(input.obj, orientation="fxs", required.col=NULL) {
             .mbecGetData(input.obj, orientation=orientation, required.col=required.col)
@@ -308,13 +327,13 @@ setMethod("mbecGetData", "MbecData",
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' \dontrun{list(counts, covariates) <- mbecGetData(input.obj=list(counts, covariates),
-#' orientation="sxf", required.col=c("group","batch"))}
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
+#'     required.col=c("group","batch"))
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'Treatment' and 'Sex' in the meta-data.
-#' \dontrun{p.RLE <- mbecGetData(input.obj=list(counts, covariates),
-#' orientation="fxs", required.col=c("Treatment","Sex"))}
+#' # of variables 'group' and 'batch' in the meta-data.
+#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
+#'     required.col=c("group","batch"))
 setMethod("mbecGetData", "list",
           function(input.obj, orientation="fxs", required.col=NULL) {
             message("It is a list!")
@@ -377,13 +396,8 @@ setMethod("mbecGetData", "list",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
 #' # an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
-#' required.col=c("group","batch"))}
-#'
-#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
-#' # return an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
-#' required.col=c("Treatment","Sex"))}
+#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#'     required.col=c("group","batch"))
 setGeneric("mbecProcessInput", signature="input.obj",
            function(input.obj, required.col=NULL)
              standardGeneric("mbecProcessInput")
@@ -429,13 +443,8 @@ setGeneric("mbecProcessInput", signature="input.obj",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
 #' # an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=MbecData,
-#' required.col=c("group","batch"))}
-#'
-#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
-#' # return an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=MbecData,
-#' required.col=c("Treatment","Sex"))}
+#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "MbecData",
           function(input.obj, required.col=NULL) {
             .mbecProcessInput(input.obj, required.col=required.col)
@@ -462,13 +471,8 @@ setMethod("mbecProcessInput", "MbecData",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
 #' # an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
-#' required.col=c("group","batch"))}
-#'
-#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
-#' # return an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=phyloseq,
-#' required.col=c("Treatment","Sex"))}
+#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "phyloseq",
           function(input.obj, required.col=NULL) {
 
@@ -512,13 +516,8 @@ setMethod("mbecProcessInput", "phyloseq",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
 #' # an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
-#' required.col=c("group","batch"))}
-#'
-#' # This will check for the presence of variables 'Treatment' and 'Sex' in the meta-data and
-#' # return an object of class 'MbecData'.
-#' \dontrun{MbecData.obj <- mbecProcessInput(input.obj=list(counts, covariates),
-#' required.col=c("Treatment","Sex"))}
+#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "list",
           function(input.obj, required.col=NULL) {
 

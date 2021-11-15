@@ -17,10 +17,5 @@ A poster theme with legend at the bottom.
 \description{
 Adjusts plot to use University of Luebeck (UzL) colors.
 }
-\examples{
-# This will return a matrix of normalised counts, according to the covariate information in meta
-\dontrun{plot <- ggplot2::boxplot(data) + theme_poster(base_size = 18,
-base_family = "Myriad Pro")}
-}
 \keyword{poster}
 \keyword{theme}
