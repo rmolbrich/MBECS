@@ -21,8 +21,9 @@
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return p-value for the linear model fit
-#' \dontrun{val.score <- mbecLM(input.obj, model.vars=c("group","batch"), method="lm")}
+#' # This will return p-value for the linear model fit of every feature.
+#' val.score <- mbecLM(input.obj=datadummy, model.vars=c("group","batch"),
+#' method="lm")
 mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch")) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
   #       alternative correction methods
@@ -151,8 +152,10 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return a matrix of normalised counts, according to the covariate information in meta
-#' \dontrun{mtx.pn_counts <- percentileNorm(cnts=mtx_of_cnts, meta=grouping_info)}
+#' # This will return a matrix of normalised counts, according to the covariate
+#' # information in meta
+#' mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
+#' meta=datadummy$meta[,c("group","batch")])
 percentileNorm <- function(cnts, meta) {
 
   ref.group <- levels(meta[,1])[1]
@@ -205,8 +208,10 @@ percentileNorm <- function(cnts, meta) {
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return a score for the supplied vector with default evaluation (strict).
-#' \dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
+#' # This will return a score for the supplied vector with default evaluation
+#' # (strict).
+#' val.score <- poscore(cnt.vec=runif(100, min=0, max=100), cnt=42,
+#' type="strict")
 poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
   # check argument
   type <- match.arg(type)

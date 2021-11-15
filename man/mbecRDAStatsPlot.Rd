@@ -22,7 +22,9 @@ to display side-by-side panels to enable easy comparison.
 }
 \examples{
 # This will return a paneled plot that shows results for three variance assessments.
-\dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
+df.var.rda <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+method="rda", type="RAW")
+plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 }
 \keyword{Analysis}
 \keyword{Redundancy}

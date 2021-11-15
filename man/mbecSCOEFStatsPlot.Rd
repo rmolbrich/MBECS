@@ -21,8 +21,10 @@ a list - IF the data.frames contain a column named 'type', this function will us
 to display side-by-side panels to enable easy comparison.
 }
 \examples{
-# This will return a paneled plot that shows results for three variance assessments.
-\dontrun{p.sc <- mbecSCOEFStatsPlot(variance.obj=list(df1, df2, df3))}
+# This will return a paneled plot that shows results for the variance assessment.
+df.var.scoef <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+method="s.coef", type="RAW")
+plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 }
 \keyword{linear}
 \keyword{mixed}

@@ -21,8 +21,10 @@ a list - IF the data.frames contain a column named 'type', this function will us
 to display side-by-side panels to enable easy comparison.
 }
 \examples{
-# This will return a paneled plot that shows results for three variance assessments.
-\dontrun{p.pvca <- mbecPVCAStatsPlot(variance.obj=list(df1, df2, df3))}
+# This will return a paneled plot that shows results for the variance assessment.
+df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+method="pvca", type="RAW")
+plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 }
 \keyword{plot}
 \keyword{proportion}

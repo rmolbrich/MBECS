@@ -35,8 +35,10 @@ Depending on type of calculation, the score will be computed as follows:
 \code{mean = (right + left) * 50/n)}
 }
 \examples{
-# This will return a score for the supplied vector with default evaluation (strict).
-\dontrun{val.score <- poscore(cnt.vec=ref.vec, cnt=adjust.vec, type="strict")}
+# This will return a score for the supplied vector with default evaluation
+# (strict).
+val.score <- poscore(cnt.vec=runif(100, min=0, max=100), cnt=42,
+type="strict")
 }
 \keyword{Log}
 \keyword{Ratio}

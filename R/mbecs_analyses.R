@@ -1290,8 +1290,10 @@ colinScore <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for three variance assessments.
-#' \dontrun{p.lmm <- mbecVarianceStatsPlot(variance.obj=list(df1, df2, df3))}
+#' # This will return a paneled plot that shows results for the variance assessments.
+#' df.var.lm <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+#' method="lm", type="RAW")
+#' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 mbecVarianceStatsPlot <- function( variance.obj ) {
 
   plot.df <- variance.obj %>%
@@ -1331,7 +1333,9 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #'
 #' @examples
 #' # This will return a paneled plot that shows results for three variance assessments.
-#' \dontrun{p.rda <- mbecRDAStatsPlot(variance.obj=list(df1, df2, df3))}
+#' df.var.rda <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+#' method="rda", type="RAW")
+#' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
   leTest <- rda.obj %>%
@@ -1378,8 +1382,10 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for three variance assessments.
-#' \dontrun{p.pvca <- mbecPVCAStatsPlot(variance.obj=list(df1, df2, df3))}
+#' # This will return a paneled plot that shows results for the variance assessment.
+#' df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+#' method="pvca", type="RAW")
+#' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
   plot.df <- pvca.obj %>%
@@ -1422,10 +1428,13 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for three variance assessments.
-#' \dontrun{p.sc <- mbecSCOEFStatsPlot(variance.obj=list(df1, df2, df3))}
+#' # This will return a paneled plot that shows results for the variance assessment.
+#' df.var.scoef <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+#' method="s.coef", type="RAW")
+#' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 mbecSCOEFStatsPlot <- function(scoef.obj) {
-
+  ## ToDo: make my own colors - with black jack and hookers
+  cols <- pals::tableau20(20)
   # first tidy-magic to create df for plotting
   plot.df <- scoef.obj %>%
     dplyr::mutate(variable=gsub("\\.",":",variable)) %>%
