@@ -15,15 +15,17 @@ mbecValidateModel(model.fit, colinearityThreshold = 0.999)
 No return values. Stops execution if validation fails.
 }
 \description{
-A helper function that calculates the collinearity between model variables and stops execution
-if the maximum value is bigger than the allowed threshold.
+A helper function that calculates the collinearity between model variables
+and stops execution, if the maximum value is bigger than the allowed
+threshold.
 }
 \details{
 ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
 # This will just go through if colinearity threshold is met.
-limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+data=datadummy$meta)
 mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 }
 \keyword{collinearity}

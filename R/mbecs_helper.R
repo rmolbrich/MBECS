@@ -108,11 +108,11 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #'
 #' @examples
 #' # This will return the cumulative log-ratio transformed counts in an MbecData object
-#' \donttest{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+#' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="CLR", offset=0)}
 #'
 #' # This will return the inverse log-ratio transformed counts in an MbecData object
-#' \donttest{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+#' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
 LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments

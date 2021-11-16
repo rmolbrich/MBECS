@@ -13,21 +13,24 @@ mbecMixedVariance(model.fit)
 a named list, containing proportional variance for model terms
 }
 \description{
-A helper function that extracts the variance components of linear mixed models, i.e., residuals,
-random-effects, fixed-effects, scales them to sample-size and returns a list of components.
+A helper function that extracts the variance components of linear mixed
+models, i.e., residuals, random-effects, fixed-effects, scales them to
+sample-size and returns a list of components.
 }
 \details{
-Uses 'lme4::VarCorr' to extract Residuals and random-effects components. Standard Deviation of
-Residuals is stored as 'sc' attribute in the output of 'VarCorr'.
+Uses 'lme4::VarCorr' to extract Residuals and random-effects components.
+Standard Deviation of Residuals is stored as 'sc' attribute in the output of
+'VarCorr'.
 
-Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter estimates. The attribute
-'pp' of the model contains the dense model matrix for fixed-effects parameters (X). The fixed
-effects variance, σ2f, is the variance of the matrix-multiplication β∗X (parameter vector by
-model matrix)
+Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter
+estimates. The attribute 'pp' of the model contains the dense model matrix
+for fixed-effects parameters (X). The fixed effects variance, σ2f, is the
+variance of the matrix-multiplication β∗X (parameter vector by model matrix)
 }
 \examples{
 # This will return the variance components.
-limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+data=datadummy$meta)
 list.variance <- mbecMixedVariance(model.fit=limimo)
 }
 \keyword{lmm}

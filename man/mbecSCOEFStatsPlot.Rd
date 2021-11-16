@@ -14,16 +14,18 @@ A ggplot2 dot-plot object.
 }
 \description{
 The goodness of clustering assessed by the silhouette coefficient.
-It works with the output of 'mbecVarianceStats()' for the method 's.coef'. Format of this
-output is a data.frame that contains a column for every model variable and as many rows as
-there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-to display side-by-side panels to enable easy comparison.
+It works with the output of 'mbecVarianceStats()' for the method 's.coef'.
+Format of this output is a data.frame that contains a column for every model
+variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+frames may be used as input by putting them into a list - IF the data.frames
+contain a column named 'type', this function will use 'facet_grid()' to
+display side-by-side panels to enable easy comparison.
 }
 \examples{
-# This will return a paneled plot that shows results for the variance assessment.
-df.var.scoef <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-method="s.coef", type="RAW")
+# This will return a paneled plot that shows results for the variance
+# assessment.
+df.var.scoef <- mbecModelVariance(input.obj=datadummy,
+model.vars=c("group","batch"), method="s.coef", type="RAW")
 plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 }
 \keyword{linear}

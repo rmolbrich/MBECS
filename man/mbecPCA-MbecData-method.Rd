@@ -24,25 +24,26 @@
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
-principal components. Covariates determine sample-shape and color and can be switched to shift
-the emphasis on either group. In addition to the ordination-plot, the function will show the
-distribution of eigenvalues (colored by the second covariate) on their respective principal
+Takes two covariates, i.e., group and batch, and computes the ordination-plot
+for user-selected principal components. Covariates determine sample-shape and
+color and can be switched to shift the emphasis on either group. In addition
+to the ordination-plot, the function will show the distribution of
+eigenvalues (colored by the second covariate) on their respective principal
 components.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-is an MbecData-object. The covariate table requires an 'sID' column that contains sample IDs
-equal to the sample naming in the counts table. Correct orientation of counts will be handled
-internally.
+The function returns either a plot-frame or the finished ggplot object. Input
+for the data-set is an MbecData-object. The covariate table requires an 'sID'
+column that contains sample IDs equal to the sample naming in the counts
+table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return the data.frame for plotting.
 data.PCA <- mbecPCA(input.obj=datadummy,
 model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 
-# This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-# x-axis and PC2 on y-axis.
+# This will return the ggplot2 object for display, saving and modification.
+# Selected PCs are PC3 on x-axis and PC2 on y-axis.
 plot.PCA <- mbecPCA(input.obj=datadummy,
 model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 }

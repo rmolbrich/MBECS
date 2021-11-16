@@ -35,11 +35,11 @@ in the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return the cumulative log-ratio transformed counts in an MbecData object
-\donttest{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+\dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 method="CLR", offset=0)}
 
 # This will return the inverse log-ratio transformed counts in an MbecData object
-\donttest{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+\dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
 method="ILR", offset=0)}
 }
 \keyword{Log}

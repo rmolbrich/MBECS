@@ -13,16 +13,19 @@ mbecVarianceStatsPlot(variance.obj)
 A ggplot2 box-plot object.
 }
 \description{
-Covariate-Variances as modeled by linear (mixed) models will be displayed as box-plots.
-It works with the output of 'mbecVarianceStats()' for methods 'lm' and 'lmm'. Format of this
-output is a data.frame that contains a column for every model variable and as many rows as
-there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-to display side-by-side panels to enable easy comparison.
+Covariate-Variances as modeled by linear (mixed) models will be displayed as
+box-plots. It works with the output of 'mbecVarianceStats()' for methods 'lm'
+and 'lmm'. Format of this output is a data.frame that contains a column for
+every model variable and as many rows as there are features
+(OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+a list - IF the data.frames contain a column named 'type', this function will
+use 'facet_grid()' to display side-by-side panels to enable easy comparison.
 }
 \examples{
-# This will return a paneled plot that shows results for the variance assessments.
-df.var.lm <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+# This will return a paneled plot that shows results for the variance
+# assessments.
+df.var.lm <- mbecModelVariance(input.obj=datadummy,
+model.vars=c("group","batch"),
 method="lm", type="RAW")
 plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 }

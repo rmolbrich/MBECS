@@ -2,16 +2,19 @@
 
 #' Relative Log Expression Plot
 #'
-#' Takes two covariates, i.e., group and batch, and computes the RLE-plot over the grouping of the
-#' first covariate, colored by the second covariate. Effectively illustrating the relative
-#' expression between samples from different batches within the respective study groups. Other
-#' covariates can be chosen as input and the function will check for factors and convert if
-#' necessary. Categorical factors, e.g., group membership, sex and batch, produce the best result.
+#' Takes two covariates, i.e., group and batch, and computes the RLE-plot over
+#' the grouping of the first covariate, colored by the second covariate.
+#' Effectively illustrating the relative expression between samples from
+#' different batches within the respective study groups. Other covariates can be
+#' chosen as input and the function will check for factors and convert if
+#' necessary. Categorical factors, e.g., group membership, sex and batch,
+#' produce the best result.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-#' the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords RLE relative log expression
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -88,16 +91,18 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),return.data=FALSE) {
 
 #' Principal Component Analysis Plot
 #'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
-#' principal components. Covariates determine sample-shape and color and can be switched to shift
-#' the emphasis on either group. In addition to the ordination-plot, the function will show the
-#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
+#' for user-selected principal components. Covariates determine sample-shape and
+#' color and can be switched to shift the emphasis on either group. In addition
+#' to the ordination-plot, the function will show the distribution of
+#' eigenvalues (colored by the second covariate) on their respective principal
 #' components.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set
-#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
@@ -113,8 +118,8 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),return.data=FALSE) {
 #' data.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 #'
-#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' # x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification.
+#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 setGeneric("mbecPCA", signature="input.obj",
@@ -174,7 +179,10 @@ setGeneric("mbecPCA", signature="input.obj",
   title <- paste("PCA:",var.shape, "-", var.color)
 
   if( length(model.vars) >= 2 ){
-    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), y = get(colnames(plot.df[pca.axes[2]+1])), colour = get(model.vars[2]), shape = get(model.vars[1]))) +
+    pMain <- ggplot2::ggplot(data = plot.df,
+      ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])),
+        y = get(colnames(plot.df[pca.axes[2]+1])), colour = get(model.vars[2]),
+        shape = get(model.vars[1]))) +
       ggplot2::geom_point() +
       ggplot2::scale_color_manual(values = cols) +
       ggplot2::labs(colour = var.color, shape = var.shape) +
@@ -247,16 +255,17 @@ setGeneric("mbecPCA", signature="input.obj",
 
 #' Principal Component Analysis Plot for MbecData
 #'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
-#' principal components. Covariates determine sample-shape and color and can be switched to shift
-#' the emphasis on either group. In addition to the ordination-plot, the function will show the
-#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
+#' for user-selected principal components. Covariates determine sample-shape and
+#' color and can be switched to shift the emphasis on either group. In addition
+#' to the ordination-plot, the function will show the distribution of
+#' eigenvalues (colored by the second covariate) on their respective principal
 #' components.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-#' is an MbecData-object. The covariate table requires an 'sID' column that contains sample IDs
-#' equal to the sample naming in the counts table. Correct orientation of counts will be handled
-#' internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for the data-set is an MbecData-object. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj MbecData object (correct orientation is handled internally)
@@ -272,8 +281,8 @@ setGeneric("mbecPCA", signature="input.obj",
 #' data.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 #'
-#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' # x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification.
+#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "MbecData",
@@ -285,16 +294,17 @@ setMethod("mbecPCA", "MbecData",
 
 #' Principal Component Analysis Plot for Phyloseq Objects
 #'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
-#' principal components. Covariates determine sample-shape and color and can be switched to shift
-#' the emphasis on either group. In addition to the ordination-plot, the function will show the
-#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
+#' for user-selected principal components. Covariates determine sample-shape and
+#' color and can be switched to shift the emphasis on either group. In addition
+#' to the ordination-plot, the function will show the distribution of
+#' eigenvalues (colored by the second covariate) on their respective principal
 #' components.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-#' is a phyloseq-object. The covariate table requires an 'sID' column that contains sample IDs
-#' equal to the sample naming in the counts table. Correct orientation of counts will be handled
-#' internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for the data-set is a phyloseq-object. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj phyloseq object
@@ -324,16 +334,18 @@ setMethod("mbecPCA", "phyloseq",
 
 #' Principal Component Analysis Plot for List-Input
 #'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot for user-selected
-#' principal components. Covariates determine sample-shape and color and can be switched to shift
-#' the emphasis on either group. In addition to the ordination-plot, the function will show the
-#' distribution of eigenvalues (colored by the second covariate) on their respective principal
+#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
+#' for user-selected principal components. Covariates determine sample-shape and
+#' color and can be switched to shift the emphasis on either group. In addition
+#' to the ordination-plot, the function will show the distribution of
+#' eigenvalues (colored by the second covariate) on their respective principal
 #' components.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-#' is a list that contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts table. Correct
-#' orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for the data-set is a list that contains counts and covariate data. The
+#' covariate table requires an 'sID' column that contains sample IDs equal to
+#' the sample naming in the counts table. Correct orientation of counts will be
+#' handled internally.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj List that contains counts and covariate data (correct orientation is handled internally)
@@ -349,8 +361,8 @@ setMethod("mbecPCA", "phyloseq",
 #' data.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 #'
-#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' # x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification.
+#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "list",
@@ -362,15 +374,17 @@ setMethod("mbecPCA", "list",
 
 #' Feature Differential Abundance Box-Plot
 #'
-#' Displays the abundance of a selected feature, grouped/colored by a covariate, i.e., batch, in a
-#' box-plot. Includes the density-plot, i.e., the distribution of counts for each sub-group.
-#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
-#' respectively. The default value for n is 10 and can be changed with the accompanying parameter.
+#' Displays the abundance of a selected feature, grouped/colored by a covariate,
+#' i.e., batch, in a box-plot. Includes the density-plot, i.e., the distribution
+#' of counts for each sub-group. Selection methods for features are 'TOP' and
+#' 'ALL' which select the top-n or all features respectively. The default value
+#' for n is 10 and can be changed with the accompanying parameter.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-#' the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Box abundance density
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -467,15 +481,17 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
 #' Feature Differential Abundance Heatmap
 #'
-#' Shows the abundance value of selected features in a heatmap. By default, the function expects two
-#' covariates group and batch to depict clustering in these groups. More covariates can be included.
-#' Selection methods for features are 'TOP' and 'ALL' which select the top-n or all features
-#' respectively. The default value for n is 10 and can be changed with the accompanying parameter.
+#' Shows the abundance value of selected features in a heatmap. By default, the
+#' function expects two covariates group and batch to depict clustering in these
+#' groups. More covariates can be included. Selection methods for features are
+#' 'TOP' and 'ALL' which select the top-n or all features respectively. The
+#' default value for n is 10 and can be changed with the accompanying parameter.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object.
+#' Input for the data-set can be an MbecData-object, a phyloseq-object or a list
+#' that contains counts and covariate data. The covariate table requires an
+#' 'sID' column that contains sample IDs equal to the sample naming in the
+#' counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Heat abundance clustering
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -491,13 +507,14 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #'
 #' @examples
 #' # This will return the plot-frame of all features i the data-set.
-#' data.Heat <- mbecHeat(input.obj=datadummy, model.vars=c("group","batch"), center=TRUE,
-#' scale=TRUE, method="ALL", return.data=TRUE)
+#' data.Heat <- mbecHeat(input.obj=datadummy, model.vars=c("group","batch"),
+#' center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)
 #'
 #' # This will return the ggplot2 object of the top 15 most variable features.
 #' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c("group","batch"),
 #' center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)
-mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scale=TRUE, method="TOP", n=10, return.data=FALSE) {
+mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
+                     scale=TRUE, method="TOP", n=10, return.data=FALSE) {
 
   cols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17,19)]
 
@@ -560,14 +577,16 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 
 #' Mosaic Sample Group Allocation
 #'
-#' Depicts the dispersion of samples over two (preferentially categorical*) covariates of interest.
-#' Effectively showing, the un-/evenness within and between covariates to inform the choice of
-#' methods for the subsequent steps in an analysis.
+#' Depicts the dispersion of samples over two (preferentially categorical*)
+#' covariates of interest. Effectively showing, the un-/evenness within and
+#' between covariates to inform the choice of methods for the subsequent steps
+#' in an analysis.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for the data-set
-#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' for the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Mosaic sample allocation
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
@@ -578,7 +597,7 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return the plot-frame of for the samples grouped by treatment and sex
+#' # This will return the plot-df of the samples grouped by treatment and sex
 #' data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c("group","batch"),
 #' return.data=TRUE)
 #'
@@ -652,66 +671,79 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
 #' Estimate Explained Variance
 #'
-#' The function offers a selection of methods/algorithms to estimate the proportion of variance that
-#' can be attributed to covariates of interest. This shows, how much variation is explained by the
-#' treatment effect, which proportion is introduced by processing in batches and the leftover
-#' variance, i.e., residuals that are not currently explained. Covariates of interest (CoI) are
-#' selected by the user and the function will incorporate them into the model building for the
-#' respective algorithm. The user can select from five different approaches to adapt to the
-#' characteristics of the data-set, e.g., LMMs are a better choice than LMs for a very unbalanced
-#' study design. Available approaches are: Linear Model (lm), Linear Mixed Model (lmm),
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model building for the respective algorithm. The user can select from
+#' five different approaches to adapt to the characteristics of the data-set,
+#' e.g., LMMs are a better choice than LMs for a very unbalanced study design.
+#' Available approaches are: Linear Model (lm), Linear Mixed Model (lmm),
 #' Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or
 #' Silhouette Coefficient (s.coef).
 #'
-#' Linear Model (lm): An additive model of all covariates is fitted to each feature respectively
-#' and the proportion of variance is extracted for each covariate
-#' (OTU_x ~ covariate_1 + covariate_2 + ...).
+#' Linear Model (lm): An additive model of all covariates is fitted to each
+#' feature respectively and the proportion of variance is extracted for each
+#' covariate (OTU_x ~ covariate_1 + covariate_2 + ...).
 #'
-#' Linear Mixed Model (lmm): All but the first covariate are considered mixed effects. A model is
-#' fitted to each OTU respectively and the proportion of variance extracted for each covariate
+#' Linear Mixed Model (lmm): All but the first covariate are considered mixed
+#' effects. A model is fitted to each OTU respectively and the proportion of
+#' variance extracted for each covariate.
 #' (OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
 #'
-#' partial Redundancy Analysis (rda): Iterates over given covariates, builds a model of all
-#' covariates that includes one variable as condition/constraint and then fits it to the feature
-#' abundance matrix. The difference in explained variance between the full- and the constrained-
-#' model is then attributed to the constraint.
-#' (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
+#' partial Redundancy Analysis (rda): Iterates over given covariates, builds a
+#' model of all covariates that includes one variable as condition/constraint
+#' and then fits it to the feature abundance matrix. The difference in explained
+#' variance between the full- and the constrained-model is then attributed to
+#' the constraint. (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
 #'
-#' Principal Variance Component Analysis (pvca): Algorithm - calculate the correlation of the fxs
-#' count-matrix - from there extract the eigenvectors and eigenvalues and calculate the proportion
-#' of explained variance per eigenvector (i.e. principal component) by dividing the eigenvalues by
-#' the sum of eigenvalues. Now select as many PCs as required to fill a chosen quota for the total
-#' proportion of explained variance. Iterate over all PCs and fit a linear mixed model that contains
-#' all covariates as random effect and all unique interactions between two covariates. Compute
-#' variance covariance components form the resulting model --> From there we get the Variance that
-#' each covariate(variable) contributes to this particular PC. Then just standardize variance by
-#' dividing it through the sum of variance for that model. Scale each PCs results by the proportion
-#' this PC accounted for in the first place. And then do it again by dividing it through the total
-#' amount of explained variance, i.e. the cutoff to select the number of PCs to take (obviously
-#' not the cutoff but rather the actual values for the selected PCs). Finally take the average
-#' over each random variable and interaction term and display in a nice plot.
+#' Principal Variance Component Analysis (pvca): Algorithm - calculate the
+#' correlation of the fxs count-matrix - from there extract the eigenvectors and
+#' eigenvalues and calculate the proportion of explained variance per
+#' eigenvector (i.e. principal component) by dividing the eigenvalues by the
+#' sum of eigenvalues. Now select as many PCs as required to fill a chosen
+#' quota for the total proportion of explained variance. Iterate over all PCs
+#' and fit a linear mixed model that contains all covariates as random effect
+#' and all unique interactions between two covariates. Compute variance
+#' covariance components form the resulting model --> From there we get the
+#' Variance that each covariate(variable) contributes to this particular PC.
+#' Then just standardize variance by dividing it through the sum of variance for
+#' that model. Scale each PCs results by the proportion this PC accounted for in
+#' the first place. And then do it again by dividing it through the total amount
+#' of explained variance, i.e. the cutoff to select the number of PCs to take
+#' (obviously not the cutoff but rather the actual values for the selected PCs).
+#' Finally take the average over each random variable and interaction term and
+#' display in a nice plot.
 #'
-#' Silhouette Coefficient (s.coef): Calculate principal components and get sample-wise distances on
-#' the resulting (sxPC) matrix. Then iterate over all the covariates and calculate the cluster
-#' silhouette (which is basically either zero, if the cluster contains only a single element, or it
-#' is the distance to the closest different cluster minus the distance of the sample within its own
-#' cluster divided (scaled) by the maximum distance). Average over each element in a cluster for all
-#' clusters and there is the representation of how good the clustering is. This shows how good a
-#' particular covariate characterizes the data, i.e., a treatment variable for instance may
-#' differentiate the samples into treated and untreated groups which implies two clusters. In an
-#' ideal scenario, the treatment variable, i.e., indicator for some biological effect would produce
-#' a perfect clustering. In reality, the confounding variables, e.g., batch, sex or age, will also
-#' influence the ordination of samples. Hence, the clustering coefficient is somewhat similar to the
-#' amount of explained variance metric that the previous methods used. If used to compare an
-#' uncorrected data-set to a batch-corrected set, the expected result would be an increase of
-#' clustering coefficient for the biological effect (and all other covariates - because a certain
-#' amount of uncertainty was removed from the data) and a decrease for the batch effect.
+#' Silhouette Coefficient (s.coef): Calculate principal components and get
+#' sample-wise distances on the resulting (sxPC) matrix. Then iterate over all
+#' the covariates and calculate the cluster silhouette (which is basically
+#' either zero, if the cluster contains only a single element, or it is the
+#' distance to the closest different cluster minus the distance of the sample
+#' within its own cluster divided (scaled) by the maximum distance). Average
+#' over each element in a cluster for all clusters and there is the
+#' representation of how good the clustering is. This shows how good a
+#' particular covariate characterizes the data, i.e., a treatment variable for
+#' instance may differentiate the samples into treated and untreated groups
+#' which implies two clusters. In an ideal scenario, the treatment variable,
+#' i.e., indicator for some biological effect would produce a perfect
+#' clustering. In reality, the confounding variables, e.g., batch, sex or age,
+#' will also influence the ordination of samples. Hence, the clustering
+#' coefficient is somewhat similar to the amount of explained variance metric
+#' that the previous methods used. If used to compare an uncorrected data-set to
+#' a batch-corrected set, the expected result would be an increase of clustering
+#' coefficient for the biological effect (and all other covariates - because a
+#' certain amount of uncertainty was removed from the data) and a decrease for
+#' the batch effect.
 #'
 #' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for the data-set can
-#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-#' the counts table. Correct orientation of counts will be handled internally.
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Model Evaluation Variance
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
@@ -726,15 +758,18 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @export
 #'
 #' @examples
-#' # This will return a data-frame that contains the variance attributable to group and batch
-#' # according to linear additive model.
-#' df.var.lm <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-#' method="lm", type="RAW")
-#' # This will return a data-frame that contains the variance attributable to group and batch
-#' # according to linear additive model.
+#' # This will return a data-frame that contains the variance attributable to
+#' # group and batch according to linear additive model.
+#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="lm", type="RAW")
+#' # This will return a data-frame that contains the variance attributable to
+#' # group and batch according to linear additive model.
 #' df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
 #' method="pvca")
-mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm","lmm","rda","pvca", "s.coef"), model.form=NULL, type="NONE", no.warning=TRUE, na.action=NULL) {
+mbecModelVariance <- function( input.obj, model.vars=character(),
+                               method=c("lm","lmm","rda","pvca", "s.coef"),
+                               model.form=NULL, type="NONE", no.warning=TRUE,
+                               na.action=NULL) {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
   ### ToDo: safety checks and logic to distinguish model types and also take care of this matrix-input issue
@@ -1011,17 +1046,19 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
 #' Wrapper for Model Variable Variance Extraction
 #'
-#' For a Linear (Mixed) Model, this function extracts the proportion of variance that can be
-#' explained by terms and interactions and returns a named row-vector.
+#' For a Linear (Mixed) Model, this function extracts the proportion of variance
+#' that can be explained by terms and interactions and returns a named
+#' row-vector.
 #'
-#' Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and return the
-#' Sum of squares for each term, scaled by the total sum of squares.
+#' Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and
+#' return the Sum of squares for each term, scaled by the total sum of squares.
 #'
-#' Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract residuals,
-#' random effects and fixed effects components from the model. The components are then
-#' transformed to reflect explained proportions of variance for the model coefficients.
-#' The function implements transformation for varying coefficients as well, but
-#' NO ADJUSTMENT for single or multiple coefficients at this point.
+#' Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract
+#' residuals, random effects and fixed effects components from the model. The
+#' components are then transformed to reflect explained proportions of variance
+#' for the model coefficients. The function implements transformation for
+#' varying coefficients as well, but NO ADJUSTMENT for single or multiple
+#' coefficients at this point.
 #'
 #' @keywords lm lmm proportion variance
 #' @param model.fit linear (mixed) model object of class 'lm' or 'lmerMod'
@@ -1113,16 +1150,18 @@ mbecVarianceStats <- function( model.fit ) {
 
 #' Mixed Model Variance-Component Extraction
 #'
-#' A helper function that extracts the variance components of linear mixed models, i.e., residuals,
-#' random-effects, fixed-effects, scales them to sample-size and returns a list of components.
+#' A helper function that extracts the variance components of linear mixed
+#' models, i.e., residuals, random-effects, fixed-effects, scales them to
+#' sample-size and returns a list of components.
 #'
-#' Uses 'lme4::VarCorr' to extract Residuals and random-effects components. Standard Deviation of
-#' Residuals is stored as 'sc' attribute in the output of 'VarCorr'.
+#' Uses 'lme4::VarCorr' to extract Residuals and random-effects components.
+#' Standard Deviation of Residuals is stored as 'sc' attribute in the output of
+#' 'VarCorr'.
 #'
-#' Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter estimates. The attribute
-#' 'pp' of the model contains the dense model matrix for fixed-effects parameters (X). The fixed
-#' effects variance, σ2f, is the variance of the matrix-multiplication β∗X (parameter vector by
-#' model matrix)
+#' Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter
+#' estimates. The attribute 'pp' of the model contains the dense model matrix
+#' for fixed-effects parameters (X). The fixed effects variance, σ2f, is the
+#' variance of the matrix-multiplication β∗X (parameter vector by model matrix)
 #'
 #' @keywords lmm proportion variance
 #' @param model.fit linear mixed model object of class 'lmerMod'
@@ -1131,7 +1170,8 @@ mbecVarianceStats <- function( model.fit ) {
 #'
 #' @examples
 #' # This will return the variance components.
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+#' data=datadummy$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
 mbecMixedVariance <- function(model.fit) {
   # remember: sd == sqrt(var)
@@ -1177,8 +1217,9 @@ mbecMixedVariance <- function(model.fit) {
 
 #' Validate Linear (Mixed) Models
 #'
-#' A helper function that calculates the collinearity between model variables and stops execution
-#' if the maximum value is bigger than the allowed threshold.
+#' A helper function that calculates the collinearity between model variables
+#' and stops execution, if the maximum value is bigger than the allowed
+#' threshold.
 #'
 #' ToDo: maybe some additional validation steps and more informative output.
 #'
@@ -1190,7 +1231,8 @@ mbecMixedVariance <- function(model.fit) {
 #'
 #' @examples
 #' # This will just go through if colinearity threshold is met.
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+#' data=datadummy$meta)
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
   ## ToDo: health & Safety
@@ -1257,8 +1299,9 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 
 #' Variable Correlation Linear (Mixed) Models
 #'
-#' Takes a fitted model and computes maximum correlation between covariates as return value.
-#' Return value contains actual correlation-matrix as 'vcor' attribute.
+#' Takes a fitted model and computes maximum correlation between covariates as
+#' return value. Return value contains actual correlation-matrix as 'vcor'
+#' attribute.
 #'
 #' ToDo: maybe some additional validation steps and more informative output.
 #'
@@ -1269,7 +1312,8 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
 #'
 #' @examples
 #' # This will return the maximum colinearity score in the given model
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+#' data=datadummy$meta)
 #' num.max_corr <- colinScore(model.fit=limimo)
 colinScore <- function(model.fit) {
   # get variance-covariance matrix
@@ -1294,12 +1338,13 @@ colinScore <- function(model.fit) {
 
 #' Plot Proportion of Variance for L(M)M
 #'
-#' Covariate-Variances as modeled by linear (mixed) models will be displayed as box-plots.
-#' It works with the output of 'mbecVarianceStats()' for methods 'lm' and 'lmm'. Format of this
-#' output is a data.frame that contains a column for every model variable and as many rows as
-#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-#' to display side-by-side panels to enable easy comparison.
+#' Covariate-Variances as modeled by linear (mixed) models will be displayed as
+#' box-plots. It works with the output of 'mbecVarianceStats()' for methods 'lm'
+#' and 'lmm'. Format of this output is a data.frame that contains a column for
+#' every model variable and as many rows as there are features
+#' (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will
+#' use 'facet_grid()' to display side-by-side panels to enable easy comparison.
 #'
 #' @keywords plot proportion variance linear mixed models
 #' @param variance.obj, list or single output of 'mbecVarianceStats' with method lm
@@ -1307,8 +1352,10 @@ colinScore <- function(model.fit) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for the variance assessments.
-#' df.var.lm <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
+#' # This will return a paneled plot that shows results for the variance
+#' # assessments.
+#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"),
 #' method="lm", type="RAW")
 #' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 mbecVarianceStatsPlot <- function( variance.obj ) {
@@ -1337,11 +1384,12 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #' Plot Proportion of Variance for pRDA
 #'
 #' Covariate-Variances as modeled by pRDA will be displayed as box-plots.
-#' It works with the output of 'mbecVarianceStats()' for the method 'rda'. Format of this
-#' output is a data.frame that contains a column for every model variable and as many rows as
-#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-#' to display side-by-side panels to enable easy comparison.
+#' It works with the output of 'mbecVarianceStats()' for the method 'rda'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
 #'
 #' @keywords plot proportion variance partial Redundancy Analysis
 #' @param rda.obj, list or single output of 'mbecVarianceStats' with method rda
@@ -1349,9 +1397,10 @@ mbecVarianceStatsPlot <- function( variance.obj ) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for three variance assessments.
-#' df.var.rda <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-#' method="rda", type="RAW")
+#' # This will return a paneled plot that shows results for three variance
+#' # assessments.
+#' df.var.rda <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="rda", type="RAW")
 #' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 mbecRDAStatsPlot <- function(rda.obj) {
   # first tidy-magic to create df for plotting
@@ -1387,11 +1436,12 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' Plot Proportion of Variance for PVCA
 #'
 #' Covariate-Variances as modeled by PVCA will be displayed as box-plots.
-#' It works with the output of 'mbecVarianceStats()' for the method 'pvca'. Format of this
-#' output is a data.frame that contains a column for every model variable and as many rows as
-#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-#' to display side-by-side panels to enable easy comparison.
+#' It works with the output of 'mbecVarianceStats()' for the method 'pvca'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
 #'
 #' @keywords plot proportion variance pvca
 #' @param pvca.obj, list or single output of 'mbecVarianceStats' with method pvca
@@ -1399,9 +1449,10 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for the variance assessment.
-#' df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-#' method="pvca", type="RAW")
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="pvca", type="RAW")
 #' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 mbecPVCAStatsPlot <- function(pvca.obj) {
   # first tidy-magic to create df for plotting
@@ -1433,11 +1484,12 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' Plot Silhouette Coefficient
 #'
 #' The goodness of clustering assessed by the silhouette coefficient.
-#' It works with the output of 'mbecVarianceStats()' for the method 's.coef'. Format of this
-#' output is a data.frame that contains a column for every model variable and as many rows as
-#' there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-#' a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-#' to display side-by-side panels to enable easy comparison.
+#' It works with the output of 'mbecVarianceStats()' for the method 's.coef'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
 #'
 #' @keywords plot proportion variance linear mixed models
 #' @param scoef.obj, list or single output of 'mbecVarianceStats' with method s.coef
@@ -1445,9 +1497,10 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' @export
 #'
 #' @examples
-#' # This will return a paneled plot that shows results for the variance assessment.
-#' df.var.scoef <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-#' method="s.coef", type="RAW")
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.var.scoef <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="s.coef", type="RAW")
 #' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 mbecSCOEFStatsPlot <- function(scoef.obj) {
   ## ToDo: make my own colors - with black jack and hookers

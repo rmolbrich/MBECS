@@ -4,34 +4,35 @@ test_that("capitalization works", {
 })
 
 test_that("linear modeling works", {
-  expect_identical(length(mbecLM(datadummy, "lm", c("group","batch"))), dim(datadummy$cnts)[2])
-  expect_identical(class(mbecLM(datadummy, "lm", c("group","batch"))), "numeric")
-  expect_identical(typeof(mbecLM(datadummy, "lm", c("group","batch"))), "double")
+  lm.res <- evaluate_promise(mbecLM(datadummy, "lmm", c("group","batch")))
+  expect_identical(length(lm.res$result), dim(datadummy$cnts)[2])
+  expect_identical(class(lm.res$result), "numeric")
+  expect_identical(typeof(lm.res$result), "double")
 })
 
 test_that("linear mixed modeling works", {
-  expect_identical(length(mbecLM(datadummy, "lmm", c("group","batch"))), dim(datadummy$cnts)[2])
-  expect_identical(class(mbecLM(datadummy, "lmm", c("group","batch"))), "numeric")
-  expect_identical(typeof(mbecLM(datadummy, "lmm", c("group","batch"))), "double")
+  lmm.res <- evaluate_promise(mbecLM(datadummy, "lmm", c("group","batch")))
+  expect_identical(length(lmm.res$result), dim(datadummy$cnts)[2])
+  expect_identical(class(lmm.res$result), "numeric")
+  expect_identical(typeof(lmm.res$result), "double")
 })
 
 
 test_that("Percentile normalization works", {
-  expect_identical(dim(percentileNorm(cnts=datadummy$cnts,meta=datadummy$meta[,c("group","batch")])), dim(datadummy$cnts))
-
-
-
+  # just use 'evaluate_promise()' to get all the relevant events for testing
+  pn.res <- evaluate_promise(percentileNorm(cnts=datadummy$cnts,meta=datadummy$meta[,c("group","batch")]))
+  expect_identical(dim(pn.res$result), dim(datadummy$cnts))
+  expect_identical(pn.res$messages[1], "Group 0-0.5 is considered control group, i.e., reference for normalization procedure. To change reference please 'relevel()' grouping factor accordingly.\n")
+  # test deterministic result!?
+  expect_identical(percentileNorm(cnts=datadummy$cnts,meta=datadummy$meta[,c("group","batch")]) ,pn.res$result)
 })
 
-
-
-
-#mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,meta=datadummy$meta[,c("group","batch")])
-
-
-
-
-
+test_that("percentile of score works", {
+  expect_identical(poscore(c(1:50), 42, type="rank"), 84)
+  expect_identical(poscore(c(1:50), 42, type="weak"), 84)
+  expect_identical(poscore(c(1:50), 42, type="strict"), 82)
+  expect_identical(poscore(c(1:50), 42, type="mean"), 83)
+})
 
 
 

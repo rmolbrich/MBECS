@@ -14,16 +14,18 @@ A ggplot2 box-plot object.
 }
 \description{
 Covariate-Variances as modeled by pRDA will be displayed as box-plots.
-It works with the output of 'mbecVarianceStats()' for the method 'rda'. Format of this
-output is a data.frame that contains a column for every model variable and as many rows as
-there are features (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-a list - IF the data.frames contain a column named 'type', this function will use 'facet_grid()'
-to display side-by-side panels to enable easy comparison.
+It works with the output of 'mbecVarianceStats()' for the method 'rda'.
+Format of this output is a data.frame that contains a column for every model
+variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+frames may be used as input by putting them into a list - IF the data.frames
+contain a column named 'type', this function will use 'facet_grid()' to
+display side-by-side panels to enable easy comparison.
 }
 \examples{
-# This will return a paneled plot that shows results for three variance assessments.
-df.var.rda <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-method="rda", type="RAW")
+# This will return a paneled plot that shows results for three variance
+# assessments.
+df.var.rda <- mbecModelVariance(input.obj=datadummy,
+model.vars=c("group","batch"), method="rda", type="RAW")
 plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 }
 \keyword{Analysis}

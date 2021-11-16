@@ -13,15 +13,17 @@ colinScore(model.fit)
 Maximum amount of correlation for given model variables.
 }
 \description{
-Takes a fitted model and computes maximum correlation between covariates as return value.
-Return value contains actual correlation-matrix as 'vcor' attribute.
+Takes a fitted model and computes maximum correlation between covariates as
+return value. Return value contains actual correlation-matrix as 'vcor'
+attribute.
 }
 \details{
 ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
 # This will return the maximum colinearity score in the given model
-limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch), data=datadummy$meta)
+limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
+data=datadummy$meta)
 num.max_corr <- colinScore(model.fit=limimo)
 }
 \keyword{collinearity}

@@ -13,18 +13,20 @@ mbecVarianceStats(model.fit)
 a named row-vector, containing proportional variance for model terms
 }
 \description{
-For a Linear (Mixed) Model, this function extracts the proportion of variance that can be
-explained by terms and interactions and returns a named row-vector.
+For a Linear (Mixed) Model, this function extracts the proportion of variance
+that can be explained by terms and interactions and returns a named
+row-vector.
 }
 \details{
-Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and return the
-Sum of squares for each term, scaled by the total sum of squares.
+Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and
+return the Sum of squares for each term, scaled by the total sum of squares.
 
-Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract residuals,
-random effects and fixed effects components from the model. The components are then
-transformed to reflect explained proportions of variance for the model coefficients.
-The function implements transformation for varying coefficients as well, but
-NO ADJUSTMENT for single or multiple coefficients at this point.
+Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract
+residuals, random effects and fixed effects components from the model. The
+components are then transformed to reflect explained proportions of variance
+for the model coefficients. The function implements transformation for
+varying coefficients as well, but NO ADJUSTMENT for single or multiple
+coefficients at this point.
 }
 \examples{
 # This will return the data.frame for plotting.
