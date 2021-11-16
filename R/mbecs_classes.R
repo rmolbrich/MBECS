@@ -68,7 +68,7 @@ MbecData <- function(type=character(),
     }
     ## check if meta is set and contains all the required columns
     if( is.null(meta.obj) | !all(eval(required.col) %in% (colnames(meta.obj))) ) {
-      stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
+      stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
     }
     # check orientation of counts for phyloseq-constructor - meta.obj needs to be sxf anyway (if not then FU)
     if( dim(input.obj)[1] == length(meta.obj[,eval(required.col[1])]) ) {
@@ -203,7 +203,7 @@ setGeneric("mbecGetData", signature="input.obj",
   if( !is.null(required.col) ) {
     ## check if meta is set and contains all the required columns
     if( is.null(tmp.meta) | !all(eval(required.col) %in% (colnames(tmp.meta))) ) {
-      stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
+      stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
     }
   }
 
@@ -350,7 +350,7 @@ setMethod("mbecGetData", "list",
             if( !is.null(required.col) ) {
               ## check if meta is set and contains all the required columns
               if( is.null(tmp.meta) | !all(eval(required.col) %in% (colnames(tmp.meta))) ) {
-                stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
+                stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
               }
             }
 
@@ -411,7 +411,7 @@ setGeneric("mbecProcessInput", signature="input.obj",
   if( !is.null(required.col) ) {
     ## check if meta is set and contains all the required columns
     if( is.null(phyloseq::sample_data(input.obj, errorIfNULL = FALSE)) | !all(eval(required.col) %in% (phyloseq::sample_variables(input.obj))) ) {
-      stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
+      stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
     }
   }
 
@@ -481,7 +481,7 @@ setMethod("mbecProcessInput", "phyloseq",
             if( !is.null(required.col) ) {
               ## check if meta is set and contains all the required columns
               if( is.null(phyloseq::sample_data(input.obj, errorIfNULL = FALSE)) | !all(eval(required.col) %in% (phyloseq::sample_variables(input.obj))) ) {
-                stop(paste("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), sep=""), call. = FALSE)
+                stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
               }
             }
 

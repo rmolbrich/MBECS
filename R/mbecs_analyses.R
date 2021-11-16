@@ -28,27 +28,32 @@
 #' # This will return the ggplot2 object for display, saving and modification.
 #' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c("group","batch"),
 #' return.data=FALSE)
-mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
+mbecRLE <- function(input.obj,model.vars=c("group","batch"),return.data=FALSE) {
 
   cols <- pals::tableau20(20)
 
   ## check for correct inputs
-  tmp <- mbecGetData(input.obj=input.obj, orientation="fxs", required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var = "specimen")
+  tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
+    required.col=eval(model.vars))
+  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>%
+    tibble::rownames_to_column(., var = "specimen")
 
   ## SPLIT - COMPUTE - MERGE
   tmp.long <- NULL
   for( g.idx in unique(tmp.meta[,eval(model.vars[1])]) ) {
-    message(paste("Calculating RLE for group: ",g.idx,sep=""))
+    message("Calculating RLE for group: ",g.idx)
 
-    tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,eval(model.vars[1])] %in% g.idx])
+    tmp.cnts.group <- dplyr::select(tmp.cnts,
+      tmp.meta$specimen[tmp.meta[,eval(model.vars[1])] %in% g.idx])
 
     # Median per feature in this group
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
-    tmp.group.long <- apply(tmp.cnts.group, 2, function(sample.col) sample.col - feature.med) %>% # subtract feature-median from sample
+    tmp.group.long <- apply(tmp.cnts.group, 2,
+      function(sample.col) sample.col - feature.med) %>% # subtract feature-median from sample
       as.data.frame() %>%
-      tidyr::pivot_longer(cols = everything(), names_to = "specimen", values_to = "values") # re-arrange to long format
+      tidyr::pivot_longer(cols = everything(), names_to = "specimen",
+        values_to = "values") # re-arrange to long format
 
     tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
   }
@@ -56,7 +61,8 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
   # the factor levels of samples need to be in the same order as batches per group
   # order by group_batch and then set factor levels for samples and batches in that order
   tmp.long <- dplyr::left_join(tmp.long, tmp.meta, by = "specimen") %>% # merge with sample data
-    dplyr::mutate(plot.order = paste(get(model.vars[1]), get(model.vars[2]), sep="_")) %>%
+    dplyr::mutate(plot.order = paste(get(model.vars[1]), get(model.vars[2]),
+      sep="_")) %>%
     dplyr::arrange(plot.order) %>%
     dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
 
@@ -64,11 +70,14 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
     return(tmp.long)
   } # else create the plot
 
-  rle.plot <- ggplot2::ggplot(tmp.long, ggplot2::aes(x = specimen, y = values, fill = get(model.vars[2]))) +
+  rle.plot <- ggplot2::ggplot(tmp.long, ggplot2::aes(x = specimen, y = values,
+    fill = get(model.vars[2]))) +
     ggplot2::stat_boxplot(color="black",notch = TRUE,
-                          outlier.colour = "#E42032", outlier.fill = "white",outlier.shape = 1, outlier.stroke = .5) +
+                          outlier.colour = "#E42032", outlier.fill = "white",
+                          outlier.shape = 1, outlier.stroke = .5) +
     #facet_wrap(~Strain, ncol=2) +
-    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free", space="free_x", drop=TRUE) +
+    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free",
+      space="free_x", drop=TRUE) +
     ggplot2::scale_fill_manual(values = cols) +
     theme_rle() +
     ggplot2::guides(fill=ggplot2::guide_legend(title=ggplot2::element_blank()))
@@ -109,16 +118,18 @@ mbecRLE <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE)
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 setGeneric("mbecPCA", signature="input.obj",
-           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE)
+           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2),
+                    return.data=FALSE)
              standardGeneric("mbecPCA")
 )
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
-.mbecPCA <- function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
+.mbecPCA <- function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2),
+                     return.data=FALSE) {
 
   cols <- pals::tableau20(20)
 
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
+  tmp <- mbecGetData(input.obj,orientation="sxf",required.col=eval(model.vars))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # calculate IQR and sort counts in decreasing order
@@ -128,22 +139,24 @@ setGeneric("mbecPCA", signature="input.obj",
   PCA <- stats::prcomp(tmp.cnts, scale = FALSE)
 
   axes.number <- dim(PCA$x)[2]
-  axes.names <- paste("PC",1:axes.number, sep="")
+  axes.names <- paste("PC",seq_len(axes.number), sep="")
 
   plot.df <- PCA$x %>%
     data.frame(stringsAsFactors = FALSE) %>%
-    dplyr::rename_at(1:axes.number, ~ axes.names) %>%
+    dplyr::rename_at(seq_len(axes.number), ~ axes.names) %>%
     tibble::rownames_to_column(var = "sample") %>%
     dplyr::left_join(tmp.meta, by = "sample")
 
-  metric.df <- data.frame("var.explained"=round((100*PCA$sdev^2) / (sum(PCA$x^2 / max(1, nrow(PCA$x)-1))),2),row.names = axes.names) %>%
+  metric.df <- data.frame("var.explained"=round((100*PCA$sdev^2) /
+      (sum(PCA$x^2 / max(1, nrow(PCA$x)-1))),2),row.names = axes.names) %>%
     dplyr::mutate("axis.min"=floor(apply(PCA$x, 2, function(col) min(col))))%>%
     dplyr::mutate("axis.max"=ceiling(apply(PCA$x, 2, function(col) max(col))))
 
-  for( g.idx in c(1:length(model.vars)) ) {
-    if( !is.factor(plot.df[,eval(model.vars[g.idx])]) ) {
-      warning("Grouping variables need to be factors. Coercing to factor now, adjust beforehand to get best results.")
-      plot.df[,eval(model.vars[g.idx])] <- factor(plot.df[,eval(model.vars[g.idx])])
+  for( idx in c(seq_along(model.vars)) ) {
+    if( !is.factor(plot.df[,eval(model.vars[idx])]) ) {
+      warning("Grouping variables need to be factors.
+              Coercing to factor now, adjust beforehand to get best results.")
+      plot.df[,eval(model.vars[idx])] <- factor(plot.df[,eval(model.vars[idx])])
     }
   }
 
@@ -155,11 +168,8 @@ setGeneric("mbecPCA", signature="input.obj",
   # Release the Ploten
   ### PCA-PLOT
   # change first letter of group denominator to uppercase for pretty-plotting
-  var.one <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars[1],perl = TRUE)
-  var.two <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars[2],perl = TRUE)
-
-  var.shape <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars[1],perl = TRUE)
-  var.color <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars[2],perl = TRUE)
+  var.shape <- mbecUpperCase(model.vars[1])
+  var.color <- mbecUpperCase(model.vars[2])
 
   title <- paste("PCA:",var.shape, "-", var.color)
 
@@ -223,7 +233,8 @@ setGeneric("mbecPCA", signature="input.obj",
   }
 
   g <- ggplot2::ggplotGrob(pMain)$grobs
-  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  #legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE = character(1)) == "guide-box")]]
 
   ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = 'none'), legend, pMain +
                                         ggplot2::theme(legend.position = 'none'), pRight + ggplot2::theme(legend.position = 'none'),
@@ -401,7 +412,8 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     # calculate IQR and order from largest to smallest
     iqr <- apply(tmp[,otu.idx],2,stats::IQR)
     iqr <- iqr[order(iqr, decreasing=TRUE)]
-    otu.idx <- names(iqr)[1:min(length(otu.idx), n)]
+    #otu.idx <- names(iqr)[1:min(length(otu.idx), n)] ToDo: remove when everything works
+    otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
 
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
@@ -440,7 +452,7 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     # modify legend
     g <- ggplot2::ggplotGrob(p.box)$grobs
     # extract legend
-    legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+    legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE=character(1)) == "guide-box")]]
 
     # put plot into the list
     ret.plot[[eval(idx)]] <- gridExtra::arrangeGrob(p.box + ggplot2::theme(legend.position = 'none'),
@@ -498,9 +510,9 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
   otu.idx <- colnames(tmp[[1]])
 
   ## CHECK if model.vars are factors
-  for( g.idx in c(1:length(model.vars)) ) {
+  for( g.idx in c(seq_along(model.vars)) ) {
     if( !is.factor(tmp.meta[,eval(model.vars[g.idx])]) ) {
-      warning(paste0("Grouping variables need to be factors. Coercing variable: ", eval(model.vars[g.idx]), " to factor now, adjust beforehand to get best results."))
+      warning("Grouping variables need to be factors. Coercing variable: ", eval(model.vars[g.idx]), " to factor now, adjust beforehand to get best results.")
       tmp.meta[,eval(model.vars[g.idx])] <- factor(tmp.meta[,eval(model.vars[g.idx])])
     }
   }
@@ -513,7 +525,7 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE, scal
     # calculate IQR and order from largest to smallest
     iqr <- apply(tmp.cnts[otu.idx,],1,stats::IQR)
     iqr <- iqr[order(iqr, decreasing=TRUE)]
-    otu.idx <- names(iqr)[1:min(length(otu.idx), n)]
+    otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
     # select only wanted features
     tmp.cnts <- tmp.cnts[otu.idx,]
   } else if( length(method) >= 2 ) {
@@ -593,7 +605,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
   ## CHECK if grouping variables are factors
   for( g.idx in eval(model.vars) ) {
     if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
-      warning(paste0("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results."))
+      warning("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results.")
       tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
     }
   }
@@ -749,7 +761,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
   ## CHECK if grouping variables are factors
   for( g.idx in eval(model.vars) ) {
     if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
-      warning(paste0("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results."))
+      warning("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results.")
       tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
     }
   }
@@ -838,7 +850,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     # full.model.variance <- paste((tmp.sig$Variance[1] / sum(tmp.sig$Variance)), tmp.sig$`Pr(>F)`[1], sep="|")
 
     # iterate over the vector of covariate names (model.vars) to construct formulas for 'RDA' procedure
-    for( condition.idx in 1:length(model.vars) ) {
+    for( condition.idx in seq_along(model.vars) ) {
       # the counts are always available in sxf format in variable 'tmp.cnts'
       # just iterate over all covariates and keep on to condition on
       tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
@@ -893,11 +905,14 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     # takes at minimum 3 PCs regardless of threshold.
     # calculate cumulative sum for vector of variances - evaluate which position is larger than the cutoff -
     # select maximum out of 3 and the smallest PC that meets the cutoff
-    n.PCs <- max(3, min(which(sapply(cumsum(prop.PCs), function(x) x >= pct_threshold))))
+    n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold, FUN.VALUE=logical(1)))))
 
     # create a long-df that contains a column for all selected eigen-vectors and the required covariates (which obviously repeat for all vectors)
     # join selected eigenvectors and covariate data in a single df
-    lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta)
+    # lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta) ToDo: remove when rest works
+    lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>%
+      dplyr::select_at(seq_len(eval(n.PCs))) %>%
+      cbind(., tmp.meta)
     #lmm.df <- eVec %>% cbind(., tmp.meta)  %>% as_tibble(.) %>% select_at(1:eval(n.PCs))
 
     # # figure out how many effects there are - it is a random effect for every covariate - plus an interaction term for
@@ -909,8 +924,8 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
 
     # now add the random-interaction effects iterating through all but the last covariate and create a 'rid'
     # with all subsequent covariates - thus creating all combinations without repetition
-    for(var.idx in 1:(n.vars-1)) {
-      for(interaction.idx in (var.idx+1):(n.vars)) {
+    for(var.idx in seq_len((n.vars-1))) {
+      for(interaction.idx in seq.int(from=(var.idx+1), to=(n.vars), by=1)) {
         # combine with the other formula terms and done
         f.terms <- c(f.terms, paste("(1|",model.vars[var.idx],":",model.vars[interaction.idx],")", sep=""))
       }
@@ -924,7 +939,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",paste(f.terms, collapse = " + "), sep=""))
 
     # for every selected eigen-vector, fit an lmm with random and interaction terms - calculate and extract the associated variances
-    for( vec.idx in 1:n.PCs ) {
+    for( vec.idx in seq_len(n.PCs) ) {
       randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula, lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
       # and put into result at the respective row
       randomEffectsMatrix[vec.idx,] <- as.numeric(randomEffects[,4])
@@ -939,7 +954,7 @@ mbecModelVariance <- function( input.obj, model.vars=character(), method=c("lm",
     # take the eigenvalues divided by sum of all eigenvalues and use them as weights for the
     # respective rows, i.e, effect-variances that belong to the PCs that the eigenvalues relate to
     scaled.eVal <- eVal / sum(eVal)
-    randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[1:n.PCs]
+    randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
 
     # at this point the total variance sums up to a value that should be close to the selected cutoff
     # for explained variance - so, now sum-up the variance for each effect, over the PCs and divide it by the
@@ -1054,13 +1069,15 @@ mbecVarianceStats <- function( model.fit ) {
 
     # meh
     lib.df <- data.frame("covariates"=colnames(model.fit@frame),
-                         row.names=sapply(colnames(model.fit@frame), function(covariate)
-                           paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]), sep=""), collapse = ",")))
+        row.names=vapply(colnames(model.fit@frame), function(covariate)
+        paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]),
+                    sep=""), collapse = ","), FUN.VALUE = character(1)))
 
     # and a look-up table to make variance calculations nice and easy
     total.var.LUT <- unlist(lapply(vc, function(var.comp) {
       if( length(var.comp) > 1 ) {
-        weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp), collapse = ",")),]]])/nrow(model.fit@frame))
+        weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp),
+            collapse = ",")),]]])/nrow(model.fit@frame))
         var.comp %*% weights
       } else {
         names(var.comp) <- NULL

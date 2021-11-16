@@ -1,5 +1,21 @@
 # HELPER FUNCTIONS --------------------------------------------------------
 
+
+#' Capitalize Word Beginning
+#'
+#' Change the first letter of the input to uppercase. Used in plotting functions
+#' to make covariates, i.e., axis-lables look nicer.
+#'
+#' @keywords uppercase
+#' @param input A string that needs to be Capitalized
+#' @return Input with first letter capitalized
+mbecUpperCase <- function(input=character()) {
+  return(gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",input,perl = TRUE))
+}
+
+
+
+
 #' Linear (Mixed) Model Feature to Batch Fit
 #'
 #' Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
@@ -159,14 +175,14 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 percentileNorm <- function(cnts, meta) {
 
   ref.group <- levels(meta[,1])[1]
-  message(paste0("Group ",ref.group, " is considered control group, i.e., reference for normalization procedure. To change reference please 'relevel()' grouping factor accordingly."))
+  message("Group ",ref.group, " is considered control group, i.e., reference for normalization procedure. To change reference please 'relevel()' grouping factor accordingly.")
 
   norm.cnts <- cnts; norm.cnts[,] <- NA
 
   # for every batch
   for( b.idx in levels(meta[,2]) ) {
     # for every feature
-    for( f.idx in 1:ncol(cnts) ) {
+    for( f.idx in seq_len(ncol(cnts)) ) {
       # which are the control-group values
       ctrl.group.vec <- cnts[which((meta[,1] %in% ref.group) & (meta[,2] %in% b.idx)), f.idx]
       # for every sample in the batch
@@ -255,15 +271,16 @@ ilr.transfo = function(x, fast = TRUE, offset = 0) {
   # KA added: a little something to avoid 0 values
   if (fast)
   {
-    for (i in 1 : ncol(x.ilr))
+    for (i in seq_len(ncol(x.ilr)) )
     {
-      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(((apply(as.matrix(x[, (i+1) : D, drop = FALSE]), 1, prod) + offset)^(1 / (D-i))) / (x[,i]+ offset))
+      #x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(((apply(as.matrix(x[, (i+1) : D, drop = FALSE]), 1, prod) + offset)^(1 / (D-i))) / (x[,i]+ offset)) ToDo: remove once it works
+      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(((apply(as.matrix(x[, seq.int(from=(i+1),to=D,by=1), drop = FALSE]), 1, prod) + offset)^(1 / (D-i))) / (x[,i]+ offset))
       #x.ilr[,i] = sqrt((D-i)/(D-i+1))*log(((apply(as.matrix(x[,(i+1):D,drop = FALSE]),1,prod))^(1/(D-i)))/(x[,i]))
     }
   } else {
-    for (i in 1 : ncol(x.ilr))
+    for (i in seq_len(ncol(x.ilr)) )
     {
-      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(apply(as.matrix(x[, (i+1):D]), 1, function(x){exp(log(x))})/(x[, i]+ offset) + offset)
+      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(apply(as.matrix(x[, seq.int(from=(i+1),to=D,by=1)]), 1, function(x){exp(log(x))})/(x[, i]+ offset) + offset)
       #x.ilr[,i] = sqrt((D-i)/(D-i+1))*log(apply(as.matrix(x[,(i+1):D]), 1, function(x){exp(log(x))})/(x[,i]))
     }
   }
@@ -276,9 +293,9 @@ ilr.transfo = function(x, fast = TRUE, offset = 0) {
 clr.backtransfo = function(x) {
   # construct orthonormal basis
   V = matrix(0, nrow = ncol(x), ncol = ncol(x)-1)
-  for( i in 1:ncol(V) )
+  for( i in seq_len(ncol(V)) )
   {
-    V[1:i, i] = 1/i
+    V[seq_len(i), i] = 1/i
     V[i+1, i] = (-1)
     V[, i] = V[, i] * sqrt(i/(i+1))
   }

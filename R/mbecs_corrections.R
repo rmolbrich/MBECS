@@ -168,7 +168,7 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     tmp.sva.n <- sva::num.sv(dat = as.matrix(tmp.cnts), mod = tmp.mod)
     tmp.sva <- sva::sva(as.matrix(tmp.cnts), tmp.mod, tmp.mod0, n.sv = tmp.sva.n)
 
-    message(paste("Number of significant surrogate variables is: ", tmp.sva$n.sv, sep=""))
+    message("Number of significant surrogate variables is: ", tmp.sva$n.sv)
     # do sth. that I have to understand yet
     tmp.mod.bat <- cbind(tmp.mod, tmp.sva$sv)
     tmp.mod0.bat <- cbind(tmp.mod0, tmp.sva$sv)
@@ -362,8 +362,8 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     corrected.cnts <- tmp.cnts
     corrected.cnts[,] <- NA
 
-    for( c.idx in 1:dim(corrected.cnts)[2] ) {
-      for( r.idx in 1:dim(corrected.cnts)[1] ) {
+    for( c.idx in seq_len(dim(corrected.cnts)[2]) ) {
+      for( r.idx in seq_len(dim(corrected.cnts)[1]) ) {
         corrected.cnts[r.idx, c.idx] <- tmp.svd.defl[r.idx, c.idx] * tmp.sd[c.idx] + tmp.mean[c.idx]
       }
     }

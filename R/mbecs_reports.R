@@ -51,7 +51,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
   # if list & !any are ps or mbecData objects --> prelim with cnts,meta input
   if( is(input.obj, "list") ) {
-    if( length(input.obj) == 2 & !any(sapply(input.obj, class) %in% c("MbecData", "phyloseq")) ) {
+    if( length(input.obj) == 2 & !any(lapply(input.obj, is) %in% c("MbecData", "phyloseq")) ) {
       # prelim-report from cnts + meta
       message("We have a preliminary report from cnts+meta-input!")
       tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
