@@ -33,12 +33,12 @@ table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return the plot-df of the samples grouped by treatment and sex
-data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c("group","batch"),
+data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c('group','batch'),
 return.data=TRUE)
 
 # Return the ggplot2 object of the samples grouped by group and batch
 plot.Mosaic <- mbecMosaic(input.obj=datadummy,
-model.vars=c("group","batch"), return.data=FALSE)
+model.vars=c('group','batch'), return.data=FALSE)
 }
 \keyword{Mosaic}
 \keyword{allocation}

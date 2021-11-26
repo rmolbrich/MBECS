@@ -44,12 +44,12 @@ table. Correct orientation of counts will be handled internally.
 \examples{
 # This will return the data.frame for plotting.
 data.PCA <- mbecPCA(input.obj=datadummy,
-model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
+model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 
 # This will return the ggplot2 object for display, saving and modification.
 # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 plot.PCA <- mbecPCA(input.obj=datadummy,
-model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
+model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 }
 \keyword{PCA}
 \keyword{analysis}

@@ -29,48 +29,50 @@
 #' @examples
 #' # This will return the data.frame for plotting.
 #' data.RLE <- mbecRLE(input.obj=datadummy,
-#' model.vars=c("group","batch"), return.data=TRUE)
+#' model.vars=c('group','batch'), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
-#' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c("group","batch"),
+#' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
 #' return.data=FALSE)
-mbecRLE <- function(input.obj,model.vars=c("group","batch"),
-                return.data=FALSE) {
+mbecRLE <- function(input.obj, model.vars = c("group",
+                                              "batch"), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
-  tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
-    required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>%
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "fxs",
+                     required.col = eval(model.vars))
+  tmp.cnts <- tmp[[1]]
+  tmp.meta <- tmp[[2]] %>%
     tibble::rownames_to_column(., var = "specimen")
 
   tmp.long <- NULL
-  for( g.idx in unique(tmp.meta[,eval(model.vars[1])]) ) {
-    message("Calculating RLE for group: ",g.idx)
+  for (g.idx in unique(tmp.meta[, eval(model.vars[1])])) {
+    message("Calculating RLE for group: ", g.idx)
 
-    tmp.cnts.group <- dplyr::select(tmp.cnts,
-      tmp.meta$specimen[tmp.meta[,eval(model.vars[1])] %in% g.idx])
+    tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,
+                                                                         eval(model.vars[1])] %in% g.idx])
 
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
     tmp.group.long <- apply(tmp.cnts.group, 2,
-      function(sample.col) sample.col - feature.med) %>%
+                            function(sample.col) sample.col - feature.med) %>%
       as.data.frame() %>%
-      tidyr::pivot_longer(cols = everything(), names_to = "specimen",
-        values_to = "values")
+      tidyr::pivot_longer(cols = everything(),
+                          names_to = "specimen", values_to = "values")
     tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
   }
 
-  tmp.long <- dplyr::left_join(tmp.long, tmp.meta, by = "specimen") %>%
-    dplyr::mutate(plot.order = paste(get(model.vars[1]), get(model.vars[2]),
-      sep="_")) %>%
+  tmp.long <- dplyr::left_join(tmp.long, tmp.meta,
+                               by = "specimen") %>%
+    dplyr::mutate(plot.order = paste(get(model.vars[1]),
+                                     get(model.vars[2]), sep = "_")) %>%
     dplyr::arrange(plot.order) %>%
     dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
 
-  if( return.data ) {
+  if (return.data) {
     return(tmp.long)
   }
-  return( mbecRLEPlot(tmp.long, model.vars, cols) )
+  return(mbecRLEPlot(tmp.long, model.vars, cols))
 }
 
 
@@ -104,151 +106,126 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),
 #' @examples
 #' # This will return the data.frame for plotting.
 #' data.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
+#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
-setGeneric("mbecPCA", signature="input.obj",
-           function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2),
-                    return.data=FALSE)
-             standardGeneric("mbecPCA")
-)
+#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
+setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
+                                                        model.vars = c("group", "batch"), pca.axes = c(1, 2),
+                                                        return.data = FALSE) standardGeneric("mbecPCA"))
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
-.mbecPCA <- function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2),
-                     return.data=FALSE) {
+.mbecPCA <- function(input.obj, model.vars = c("group", "batch"), pca.axes = c(1,
+                                                                               2), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
-  tmp <- mbecGetData(input.obj,orientation="sxf",required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp.cnts <- tmp[[1]]
+  tmp.meta <- tmp[[2]]
 
   # calculate IQR and sort counts in decreasing order
-  iqr <- apply(tmp.cnts,2,stats::IQR)
-  tmp.cnts <- tmp.cnts[,order(iqr,decreasing=TRUE)]
+  iqr <- apply(tmp.cnts, 2, stats::IQR)
+  tmp.cnts <- tmp.cnts[, order(iqr, decreasing = TRUE)]
 
   PCA <- stats::prcomp(tmp.cnts, scale = FALSE)
 
   axes.number <- dim(PCA$x)[2]
-  axes.names <- paste("PC",seq_len(axes.number), sep="")
+  axes.names <- paste("PC", seq_len(axes.number), sep = "")
 
   plot.df <- PCA$x %>%
     data.frame(stringsAsFactors = FALSE) %>%
-    dplyr::rename_at(seq_len(axes.number), ~ axes.names) %>%
+    dplyr::rename_at(seq_len(axes.number), ~axes.names) %>%
     tibble::rownames_to_column(var = "sample") %>%
     dplyr::left_join(tmp.meta, by = "sample")
 
-  metric.df <- data.frame("var.explained"=round((100*PCA$sdev^2) /
-      (sum(PCA$x^2 / max(1, nrow(PCA$x)-1))),2),row.names = axes.names) %>%
-    dplyr::mutate("axis.min"=floor(apply(PCA$x, 2, function(col) min(col))))%>%
-    dplyr::mutate("axis.max"=ceiling(apply(PCA$x, 2, function(col) max(col))))
+  metric.df <- data.frame(var.explained = round((100 * PCA$sdev^2)/(sum(PCA$x^2/max(1,
+                                                                                    nrow(PCA$x) - 1))), 2), row.names = axes.names) %>%
+    dplyr::mutate(axis.min = floor(apply(PCA$x, 2, function(col) min(col)))) %>%
+    dplyr::mutate(axis.max = ceiling(apply(PCA$x, 2, function(col) max(col))))
 
-  for( idx in c(seq_along(model.vars)) ) {
-    if( !is.factor(plot.df[,eval(model.vars[idx])]) ) {
+  for (idx in c(seq_along(model.vars))) {
+    if (!is.factor(plot.df[, eval(model.vars[idx])])) {
       warning("Grouping variables need to be factors.
               Coercing to factor now, adjust beforehand to get best results.")
-      plot.df[,eval(model.vars[idx])] <- factor(plot.df[,eval(model.vars[idx])])
+      plot.df[, eval(model.vars[idx])] <- factor(plot.df[, eval(model.vars[idx])])
     }
   }
 
   # No plotting, just return data.
-  if( return.data ) {
+  if (return.data) {
     return(list(plot.df, metric.df, pca.axes))
   }
 
-  # Release the Ploten
-  ### PCA-PLOT
-  # change first letter of group denominator to uppercase for pretty-plotting
+  # Release the Ploten PCA-PLOT change first letter of group denominator to
+  # uppercase for pretty-plotting
   var.shape <- mbecUpperCase(model.vars[1])
   var.color <- mbecUpperCase(model.vars[2])
 
-  title <- paste("PCA:",var.shape, "-", var.color)
+  title <- paste("PCA:", var.shape, "-", var.color)
 
-  if( length(model.vars) >= 2 ){
-    pMain <- ggplot2::ggplot(data = plot.df,
-      ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])),
-        y = get(colnames(plot.df[pca.axes[2]+1])), colour = get(model.vars[2]),
-        shape = get(model.vars[1]))) +
-      ggplot2::geom_point() +
-      ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = var.color, shape = var.shape) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
-                    metric.df$axis.max[pca.axes[1]]) +
-      ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
-                    metric.df$axis.max[pca.axes[2]]) +
-      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ',
-                    metric.df$var.explained[pca.axes[1]], '% expl.var')) +
-      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ',
-                    metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      theme_pca()
+  if (length(model.vars) >= 2) {
+    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(model.vars[2]),
+                                                          shape = get(model.vars[1]))) + ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::labs(colour = var.color, shape = var.shape) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                                                                           metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                                                                                                                            metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
+                                                                                                                                                                                                       1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
+                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
 
-    pTop <- ggplot2::ggplot(data = plot.df,
-                ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])),
-                    fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2, alpha = 0.5) +
-      ggplot2::ylab('Density') +
-      ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
-                    metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() +
-      ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-          axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
-          plot.title = ggplot2::element_text(hjust = 0.5,
-                                             size = ggplot2::rel(1.5)))
-
-    pRight <- ggplot2::ggplot(data = plot.df,
-                  ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])),
-                               fill = get(model.vars[2]),
-                               linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() +
-      ggplot2::ylab('Density') +
-      ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[2]],
-                    metric.df$axis.max[pca.axes[2]]) + theme_pca() +
-      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     axis.title.y = ggplot2::element_blank(),
-                     axis.line = ggplot2::element_blank(),
-                     plot.title = ggplot2::element_blank())
-
-  }else{
-    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), y = get(colnames(plot.df[pca.axes[2]+1])), colour = get(model.vars[1]))) +
-      ggplot2::geom_point() +
-      ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = var.color, shape = var.shape) +
+    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                    1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                                                             alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
-      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
-      theme_pca()
+      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                                                                  axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
+                                                                                                                                                                     size = ggplot2::rel(1.5)))
 
-    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[1]))) +
-      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
-      ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() +
-      ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
-
-    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])), fill = get(model.vars[1]))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
-      ggplot2::scale_fill_manual(values = cols) +
+    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
+                                                                                      1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                                                               alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() +
-      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                     plot.title = ggplot2::element_blank())
+      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                   plot.title = ggplot2::element_blank())
+
+  } else {
+    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(model.vars[1]))) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::labs(colour = var.color, shape = var.shape) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                                                                           metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                                                                                                                            metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
+                                                                                                                                                                                                       1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
+                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
+
+    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                    1])), fill = get(model.vars[1]))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                              alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
+      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                                                                  axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
+                                                                                                                                                                     size = ggplot2::rel(1.5)))
+
+    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
+                                                                                      1])), fill = get(model.vars[1]))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                                alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
+      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                   plot.title = ggplot2::element_blank())
   }
 
   g <- ggplot2::ggplotGrob(pMain)$grobs
-  #legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-  legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE = character(1)) == "guide-box")]]
+  # legend <- g[[which(sapply(g, function(x) x$name) == 'guide-box')]]
+  legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE = character(1)) ==
+                       "guide-box")]]
 
-  ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = 'none'), legend, pMain +
-                                        ggplot2::theme(legend.position = 'none'), pRight + ggplot2::theme(legend.position = 'none'),
+  ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = "none"),
+                                      legend, pMain + ggplot2::theme(legend.position = "none"), pRight + ggplot2::theme(legend.position = "none"),
                                       ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1, 3))
 
   return(ret.plot)
@@ -284,17 +261,17 @@ setGeneric("mbecPCA", signature="input.obj",
 #' @examples
 #' # This will return the data.frame for plotting.
 #' data.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
+#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "MbecData",
-          function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
-            .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
-          }
-)
+#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
+setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("group",
+                                                                    "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+           return.data = return.data)
+})
 
 
 #' Principal Component Analysis Plot for Phyloseq Objects
@@ -325,17 +302,17 @@ setMethod("mbecPCA", "MbecData",
 #' @examples
 #' # This will return the data.frame for plotting.
 #' data.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
+#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "phyloseq",
-          function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
-            .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
-          }
-)
+#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
+setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("group",
+                                                                    "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+           return.data = return.data)
+})
 
 
 
@@ -369,17 +346,17 @@ setMethod("mbecPCA", "phyloseq",
 #' @examples
 #' # This will return the data.frame for plotting.
 #' data.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
+#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
-#' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "list",
-          function(input.obj, model.vars=c("group","batch"), pca.axes=c(1,2), return.data=FALSE) {
-            .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, return.data=return.data)
-          }
-)
+#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
+setMethod("mbecPCA", "list", function(input.obj, model.vars = c("group",
+                                                                "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+           return.data = return.data)
+})
 
 
 #' Feature Differential Abundance Box-Plot
@@ -411,44 +388,46 @@ setMethod("mbecPCA", "list",
 #'
 #' @examples
 #' # This will return the plot-frame of all features i the data-set.
-#' data.Box <- mbecBox(input.obj=datadummy, method="ALL", model.var="batch",
+#' data.Box <- mbecBox(input.obj=datadummy, method='ALL', model.var='batch',
 #' return.data=TRUE)
 #'
 #' # This will return the ggplot2 object of the top 15 most variable features.
-#' plot.Box <- mbecBox(input.obj=datadummy, method="TOP", n=15,
-#' model.var="batch", return.data=FALSE)
-mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", return.data=FALSE) {
+#' plot.Box <- mbecBox(input.obj=datadummy, method='TOP', n=15,
+#' model.var='batch', return.data=FALSE)
+mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch",
+                    return.data = FALSE) {
 
-  cols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17,19)]
+  cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
   # needs sxf orientation
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.var))
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.var))
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
   otu.idx <- colnames(tmp[[1]])
 
   tmp <- tmp[[1]] %>%
     tibble::rownames_to_column(var = "specimen") %>%
-    dplyr::left_join(tmp[[2]], by = c("specimen" = "specimen"))
+    dplyr::left_join(tmp[[2]], by = c(specimen = "specimen"))
 
-  if( method[1] == "TOP" ) {
-    iqr <- apply(tmp[,otu.idx],2,stats::IQR)
-    iqr <- iqr[order(iqr, decreasing=TRUE)]
+  if (method[1] == "TOP") {
+    iqr <- apply(tmp[, otu.idx], 2, stats::IQR)
+    iqr <- iqr[order(iqr, decreasing = TRUE)]
     otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
 
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
-  } else if( length(method) >= 2 ) {
+  } else if (length(method) >= 2)
+  {
     message("'Method' parameter contains multiple elements -
             using to select features.")
     otu.idx <- method
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
-  } # else is 'select-all-mode'
+  }  # else is 'select-all-mode'
 
-  if( return.data ) {
+  if (return.data) {
     return(list(tmp, otu.idx))
   }
 
@@ -486,44 +465,44 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #'
 #' @examples
 #' # This will return the plot-frame of all features i the data-set.
-#' data.Heat <- mbecHeat(input.obj=datadummy, model.vars=c("group","batch"),
-#' center=TRUE, scale=TRUE, method="ALL", return.data=TRUE)
+#' data.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
+#' center=TRUE, scale=TRUE, method='ALL', return.data=TRUE)
 #'
 #' # This will return the ggplot2 object of the top 15 most variable features.
-#' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c("group","batch"),
-#' center=TRUE, scale=TRUE, method="TOP", n=15, return.data=FALSE)
-mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
-                     scale=TRUE, method="TOP", n=10, return.data=FALSE) {
+#' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
+#' center=TRUE, scale=TRUE, method='TOP', n=15, return.data=FALSE)
+mbecHeat <- function(input.obj, model.vars = c("group", "batch"), center = TRUE,
+                     scale = TRUE, method = "TOP", n = 10, return.data = FALSE) {
 
-  cols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17,19)]
+  cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp.cnts <- tmp[[1]]
+  tmp.meta <- tmp[[2]]
   otu.idx <- colnames(tmp[[1]])
 
-  for( g.idx in c(seq_along(model.vars)) ) {
-    if( !is.factor(tmp.meta[,eval(model.vars[g.idx])]) ) {
+  for (g.idx in c(seq_along(model.vars))) {
+    if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
       warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(model.vars[g.idx]),
-              " to factor now, adjust beforehand to get best results.")
-      tmp.meta[,eval(model.vars[g.idx])] <- factor(tmp.meta[,eval(model.vars[g.idx])])
+              eval(model.vars[g.idx]), " to factor now, adjust beforehand to get best results.")
+      tmp.meta[, eval(model.vars[g.idx])] <- factor(tmp.meta[, eval(model.vars[g.idx])])
     }
   }
   tmp.cnts <- base::scale(tmp.cnts, center = eval(center), scale = eval(scale))
-  tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center),
-                          scale = eval(scale))
-  if( method[1] == "TOP" ) {
-    iqr <- apply(tmp.cnts[otu.idx,],1,stats::IQR)
-    iqr <- iqr[order(iqr, decreasing=TRUE)]
+  tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center), scale = eval(scale))
+  if (method[1] == "TOP") {
+    iqr <- apply(tmp.cnts[otu.idx, ], 1, stats::IQR)
+    iqr <- iqr[order(iqr, decreasing = TRUE)]
     otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
-    tmp.cnts <- tmp.cnts[otu.idx,]
-  } else if( length(method) >= 2 ) {
+    tmp.cnts <- tmp.cnts[otu.idx, ]
+  } else if (length(method) >= 2)
+  {
     message("'Method' parameter contains multiple elements -
             using to select features.")
-    tmp.cnts <- tmp.cnts[method,]
+    tmp.cnts <- tmp.cnts[method, ]
 
-  } # else is 'select-all-mode'
-  if( return.data ) {
+  }  # else is 'select-all-mode'
+  if (return.data) {
     return(list(tmp.cnts, tmp.meta))
   }
   return(mbecHeatPlot(center, scale, tmp.cnts, tmp.meta, model.vars))
@@ -555,42 +534,41 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
 #'
 #' @examples
 #' # This will return the plot-df of the samples grouped by treatment and sex
-#' data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c("group","batch"),
+#' data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c('group','batch'),
 #' return.data=TRUE)
 #'
 #' # Return the ggplot2 object of the samples grouped by group and batch
 #' plot.Mosaic <- mbecMosaic(input.obj=datadummy,
-#' model.vars=c("group","batch"), return.data=FALSE)
-mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
+#' model.vars=c('group','batch'), return.data=FALSE)
+mbecMosaic <- function(input.obj, model.vars = c("group", "batch"), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
-  tmp <- mbecGetData(input.obj,orientation="sxf",required.col=eval(model.vars))
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
   tmp.meta <- tmp[[2]]
 
-  if( length(model.vars) < 2 ) {
+  if (length(model.vars) < 2) {
     message("Only one variable specified for Mosaic-plot, two are required!")
-  } else if( length(model.vars) > 2 ) {
+  } else if (length(model.vars) > 2) {
     message("More than 2 variables specified. Mosaic will take the first two.")
   }
 
-  for( g.idx in eval(model.vars) ) {
-    if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
+  for (g.idx in eval(model.vars)) {
+    if (!is.factor(tmp.meta[, eval(g.idx)])) {
       warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(g.idx),
-              " to factor now, adjust beforehand to get best results.")
-      tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
+              eval(g.idx), " to factor now, adjust beforehand to get best results.")
+      tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
     }
   }
   n.observations <- base::dim(tmp.meta)[1]
-  study.summary <- base::table(tmp.meta[,eval(model.vars[1])],
-                               tmp.meta[,eval(model.vars[2])]) %>%
+  study.summary <- base::table(tmp.meta[, eval(model.vars[1])], tmp.meta[, eval(model.vars[2])]) %>%
     as.data.frame() %>%
-    dplyr::mutate("Freq.scaled"=Freq / n.observations)
+    dplyr::mutate(Freq.scaled = Freq/n.observations)
 
-  if( return.data ) {
+  if (return.data)
+  {
     return(study.summary)
-  } # else return the plots
+  }  # else return the plots
 
   return(mbecMosaicPlot(study.summary, model.vars))
 
@@ -685,7 +663,7 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis
 #' (pvca) or Silhouette Coefficient (s.coef)
 #' @param model.form string that describes a model formula, i.e.,
-#' "y ~ covariate1 + (1|covariate2)"
+#' 'y ~ covariate1 + (1|covariate2)'
 #' @param type keep track of cnt-source
 #' @param no.warning (OPTIONAL) True/False-flag that should turn of singularity
 #' warnings, but it doesn't quite work
@@ -700,64 +678,66 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
 #' df.var.lm <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="lm", type="RAW")
+#' model.vars=c('group','batch'), method='lm', type='RAW')
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
 #' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="pvca")
-mbecModelVariance <- function( input.obj, model.vars=character(),
-                               method=c("lm","lmm","rda","pvca", "s.coef"),
-                               model.form=NULL, type="NONE", no.warning=TRUE,
-                               na.action=NULL) {
+#' model.vars=c('group','batch'), method='pvca')
+mbecModelVariance <- function(input.obj, model.vars = character(), method = c("lm",
+                                                                              "lmm", "rda", "pvca", "s.coef"), model.form = NULL, type = "NONE", no.warning = TRUE,
+                              na.action = NULL) {
   oldw <- getOption("warn")
-  if( no.warning ) {
+  if (no.warning) {
     options(warn = -1)
   }
   on.exit(options(warn = oldw))
 
   # handle optional parameters
-  if( is.null(na.action)) {
+  if (is.null(na.action)) {
     na.action = getOption("na.action")
   }
 
   ## PVCA stuff
-  pct_threshold = .5876   # threshold for explained variances
+  pct_threshold = 0.5876  # threshold for explained variances
 
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp.cnts <- tmp[[1]]
+  tmp.meta <- tmp[[2]]
 
   ## CHECK if grouping variables are factors
-  for( g.idx in eval(model.vars) ) {
-    if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
-      warning("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results.")
-      tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
+  for (g.idx in eval(model.vars)) {
+    if (!is.factor(tmp.meta[, eval(g.idx)])) {
+      warning("Grouping variables need to be factors. Coercing variable: ",
+              eval(g.idx), " to factor now, adjust beforehand to get best results.")
+      tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
     }
   }
 
-  if( method == "lm" ) {
-    res <- mbecModelVarianceLM(model.form,model.vars,tmp.cnts,tmp.meta,type)
+  if (method == "lm") {
+    res <- mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)
     return(res)
 
-  } else if( method == "lmm" ) {
-    res <- mbecModelVarianceLMM(model.form,model.vars,tmp.cnts,tmp.meta,type)
+  } else if (method == "lmm") {
+    res <- mbecModelVarianceLMM(model.form, model.vars, tmp.cnts, tmp.meta, type)
     return(res)
 
-  } else if( method == "rda" ) {
-    res <- mbecModelVarianceRDA(model.form,model.vars,tmp.cnts,tmp.meta,type)
+  } else if (method == "rda") {
+    res <- mbecModelVarianceRDA(model.form, model.vars, tmp.cnts, tmp.meta, type)
     return(res)
 
-  } else if( method == "pvca" ) {
-    res <- mbecModelVariancePVCA(model.form,model.vars,tmp.cnts,tmp.meta,type,
-                                 pct_threshold, na.action)
+  } else if (method == "pvca") {
+    res <- mbecModelVariancePVCA(model.form, model.vars, tmp.cnts, tmp.meta,
+                                 type, pct_threshold, na.action)
     return(res)
 
-  } else if( method == "s.coef" ) {
-    res <- mbecModelVarianceSCOEF(model.form,model.vars,tmp.cnts,tmp.meta,type)
+  } else if (method == "s.coef") {
+    res <- mbecModelVarianceSCOEF(model.form, model.vars, tmp.cnts, tmp.meta,
+                                  type)
     return(res)
 
   }
   message("Input doesn't apply to any available method. Nothing was done here.")
-  return( NULL )
+  return(NULL)
 }
 
 
@@ -792,30 +772,27 @@ mbecModelVariance <- function( input.obj, model.vars=character(),
 #' @param type String the denotes data source to keep track of process steps
 #' @return df that contains proportions of variance for given covariates
 #' @include mbecs_classes.R
-mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
-                                type) {
+mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type) {
   message("Fitting linear model to every feature and extract proportion of
           variance explained by covariates.")
-  if( !is.null(model.form) ) {
+  if (!is.null(model.form)) {
     message("Use provided model formula.")
     tmp.formula <- stats::as.formula(model.form)
   } else {
     message("Construct formula from covariates.")
-    tmp.formula = stats::as.formula(paste("y", " ~ ",
-                                          paste(model.vars, collapse=" + ")))
+    tmp.formula = stats::as.formula(paste("y", " ~ ", paste(model.vars, collapse = " + ")))
   }
   model.variances <- NULL
-  for( x in colnames(tmp.cnts)) {
+  for (x in colnames(tmp.cnts)) {
     y <- tmp.cnts[[eval(x)]]
 
-    model.fit <- stats::lm(tmp.formula, data=tmp.meta)
-    model.variances <- rbind.data.frame(model.variances,
-                                        mbecVarianceStats(model.fit))
+    model.fit <- stats::lm(tmp.formula, data = tmp.meta)
+    model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
   }
   res <- dplyr::mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- "anova"
 
-  return( res )
+  return(res)
 }
 
 #' Estimate Explained Variance with Linear Mixed Models
@@ -848,37 +825,34 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' @param type String the denotes data source to keep track of process steps
 #' @return df that contains proportions of variance for given covariates
 #' @include mbecs_classes.R
-mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
-                                 type) {
+mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type) {
 
 
   message("Fitting linear-mixed model to every feature and extract proportion
           of variance explained by covariates.")
 
-  control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
+  control = lme4::lmerControl(calc.derivs = FALSE, check.rankX = "stop.deficient")
 
-  if( !is.null(model.form) ) {
+  if (!is.null(model.form)) {
     message("Use provided model formula.")
     tmp.formula <- stats::as.formula(model.form)
   } else {
     message("Construct formula from covariates.")
-    f.terms <- paste("(1|",model.vars,")", sep="")
-    tmp.formula <- stats::as.formula(paste(paste("y",model.vars[1], sep=" ~ "),
-                                           paste(f.terms[-1], collapse=" + "),
-                                           sep=" + "))
+    f.terms <- paste("(1|", model.vars, ")", sep = "")
+    tmp.formula <- stats::as.formula(paste(paste("y", model.vars[1], sep = " ~ "),
+                                           paste(f.terms[-1], collapse = " + "), sep = " + "))
   }
   model.variances <- NULL
-  for( x in colnames(tmp.cnts)) {
-    y <- tmp.cnts[[eval(x)]] # meh
+  for (x in colnames(tmp.cnts)) {
+    y <- tmp.cnts[[eval(x)]]  # meh
 
-    model.fit <- lme4::lmer(tmp.formula, data=tmp.meta)
-    model.variances <- rbind.data.frame(model.variances,
-                                        mbecVarianceStats(model.fit))
+    model.fit <- lme4::lmer(tmp.formula, data = tmp.meta)
+    model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
   }
   res <- dplyr::mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- "linear-mixed model"
 
-  return( res )
+  return(res)
 }
 
 #' Estimate Explained Variance with Redundancy Analysis
@@ -912,21 +886,29 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' @param type String the denotes data source to keep track of process steps
 #' @return df that contains proportions of variance for given covariates
 #' @include mbecs_classes.R
-mbecModelVarianceRDA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
-                                 type) {
+mbecModelVarianceRDA <- function(model.form,
+                                 model.vars, tmp.cnts, tmp.meta, type) {
 
-  model.variances = data.frame(matrix(nrow = length(model.vars), ncol = 1,
-                                      dimnames = list(model.vars,eval(type))))
-  for( condition.idx in seq_along(model.vars) ) {
-    tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
-                                          paste(model.vars[-eval(condition.idx)], "+", collapse=" "),
-                                          " Condition(", model.vars[eval(condition.idx)],")", sep=""))
-    tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
-    tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>FALSE)`[1]
-    model.variances[condition.idx,eval(type)] <- summary(tmp.rda.covariate)$partial.chi*100/summary(tmp.rda.covariate)$tot.chi
+  model.variances = data.frame(matrix(nrow = length(model.vars),
+                                      ncol = 1, dimnames = list(model.vars,
+                                                                eval(type))))
+  for (condition.idx in seq_along(model.vars)) {
+    tmp.formula = stats::as.formula(paste("tmp.cnts",
+                                          " ~ ", paste(model.vars[-eval(condition.idx)],
+                                                       "+", collapse = " "), " Condition(",
+                                          model.vars[eval(condition.idx)],
+                                          ")", sep = ""))
+    tmp.rda.covariate <- vegan::rda(tmp.formula,
+                                    data = tmp.meta)
+    tmp.sig <- stats::anova(tmp.rda.covariate,
+                            permutations = permute::how(nperm = 999))$`Pr(>FALSE)`[1]
+    model.variances[condition.idx,
+                    eval(type)] <- summary(tmp.rda.covariate)$partial.chi *
+      100/summary(tmp.rda.covariate)$tot.chi
   }
 
-  res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
+  res <- data.frame(t(model.variances)) %>%
+    dplyr::mutate(type = eval(type))
   attr(res, "modelType") <- "rda"
 
   return(res)
@@ -977,12 +959,13 @@ mbecModelVarianceRDA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' @param na.action Set NA handling, will take global option if not supplied
 #' @return df that contains proportions of variance for given covariates
 #' @include mbecs_classes.R
-mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
-                                  type, pct_threshold, na.action) {
+mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, type,
+                                  pct_threshold, na.action) {
   n.vars <- length(model.vars)
   s.names <- rownames(tmp.cnts)
 
-  tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>% t()
+  tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
+    t()
   colnames(tmp.cnts) <- s.names
   tmp.cor <- stats::cor(tmp.cnts)
 
@@ -994,40 +977,45 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
   sum.eVal <- sum(eVal)
   prop.PCs <- eVal/sum.eVal
 
-  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold, FUN.VALUE=logical(1)))))
+  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold,
+                                   FUN.VALUE = logical(1)))))
 
-  lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>%
+  lmm.df <- eVec %>%
+    tibble::as_tibble(.name_repair = "unique") %>%
     dplyr::select_at(seq_len(eval(n.PCs))) %>%
     cbind(., tmp.meta)
 
-  f.terms <- paste("(1|",model.vars,")", sep="")
+  f.terms <- paste("(1|", model.vars, ")", sep = "")
 
-  for(var.idx in seq_len((n.vars-1))) {
-    for(interaction.idx in seq.int(from=(var.idx+1), to=(n.vars), by=1)) {
-      f.terms <- c(f.terms, paste("(1|",model.vars[var.idx],":",model.vars[interaction.idx],")", sep=""))
+  for (var.idx in seq_len((n.vars - 1))) {
+    for (interaction.idx in seq.int(from = (var.idx + 1), to = (n.vars), by = 1)) {
+      f.terms <- c(f.terms, paste("(1|", model.vars[var.idx], ":", model.vars[interaction.idx],
+                                  ")", sep = ""))
     }
   }
   n.effects <- length(f.terms) + 1
   randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
 
-  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",paste(f.terms, collapse = " + "), sep=""))
+  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ", paste(f.terms,
+                                                                            collapse = " + "), sep = ""))
 
-  for( vec.idx in seq_len(n.PCs) ) {
+  for (vec.idx in seq_len(n.PCs)) {
     randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula,
                                                                   lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
-    randomEffectsMatrix[vec.idx,] <- as.numeric(randomEffects[,4])
+    randomEffectsMatrix[vec.idx, ] <- as.numeric(randomEffects[, 4])
   }
 
-  names.effects <- randomEffects[,1]
-  randomEffectsMatrix.std <- randomEffectsMatrix / rowSums(randomEffectsMatrix)
+  names.effects <- randomEffects[, 1]
+  randomEffectsMatrix.std <- randomEffectsMatrix/rowSums(randomEffectsMatrix)
 
-  scaled.eVal <- eVal / sum(eVal)
+  scaled.eVal <- eVal/sum(eVal)
   randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
 
-  model.variances <- colSums(randomEffectsMatrix.wgt) / sum(colSums(randomEffectsMatrix.wgt))
+  model.variances <- colSums(randomEffectsMatrix.wgt)/sum(colSums(randomEffectsMatrix.wgt))
   names(model.variances) <- names.effects
 
-  res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
+  res <- data.frame(t(model.variances)) %>%
+    dplyr::mutate(type = eval(type))
   attr(res, "modelType") <- "PVCA - lmm"
 
   return(res)
@@ -1079,25 +1067,32 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' @param type String the denotes data source to keep track of process steps
 #' @return df that contains proportions of variance for given covariates
 #' @include mbecs_classes.R
-mbecModelVarianceSCOEF <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+mbecModelVarianceSCOEF <- function(model.form,
+                                   model.vars, tmp.cnts, tmp.meta,
                                    type) {
 
-  tmp.prcomp <- stats::prcomp(tmp.cnts, center = TRUE, scale = FALSE)
+  tmp.prcomp <- stats::prcomp(tmp.cnts,
+                              center = TRUE, scale = FALSE)
 
-  tmp.dist <- stats::dist(tmp.prcomp$x, method = "euclidian")
+  tmp.dist <- stats::dist(tmp.prcomp$x,
+                          method = "euclidian")
 
   avg.sil.df <- NULL
-  for( var.elem in model.vars ) {
+  for (var.elem in model.vars) {
     print(var.elem)
 
-    tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,eval(var.elem)]), dist = tmp.dist)
+    tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,
+                                                          eval(var.elem)]), dist = tmp.dist)
 
-    avg.sil.df <- rbind.data.frame(avg.sil.df, data.frame("variable"=var.elem,
-                                                          "cluster"=levels(tmp.meta[,eval(var.elem)]),
-                                                          "sil.coefficient"= c(summary(tmp.sil))$clus.avg.widths))
+    avg.sil.df <- rbind.data.frame(avg.sil.df,
+                                   data.frame(variable = var.elem,
+                                              cluster = levels(tmp.meta[,
+                                                                        eval(var.elem)]),
+                                              sil.coefficient = c(summary(tmp.sil))$clus.avg.widths))
   }
 
-  res <- avg.sil.df %>% dplyr::mutate(type = eval(type))
+  res <- avg.sil.df %>%
+    dplyr::mutate(type = eval(type))
   attr(res, "modelType") <- "s.coef"
 
   return(res)
@@ -1130,23 +1125,23 @@ mbecModelVarianceSCOEF <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' # This will return the data.frame for plotting.
 #' limo <- stats::lm(datadummy$cnts[,1] ~ group + batch, data=datadummy$meta)
 #' vec.variance <- mbecVarianceStats(model.fit=limo)
-mbecVarianceStats <- function( model.fit ) {
+mbecVarianceStats <- function(model.fit) {
 
   ### ToDo: implement glm versions of this
 
   # check validity of model fit
-  mbecValidateModel( model.fit)
+  mbecValidateModel(model.fit)
 
   # linear model
-  if( is(model.fit, "lm") ) {
+  if (is(model.fit, "lm")) {
 
-    res <- mbecVarianceStatsLM( model.fit )
+    res <- mbecVarianceStatsLM(model.fit)
 
-  } else if( is(model.fit, "lmerMod") ) {
+  } else if (is(model.fit, "lmerMod")) {
 
-    res <- mbecVarianceStatsLMM( model.fit )
+    res <- mbecVarianceStatsLMM(model.fit)
 
-  } else if( is(model.fit, "glm") ) {
+  } else if (is(model.fit, "glm")) {
     ### ToDon't
   }
   return(res)
@@ -1165,11 +1160,12 @@ mbecVarianceStats <- function( model.fit ) {
 #' @keywords lm proportion variance
 #' @param model.fit linear model object of class 'lm'
 #' @return a named row-vector, containing proportional variance for model terms
-mbecVarianceStatsLM <- function( model.fit ) {
+mbecVarianceStatsLM <- function(model.fit) {
 
   vp = stats::anova(model.fit) %>%
     data.frame() %>%
-    dplyr::mutate("variance" = dplyr::select(.,"Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
+    dplyr::mutate(variance = dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,
+                                                                          "Sum.Sq")), .keep = "none") %>%
     t()
 
   return(vp)
@@ -1192,37 +1188,41 @@ mbecVarianceStatsLM <- function( model.fit ) {
 #' @keywords lmm proportion variance
 #' @param model.fit linear mixed model object of class 'lmerMod'
 #' @return a named row-vector, containing proportional variance for model terms
-mbecVarianceStatsLMM <- function( model.fit ) {
+mbecVarianceStatsLMM <- function(model.fit) {
 
   vc <- mbecMixedVariance(model.fit)
 
-  lib.df <- data.frame("covariates"=colnames(model.fit@frame),
-                       row.names=vapply(colnames(model.fit@frame), function(covariate)
-                         paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]),
-                                     sep=""), collapse = ","), FUN.VALUE = character(1)))
+  lib.df <- data.frame(covariates = colnames(model.fit@frame),
+                       row.names = vapply(colnames(model.fit@frame),
+                                          function(covariate) paste(paste(covariate,
+                                                                          levels(model.fit@frame[, eval(covariate)]),
+                                                                          sep = ""), collapse = ","), FUN.VALUE = character(1)))
 
   total.var.LUT <- unlist(lapply(vc, function(var.comp) {
-    if( length(var.comp) > 1 ) {
+    if (length(var.comp) > 1) {
       weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp),
-                                                          collapse = ",")),]]])/nrow(model.fit@frame))
+                                                          collapse = ",")), ]]])/nrow(model.fit@frame))
       var.comp %*% weights
     } else {
       names(var.comp) <- NULL
       var.comp
     }
-  } ), use.names = TRUE, recursive = FALSE)
+  }), use.names = TRUE, recursive = FALSE)
 
   vp <- list()
 
-  for( effect in names(vc) ) {
+  for (effect in names(vc)) {
 
     # value of this effect divided by the total variance
-    tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in% eval(effect))])
-    vp[[eval(effect)]] <- vc[[eval(effect)]] / (tmp.t.var + vc[[eval(effect)]])
+    tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in%
+                                            eval(effect))])
+    vp[[eval(effect)]] <- vc[[eval(effect)]]/(tmp.t.var +
+                                                vc[[eval(effect)]])
   }
 
   vp <- unlist(vp)
-  names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
+  names(vp) <- gsub(".(Intercept)", replacement = "",
+                    names(vp), fixed = TRUE)
   vp <- data.frame(t(vp))
 
   return(vp)
@@ -1261,21 +1261,19 @@ mbecMixedVariance <- function(model.fit) {
 
   rVC <- lme4::VarCorr(model.fit)
 
-  randomVar <- c("Residuals"=attr(rVC, "sc")^2,
-                 lapply(rVC,diag))
+  randomVar <- c(Residuals = attr(rVC, "sc")^2, lapply(rVC, diag))
 
-  n.scaling <- (stats::nobs(model.fit) - 1) / stats::nobs(model.fit)
+  n.scaling <- (stats::nobs(model.fit) - 1)/stats::nobs(model.fit)
 
   fixedVar <- t(t(model.fit@pp$X) * lme4::fixef(model.fit)) %>%
     as.data.frame() %>%
     dplyr::select(!"(Intercept)") %>%
-    dplyr::mutate("total.var"=apply(., 1, sum)) %>%
+    dplyr::mutate(total.var = apply(., 1, sum)) %>%
     apply(2, function(effect) stats::var(effect) * n.scaling)
 
-  fixedVar <- lapply(split(
-    utils::head(fixedVar, -1) / sum(utils::head(fixedVar, -1)) *
-      utils::tail(fixedVar, 1),
-    names(utils::head(fixedVar, -1))),unname)
+  fixedVar <- lapply(split(utils::head(fixedVar, -1)/sum(utils::head(fixedVar,
+                                                                     -1)) * utils::tail(fixedVar, 1), names(utils::head(fixedVar, -1))),
+                     unname)
 
   return(c(randomVar, fixedVar))
 }
@@ -1300,17 +1298,17 @@ mbecMixedVariance <- function(model.fit) {
 #' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
 #' data=datadummy$meta)
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
-mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
+mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
   ## ToDo: health & Safety
 
   # implement for lmm as well
-  if( class(model.fit) %in% "lm" ) {
-    if( colinScore(model.fit) > colinearityThreshold ) {
+  if (class(model.fit) %in% "lm") {
+    if (colinScore(model.fit) > colinearityThreshold) {
       stop("Some covariates are strongly correlated. Try again.")
     }
-  } else if( class(model.fit) %in% "lmerMod" ) {
+  } else if (class(model.fit) %in% "lmerMod") {
 
-    if( colinScore(model.fit) > colinearityThreshold ) {
+    if (colinScore(model.fit) > colinearityThreshold) {
       stop("Some covariates are strongly correlated. Try again.")
     }
   }
@@ -1339,16 +1337,15 @@ colinScore <- function(model.fit) {
   # get variance-covariance matrix
   V <- stats::vcov(model.fit)
   # 'NA' values or non-square matrix
-  if( any(is.na(V)) || nrow(V) == 0 ) {
-    score <- ifelse(any(is.na(V)), 1,0)
-    attr( score, "vcor") = NA
+  if (any(is.na(V)) || nrow(V) == 0) {
+    score <- ifelse(any(is.na(V)), 1, 0)
+    attr(score, "vcor") = NA
   } else {
     # scale to correlation
     C <- stats::cov2cor(as.matrix(V))
     # get largest correlation
     score = max(abs(C[lower.tri(C)]))
-    attr( score, "vcor") = C
+    attr(score, "vcor") = C
   }
   return(score)
 }
-

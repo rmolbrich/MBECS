@@ -38,10 +38,10 @@ table. Correct orientation of counts will be handled internally.
 \examples{
 # This will return the data.frame for plotting.
 data.RLE <- mbecRLE(input.obj=datadummy,
-model.vars=c("group","batch"), return.data=TRUE)
+model.vars=c('group','batch'), return.data=TRUE)
 
 # This will return the ggplot2 object for display, saving and modification.
-plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c("group","batch"),
+plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
 return.data=FALSE)
 }
 \keyword{RLE}
