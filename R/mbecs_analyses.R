@@ -17,9 +17,12 @@
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords RLE relative log expression
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable
+#' selects panels and second one determines coloring
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #'
@@ -31,7 +34,8 @@
 #' # This will return the ggplot2 object for display, saving and modification.
 #' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c("group","batch"),
 #' return.data=FALSE)
-mbecRLE <- function(input.obj,model.vars=c("group","batch"),return.data=FALSE) {
+mbecRLE <- function(input.obj,model.vars=c("group","batch"),
+                return.data=FALSE) {
 
   cols <- pals::tableau20(20)
 
@@ -105,10 +109,13 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),return.data=FALSE) {
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords PCA principal component analysis
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
-#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handled internally)
+#' @param model.vars two covariates of interest to select by first variable
+#' selects shape and second one determines coloring
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -186,28 +193,43 @@ setGeneric("mbecPCA", signature="input.obj",
       ggplot2::geom_point() +
       ggplot2::scale_color_manual(values = cols) +
       ggplot2::labs(colour = var.color, shape = var.shape) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      ggplot2::ylim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ', metric.df$var.explained[pca.axes[1]], '% expl.var')) +
-      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ', metric.df$var.explained[pca.axes[2]], '% expl.var')) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                    metric.df$axis.max[pca.axes[1]]) +
+      ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                    metric.df$axis.max[pca.axes[2]]) +
+      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ': ',
+                    metric.df$var.explained[pca.axes[1]], '% expl.var')) +
+      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2]+1]), ': ',
+                    metric.df$var.explained[pca.axes[2]], '% expl.var')) +
       theme_pca()
 
-    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2, alpha = 0.5) + ggplot2::ylab('Density') +
+    pTop <- ggplot2::ggplot(data = plot.df,
+                ggplot2::aes(x = get(colnames(plot.df[pca.axes[1]+1])),
+                    fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
+      ggplot2::geom_density(size = 0.2, alpha = 0.5) +
+      ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                    metric.df$axis.max[pca.axes[1]]) +
       theme_pca() +
       ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.5)))
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+          axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
+          plot.title = ggplot2::element_text(hjust = 0.5,
+                                             size = ggplot2::rel(1.5)))
 
-    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() + ggplot2::ylab('Density') +
+    pRight <- ggplot2::ggplot(data = plot.df,
+                  ggplot2::aes(x=get(colnames(plot.df[pca.axes[2]+1])),
+                               fill = get(model.vars[2]),
+                               linetype = get(model.vars[2]))) +
+      ggplot2::geom_density(size = 0.2,alpha = 0.5) +  ggplot2::coord_flip() +
+      ggplot2::ylab('Density') +
       ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[2]],
+                    metric.df$axis.max[pca.axes[2]]) + theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_blank(),
+                     axis.line = ggplot2::element_blank(),
                      plot.title = ggplot2::element_blank())
 
   }else{
@@ -269,9 +291,11 @@ setGeneric("mbecPCA", signature="input.obj",
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj MbecData object (correct orientation is handled internally)
-#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param model.vars two covariates of interest to select by first variable
+#' selects shape and second one determines coloring
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -308,9 +332,11 @@ setMethod("mbecPCA", "MbecData",
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj phyloseq object
-#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param model.vars two covariates of interest to select by first variable
+#' selects shape and second one determines coloring
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -320,8 +346,8 @@ setMethod("mbecPCA", "MbecData",
 #' data.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 #'
-#' # This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-#' # x-axis and PC2 on y-axis.
+#' # This will return the ggplot2 object for display, saving and modification.
+#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "phyloseq",
@@ -348,10 +374,13 @@ setMethod("mbecPCA", "phyloseq",
 #' handled internally.
 #'
 #' @keywords PCA principal component analysis
-#' @param input.obj List that contains counts and covariate data (correct orientation is handled internally)
-#' @param model.vars two covariates of interest to select by first variable selects shape and second one determines coloring
+#' @param input.obj List that contains counts and covariate data (correct
+#' orientation is handled internally)
+#' @param model.vars two covariates of interest to select by first variable
+#' selects shape and second one determines coloring
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -387,11 +416,14 @@ setMethod("mbecPCA", "list",
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Box abundance density
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param method one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handeled internally)
+#' @param method one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT
+#' is 'ALL'
 #' @param n number of OTUs to display for 'TOP' method
 #' @param model.var covariate to group by, default is batch
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -426,14 +458,14 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     # calculate IQR and order from largest to smallest
     iqr <- apply(tmp[,otu.idx],2,stats::IQR)
     iqr <- iqr[order(iqr, decreasing=TRUE)]
-    #otu.idx <- names(iqr)[1:min(length(otu.idx), n)] ToDo: remove when everything works
     otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
 
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
   } else if( length(method) >= 2 ) {
-    message("'Method' parameter contains multiple elements - using to select features.")
+    message("'Method' parameter contains multiple elements -
+            using to select features.")
     # calculate IQR and sort as well
     otu.idx <- method
     tmp <- tmp %>%
@@ -447,18 +479,24 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
   ## Prepare the plots for selected features
   # upper case first letter for the legend box
-  legend.title <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.var,perl = TRUE)
+  legend.title <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.var,
+                       perl = TRUE)
   ret.plot <- list()
 
   for( idx in otu.idx ) {
-    p.box <- ggplot2::ggplot(data = tmp, ggplot2::aes(x = get(model.var), y = get(idx), fill = get(model.var))) + ggplot2::stat_boxplot(geom = "errorbar", width = 0.4) +
+    p.box <- ggplot2::ggplot(data = tmp,
+                             ggplot2::aes(x = get(model.var), y = get(idx),
+                                          fill = get(model.var))) +
+      ggplot2::stat_boxplot(geom = "errorbar", width = 0.4) +
       ggplot2::geom_boxplot() + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::theme_bw() +
       theme_box() +
       ggplot2::labs(fill = legend.title, y = 'value',title = idx)
 
-    p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx), fill = get(model.var))) +
-      ggplot2::geom_density(alpha = 0.5) + ggplot2::scale_fill_manual(values = cols) +
+    p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx),
+                                                   fill = get(model.var))) +
+      ggplot2::geom_density(alpha = 0.5) +
+      ggplot2::scale_fill_manual(values = cols) +
       ggplot2::labs(title = idx, x = 'Value', fill = legend.title) +
       theme_box()
 
@@ -466,7 +504,8 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     # modify legend
     g <- ggplot2::ggplotGrob(p.box)$grobs
     # extract legend
-    legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE=character(1)) == "guide-box")]]
+    legend <- g[[which(vapply(g, function(x) x$name,
+                              FUN.VALUE=character(1)) == "guide-box")]]
 
     # put plot into the list
     ret.plot[[eval(idx)]] <- gridExtra::arrangeGrob(p.box + ggplot2::theme(legend.position = 'none'),
@@ -494,13 +533,15 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 #' counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Heat abundance clustering
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handeled internally)
 #' @param model.vars covariates of interest to show in heatmap
 #' @param center flag to activate centering
 #' @param scale flag to activate scaling
 #' @param method one of 'ALL' or 'TOP' or a vector of feature names
 #' @param n number of features to select in method TOP
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -529,14 +570,17 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
   ## CHECK if model.vars are factors
   for( g.idx in c(seq_along(model.vars)) ) {
     if( !is.factor(tmp.meta[,eval(model.vars[g.idx])]) ) {
-      warning("Grouping variables need to be factors. Coercing variable: ", eval(model.vars[g.idx]), " to factor now, adjust beforehand to get best results.")
+      warning("Grouping variables need to be factors. Coercing variable: ",
+              eval(model.vars[g.idx]),
+              " to factor now, adjust beforehand to get best results.")
       tmp.meta[,eval(model.vars[g.idx])] <- factor(tmp.meta[,eval(model.vars[g.idx])])
     }
   }
 
   ## center & scale
   tmp.cnts <- base::scale(tmp.cnts, center = eval(center), scale = eval(scale))
-  tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center), scale = eval(scale))
+  tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center),
+                          scale = eval(scale))
 
   if( method[1] == "TOP" ) {
     # calculate IQR and order from largest to smallest
@@ -546,7 +590,8 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
     # select only wanted features
     tmp.cnts <- tmp.cnts[otu.idx,]
   } else if( length(method) >= 2 ) {
-    message("'Method' parameter contains multiple elements - using to select features.")
+    message("'Method' parameter contains multiple elements -
+            using to select features.")
     # calculate IQR and sort as well
     tmp.cnts <- tmp.cnts[method,]
 
@@ -589,9 +634,11 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Mosaic sample allocation
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handeled internally)
 #' @param model.vars covariates of interest to the sample allocation
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)
+#' @param return.data logical if TRUE returns the data.frame required for
+#' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -601,7 +648,7 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
 #' data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c("group","batch"),
 #' return.data=TRUE)
 #'
-#' # This will return the ggplot2 object of the samples grouped by group and batch
+#' # Return the ggplot2 object of the samples grouped by group and batch
 #' plot.Mosaic <- mbecMosaic(input.obj=datadummy,
 #' model.vars=c("group","batch"), return.data=FALSE)
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
@@ -624,7 +671,9 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
   ## CHECK if grouping variables are factors
   for( g.idx in eval(model.vars) ) {
     if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
-      warning("Grouping variables need to be factors. Coercing variable: ", eval(g.idx), " to factor now, adjust beforehand to get best results.")
+      warning("Grouping variables need to be factors. Coercing variable: ",
+              eval(g.idx),
+              " to factor now, adjust beforehand to get best results.")
       tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
     }
   }
@@ -632,12 +681,14 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
   # how many samples are there
   n.observations <- base::dim(tmp.meta)[1]
 
-  study.summary <- base::table(tmp.meta[,eval(model.vars[1])], tmp.meta[,eval(model.vars[2])]) %>%
+  study.summary <- base::table(tmp.meta[,eval(model.vars[1])],
+                               tmp.meta[,eval(model.vars[2])]) %>%
     as.data.frame() %>%
     dplyr::mutate("Freq.scaled"=Freq / n.observations)
 
   # prepare plot-annotation
-  vars.axes <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.vars,perl = TRUE)
+  vars.axes <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",
+                    model.vars,perl = TRUE)
 
   if( return.data ) {
     return(study.summary)
@@ -746,14 +797,22 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Model Evaluation Variance
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)
-#' @param model.vars vector of covariates to include in model-construction, in case parameter 'model.form' is not supplied
-#' @param method select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)
-#' @param model.form string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"
-#' @param type creates a column with that string in the output df - to keep track of cnt-source
-#' @param no.warning (OPTIONAL) True/False-flag that should turn of singularity warnings, but it doesn't quite work
-#' @param na.action (OPTIONAL) set NA handling, will take global option if not supplied
-#' @return df that contains proportions of variance for given covariates in every feature
+#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
+#' orientation is handled internally)
+#' @param model.vars vector of covariates to include in model-construction, in
+#' case parameter 'model.form' is not supplied
+#' @param method select method of modeling: Linear Model (lm), Linear Mixed
+#' Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis
+#' (pvca) or Silhouette Coefficient (s.coef)
+#' @param model.form string that describes a model formula, i.e.,
+#' "y ~ covariate1 + (1|covariate2)"
+#' @param type keep track of cnt-source
+#' @param no.warning (OPTIONAL) True/False-flag that should turn of singularity
+#' warnings, but it doesn't quite work
+#' @param na.action (OPTIONAL) set NA handling, will take global option if not
+#' supplied
+#' @return df that contains proportions of variance for given covariates in
+#' every feature
 #' @include mbecs_classes.R
 #' @export
 #'
@@ -764,15 +823,16 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' model.vars=c("group","batch"), method="lm", type="RAW")
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
-#' df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-#' method="pvca")
+#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="pvca")
 mbecModelVariance <- function( input.obj, model.vars=character(),
                                method=c("lm","lmm","rda","pvca", "s.coef"),
                                model.form=NULL, type="NONE", no.warning=TRUE,
                                na.action=NULL) {
 
   ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
-  ### ToDo: safety checks and logic to distinguish model types and also take care of this matrix-input issue
+  ### ToDo: safety checks and logic to distinguish model types and also take
+  ### care of this matrix-input issue
   ### ToDoAsWell: How2Make lm and lmm formulas.. or if  or whatever
   ## ToDo: check this out - itis part of lmm just put it her to remind me
   ## control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )

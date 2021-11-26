@@ -7,11 +7,13 @@
 mbecMosaic(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
+orientation is handeled internally)}
 
 \item{model.vars}{covariates of interest to the sample allocation}
 
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for
+plotting (NO plotting or saving here bucko)}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
@@ -34,7 +36,7 @@ table. Correct orientation of counts will be handled internally.
 data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c("group","batch"),
 return.data=TRUE)
 
-# This will return the ggplot2 object of the samples grouped by group and batch
+# Return the ggplot2 object of the samples grouped by group and batch
 plot.Mosaic <- mbecMosaic(input.obj=datadummy,
 model.vars=c("group","batch"), return.data=FALSE)
 }

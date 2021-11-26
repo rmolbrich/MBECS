@@ -15,22 +15,30 @@ mbecModelVariance(
 )
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
+orientation is handled internally)}
 
-\item{model.vars}{vector of covariates to include in model-construction, in case parameter 'model.form' is not supplied}
+\item{model.vars}{vector of covariates to include in model-construction, in
+case parameter 'model.form' is not supplied}
 
-\item{method}{select method of modeling: Linear Model (lm), Linear Mixed Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis (pvca) or Silhouette Coefficient (s.coef)}
+\item{method}{select method of modeling: Linear Model (lm), Linear Mixed
+Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis
+(pvca) or Silhouette Coefficient (s.coef)}
 
-\item{model.form}{string that describes a model formula, i.e., "y ~ covariate1 + (1|covariate2)"}
+\item{model.form}{string that describes a model formula, i.e.,
+"y ~ covariate1 + (1|covariate2)"}
 
-\item{type}{creates a column with that string in the output df - to keep track of cnt-source}
+\item{type}{keep track of cnt-source}
 
-\item{no.warning}{(OPTIONAL) True/False-flag that should turn of singularity warnings, but it doesn't quite work}
+\item{no.warning}{(OPTIONAL) True/False-flag that should turn of singularity
+warnings, but it doesn't quite work}
 
-\item{na.action}{(OPTIONAL) set NA handling, will take global option if not supplied}
+\item{na.action}{(OPTIONAL) set NA handling, will take global option if not
+supplied}
 }
 \value{
-df that contains proportions of variance for given covariates in every feature
+df that contains proportions of variance for given covariates in
+every feature
 }
 \description{
 The function offers a selection of methods/algorithms to estimate the
@@ -115,8 +123,8 @@ df.var.lm <- mbecModelVariance(input.obj=datadummy,
 model.vars=c("group","batch"), method="lm", type="RAW")
 # This will return a data-frame that contains the variance attributable to
 # group and batch according to linear additive model.
-df.var.pvca <- mbecModelVariance(input.obj=datadummy, model.vars=c("group","batch"),
-method="pvca")
+df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+model.vars=c("group","batch"), method="pvca")
 }
 \keyword{Evaluation}
 \keyword{Model}

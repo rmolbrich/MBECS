@@ -14,11 +14,13 @@
 \arguments{
 \item{input.obj}{phyloseq object}
 
-\item{model.vars}{two covariates of interest to select by first variable selects shape and second one determines coloring}
+\item{model.vars}{two covariates of interest to select by first variable
+selects shape and second one determines coloring}
 
 \item{pca.axes}{numeric vector which axes to plot, first is X and second is Y}
 
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for
+plotting (NO plotting or saving here bucko)}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
@@ -42,8 +44,8 @@ table. Correct orientation of counts will be handled internally.
 data.PCA <- mbecPCA(input.obj=datadummy,
 model.vars=c("group","batch"), pca.axes=c(1,2), return.data=TRUE)
 
-# This will return the ggplot2 object for display, saving and modification. Selected PCs are PC3 on
-# x-axis and PC2 on y-axis.
+# This will return the ggplot2 object for display, saving and modification.
+# Selected PCs are PC3 on x-axis and PC2 on y-axis.
 plot.PCA <- mbecPCA(input.obj=datadummy,
 model.vars=c("group","batch"), pca.axes=c(3,2), return.data=FALSE)
 }

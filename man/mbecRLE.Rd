@@ -7,11 +7,14 @@
 mbecRLE(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
+orientation is handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
+\item{model.vars}{two covariates of interest to select by first variable
+selects panels and second one determines coloring}
 
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for
+plotting (NO plotting here bucko)}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from

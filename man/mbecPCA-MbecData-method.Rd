@@ -14,11 +14,13 @@
 \arguments{
 \item{input.obj}{MbecData object (correct orientation is handled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable selects shape and second one determines coloring}
+\item{model.vars}{two covariates of interest to select by first variable
+selects shape and second one determines coloring}
 
 \item{pca.axes}{numeric vector which axes to plot, first is X and second is Y}
 
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for
+plotting (NO plotting or saving here bucko)}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from

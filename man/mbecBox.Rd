@@ -13,15 +13,18 @@ mbecBox(
 )
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
+orientation is handeled internally)}
 
-\item{method}{one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT is 'ALL'}
+\item{method}{one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT
+is 'ALL'}
 
 \item{n}{number of OTUs to display for 'TOP' method}
 
 \item{model.var}{covariate to group by, default is batch}
 
-\item{return.data}{logical if TRUE returns the data.frame required for plotting (NO plotting or saving here bucko)}
+\item{return.data}{logical if TRUE returns the data.frame required for
+plotting (NO plotting or saving here bucko)}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
