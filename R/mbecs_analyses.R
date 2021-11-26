@@ -709,13 +709,6 @@ mbecModelVariance <- function( input.obj, model.vars=character(),
                                method=c("lm","lmm","rda","pvca", "s.coef"),
                                model.form=NULL, type="NONE", no.warning=TRUE,
                                na.action=NULL) {
-
-  ### ToDo: selection cutoff for PCs in silhouette coefficient method?!
-  ### ToDo: safety checks and logic to distinguish model types and also take
-  ### care of this matrix-input issue
-  ### ToDoAsWell: How2Make lm and lmm formulas.. or if  or whatever
-  ## ToDo: check this out - itis part of lmm just put it her to remind me
-  ## control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
   oldw <- getOption("warn")
   if( no.warning ) {
     options(warn = -1)
@@ -741,247 +734,375 @@ mbecModelVariance <- function( input.obj, model.vars=character(),
     }
   }
 
-  ## 1. implement for linear model
   if( method == "lm" ) {
-    message("Fitting linear model to every feature and extract proportion of variance explained by covariates.")
-    # if no formula is supplied a simple additive model will be constructed
-    if( !is.null(model.form) ) {
-      message("Use provided model formula.")
-      # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
-      tmp.formula <- stats::as.formula(model.form)
-    } else {
-      message("Construct formula from covariates.")
-      tmp.formula = stats::as.formula(paste("y", " ~ ",
-                                            paste(model.vars, collapse=" + ")))
-    }
-    ## so, for some reason this shit does not work with apply, because the iterator will not update in the formula
-    ## maybe try again once the rest works
-    ### DEBUG ###
-    # model.variances <- sapply(colnames(tmp.cnts), FUN = function(x) {
-    #   model.fit <- stats::lm(tmp.cnts[,eval(x)] ~ group + batch, data = tmp.meta)
-    #   # data.frame(mbecVarianceStats(model.fit))
-    #   data.frame(mbecVarianceStats(model.fit))
-    # })
-    ### DEBUG ###
-
-    model.variances <- NULL
-    for( x in colnames(tmp.cnts)) {
-      y <- tmp.cnts[[eval(x)]]
-
-      model.fit <- stats::lm(tmp.formula, data=tmp.meta)
-      model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
-    }
-
-    modelType = "anova"
-
-  } else if( method == "lmm" ) {
-    message("Fitting linear-mixed model to every feature and extract proportion of variance explained by covariates.")
-
-    control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
-
-    # if no formula is supplied a simple additive model will be constructed
-    if( !is.null(model.form) ) {
-      message("Use provided model formula.")
-      # tmp.formula <- as.formula(deparse(model.form)) this would make a function work, but fails for string --> just string for now
-      tmp.formula <- stats::as.formula(model.form)
-    } else {
-      message("Construct formula from covariates.")
-      f.terms <- paste("(1|",model.vars,")", sep="")
-      tmp.formula <- stats::as.formula(paste(paste("y", model.vars[1], sep=" ~ "), paste(f.terms[-1], collapse=" + "), sep=" + "))
-
-    }
-    # now fit a model to every feature
-    model.variances <- NULL
-    for( x in colnames(tmp.cnts)) {
-      # meh
-      y <- tmp.cnts[[eval(x)]]
-
-      model.fit <- lme4::lmer(tmp.formula, data=tmp.meta)
-      model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
-    }
-
-    modelType = "linear-mixed model"
-
-  } else if( method == "rda" ) {
-    # pre-analysis check-up
-    # 1. response var: dimensional homogeneity (equal units of measurement) --> counts should be like that (else center and standardise)
-    # 2. #explanatory variables << #samples --> else overdetermined system
-    # 3. explanatory var: dimensional homogeneity for quantitative variables --> else center & standard (qualitative vars work anyways)
-    # 4. Examine the distribution of each variable in you explanatory and response matrix as well as plots of each variable against other
-    # variables in its own and any other matrix. If the relationships are markedly non-linear, apply transformations to linearise the
-    # relationships and reduce the effect of outliers.
-    # 5. If you wish to represent non-Euclidean relationships (e.g. Hellinger distances) between objects in an RDA ordination, you should
-    # apply an ecologically-motivated transformation discussed on this page before analysis.
-
-    ### perform as much RDAs as there are covariates, while conditioning on a single one each time.
-    # set-up df for results
-    model.variances = data.frame(matrix(nrow = length(model.vars), ncol = 1, dimnames = list(model.vars,eval(type))))
-
-    # get significance and variance for whole model
-    # tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
-    #                                       paste(model.vars, collapse=" + "),sep=""))
-    # tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
-    # tmp.sig <- anova(tmp.rda.covariate,permutations = how(nperm=999))
-    # full.model.variance <- paste((tmp.sig$Variance[1] / sum(tmp.sig$Variance)), tmp.sig$`Pr(>F)`[1], sep="|")
-
-    # iterate over the vector of covariate names (model.vars) to construct formulas for 'RDA' procedure
-    for( condition.idx in seq_along(model.vars) ) {
-      # the counts are always available in sxf format in variable 'tmp.cnts'
-      # just iterate over all covariates and keep on to condition on
-      tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
-                                            paste(model.vars[-eval(condition.idx)], "+", collapse=" "),
-                                            " Condition(", model.vars[eval(condition.idx)],")", sep=""))
-      # compute RDA for this condition
-      tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
-
-      # estimate significance of
-      tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>FALSE)`[1]
-
-      # calculate proportion of variance for this covariate as quotient of its eigenvalue and the sum of eigenvalues
-      # partial.chi denotes the variance in the 'CONDITION'
-      model.variances[condition.idx,eval(type)] <- summary(tmp.rda.covariate)$partial.chi*100/summary(tmp.rda.covariate)$tot.chi
-      # model.variances[condition.idx,eval(type)] <- paste(summary(tmp.rda.covariate)$partial.chi*100/summary(tmp.rda.covariate)$tot.chi, tmp.sig, full.model.variance, sep="|")
-    }
-
-    modelType = "rda"
-    # make-up some return format
-    res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
-    attr(res, "modelType") <- modelType
-
+    res <- mbecModelVarianceLM(model.form,model.vars,tmp.cnts,tmp.meta,type)
     return(res)
 
+  } else if( method == "lmm" ) {
+    res <- mbecModelVarianceLMM(model.form,model.vars,tmp.cnts,tmp.meta,type)
+    return(res)
+
+  } else if( method == "rda" ) {
+    res <- mbecModelVarianceRDA(model.form,model.vars,tmp.cnts,tmp.meta,type)
+    return(res)
 
   } else if( method == "pvca" ) {
-
-    #model.vars <- c("Time","Treatment","Batch")
-    n.vars <- length(model.vars)
-    s.names <- rownames(tmp.cnts)
-
-    # center and/or scale the counts - if both arguments are set to false, it will just transpose the matrix for the subsequent steps
-    tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
-      t()
-
-    #reset the sample-names
-    colnames(tmp.cnts) <- s.names
-
-    # calculate correlation - fxs
-    tmp.cor <- stats::cor(tmp.cnts)
-
-    # get eigen-values/vectors of the correlation matrix
-    eCor <- eigen(tmp.cor)
-    eVal <- eCor$values
-    eVec <- eCor$vectors
-    rownames(eVec) <- s.names
-    n.eVal <- length(eVal)
-    sum.eVal <- sum(eVal)
-    prop.PCs <- eVal/sum.eVal
-
-    # figure out how many PCs to model by summing up the variance they account for until a threshold is met
-    # takes at minimum 3 PCs regardless of threshold.
-    # calculate cumulative sum for vector of variances - evaluate which position is larger than the cutoff -
-    # select maximum out of 3 and the smallest PC that meets the cutoff
-    n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold, FUN.VALUE=logical(1)))))
-
-    # create a long-df that contains a column for all selected eigen-vectors and the required covariates (which obviously repeat for all vectors)
-    # join selected eigenvectors and covariate data in a single df
-    # lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>% dplyr::select_at(1:eval(n.PCs)) %>% cbind(., tmp.meta) ToDo: remove when rest works
-    lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>%
-      dplyr::select_at(seq_len(eval(n.PCs))) %>%
-      cbind(., tmp.meta)
-    #lmm.df <- eVec %>% cbind(., tmp.meta)  %>% as_tibble(.) %>% select_at(1:eval(n.PCs))
-
-    # # figure out how many effects there are - it is a random effect for every covariate - plus an interaction term for
-    # # every combination of covariates - plus 1 for the residuals
-    # n.effects <- length(model.vars) + (factorial(length(model.vars)) / (2 * (factorial(length(model.vars)-2)))) + 1
-
-    # these are the basic random effects for all covariates
-    f.terms <- paste("(1|",model.vars,")", sep="")
-
-    # now add the random-interaction effects iterating through all but the last covariate and create a 'rid'
-    # with all subsequent covariates - thus creating all combinations without repetition
-    for(var.idx in seq_len((n.vars-1))) {
-      for(interaction.idx in seq.int(from=(var.idx+1), to=(n.vars), by=1)) {
-        # combine with the other formula terms and done
-        f.terms <- c(f.terms, paste("(1|",model.vars[var.idx],":",model.vars[interaction.idx],")", sep=""))
-      }
-    }
-
-    # OR just take the length of the f.terms vector +1 (for Residuals) to create a results.matrix
-    n.effects <- length(f.terms) + 1
-    randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
-
-    # now prepare the model formula, which only needs to be done once
-    model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",paste(f.terms, collapse = " + "), sep=""))
-
-    # for every selected eigen-vector, fit an lmm with random and interaction terms - calculate and extract the associated variances
-    for( vec.idx in seq_len(n.PCs) ) {
-      randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula, lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
-      # and put into result at the respective row
-      randomEffectsMatrix[vec.idx,] <- as.numeric(randomEffects[,4])
-    }
-    # save effect-names and more importantly the actual order
-    names.effects <- randomEffects[,1]
-
-    # standardize variance by scaling every row by its sum
-    randomEffectsMatrix.std <- randomEffectsMatrix / rowSums(randomEffectsMatrix)
-
-    # weigh the values by the proportion of variance that the respective PCs accounted for
-    # take the eigenvalues divided by sum of all eigenvalues and use them as weights for the
-    # respective rows, i.e, effect-variances that belong to the PCs that the eigenvalues relate to
-    scaled.eVal <- eVal / sum(eVal)
-    randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
-
-    # at this point the total variance sums up to a value that should be close to the selected cutoff
-    # for explained variance - so, now sum-up the variance for each effect, over the PCs and divide it by the
-    # actual amount of variance that is associate with the selected PCs --> this puts it in the interval:[0,1]
-    # for better comparability
-    model.variances <- colSums(randomEffectsMatrix.wgt) / sum(colSums(randomEffectsMatrix.wgt))
-    names(model.variances) <- names.effects
-
-    modelType <- "PVCA - lmm"
-
-    res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
-    attr(res, "modelType") <- modelType
-
+    res <- mbecModelVariancePVCA(model.form,model.vars,tmp.cnts,tmp.meta,type,
+                                 pct_threshold, na.action)
     return(res)
 
   } else if( method == "s.coef" ) {
-
-    ### prcomp and selection cutoff??!
-    tmp.prcomp <- stats::prcomp(tmp.cnts, center = TRUE, scale = FALSE)
-
-    # get sample-wise distances
-    tmp.dist <- stats::dist(tmp.prcomp$x, method = "euclidian")
-
-    # iterate over variables, calculate silhouette, compute avg. silhouette coefficient,
-    # merge in neat little dataframe
-    avg.sil.df <- NULL
-    for( var.elem in model.vars ) {
-      print(var.elem)
-
-      tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,eval(var.elem)]), dist = tmp.dist)
-
-      avg.sil.df <- rbind.data.frame(avg.sil.df, data.frame("variable"=var.elem,
-                                                            "cluster"=levels(tmp.meta[,eval(var.elem)]),
-                                                            "sil.coefficient"= c(summary(tmp.sil))$clus.avg.widths))
-
-    }
-
-    res <- avg.sil.df %>% dplyr::mutate(type = eval(type))
-    attr(res, "modelType") <- "s.coef"
-
+    res <- mbecModelVarianceSCOEF(model.form,model.vars,tmp.cnts,tmp.meta,type)
     return(res)
+
   }
+  message("Input doesn't apply to any available method. Nothing was done here.")
+  return( NULL )
+}
 
-  # transpose result and add column with correction/transformation type.. maybe more later though
+
+
+
+#' Estimate Explained Variance with Linear Models
+#'
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model.
+#'
+#' Linear Model (lm): An additive model of all covariates is fitted to each
+#' feature respectively and the proportion of variance is extracted for each
+#' covariate (OTU_x ~ covariate_1 + covariate_2 + ...).
+#'
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords LM Variance
+#' @param model.form type formula for linear model
+#' @param model.vars covariates to use for model building
+#' @param tmp.cnts extracted count matrix
+#' @param tmp.meta extracted covariate table
+#' @param type String the denotes data source to keep track of process steps
+#' @return df that contains proportions of variance for given covariates
+#' @include mbecs_classes.R
+mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                type) {
+  message("Fitting linear model to every feature and extract proportion of
+          variance explained by covariates.")
+  if( !is.null(model.form) ) {
+    message("Use provided model formula.")
+    tmp.formula <- stats::as.formula(model.form)
+  } else {
+    message("Construct formula from covariates.")
+    tmp.formula = stats::as.formula(paste("y", " ~ ",
+                                          paste(model.vars, collapse=" + ")))
+  }
+  model.variances <- NULL
+  for( x in colnames(tmp.cnts)) {
+    y <- tmp.cnts[[eval(x)]]
+
+    model.fit <- stats::lm(tmp.formula, data=tmp.meta)
+    model.variances <- rbind.data.frame(model.variances,
+                                        mbecVarianceStats(model.fit))
+  }
   res <- dplyr::mutate(model.variances, type = eval(type))
-  attr(res, "modelType") <- modelType
-
-  ### fancy return type from variancePart package - wait if we need that
-  # res <- new("varPartResults", varPartMat, type=modelType, method="Variance explained (%)")
+  attr(res, "modelType") <- "anova"
 
   return( res )
 }
+
+#' Estimate Explained Variance with Linear Mixed Models
+#'
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model.
+#'
+#' Linear Mixed Model (lmm): All but the first covariate are considered mixed
+#' effects. A model is fitted to each OTU respectively and the proportion of
+#' variance extracted for each covariate.
+#' (OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
+#'
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords LM Variance
+#' @param model.form type formula for linear model
+#' @param model.vars covariates to use for model building
+#' @param tmp.cnts extracted count matrix
+#' @param tmp.meta extracted covariate table
+#' @param type String the denotes data source to keep track of process steps
+#' @return df that contains proportions of variance for given covariates
+#' @include mbecs_classes.R
+mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                 type) {
+
+
+  message("Fitting linear-mixed model to every feature and extract proportion
+          of variance explained by covariates.")
+
+  control = lme4::lmerControl(calc.derivs=FALSE, check.rankX="stop.deficient" )
+
+  if( !is.null(model.form) ) {
+    message("Use provided model formula.")
+    tmp.formula <- stats::as.formula(model.form)
+  } else {
+    message("Construct formula from covariates.")
+    f.terms <- paste("(1|",model.vars,")", sep="")
+    tmp.formula <- stats::as.formula(paste(paste("y",model.vars[1], sep=" ~ "),
+                                           paste(f.terms[-1], collapse=" + "),
+                                           sep=" + "))
+  }
+  model.variances <- NULL
+  for( x in colnames(tmp.cnts)) {
+    y <- tmp.cnts[[eval(x)]] # meh
+
+    model.fit <- lme4::lmer(tmp.formula, data=tmp.meta)
+    model.variances <- rbind.data.frame(model.variances,
+                                        mbecVarianceStats(model.fit))
+  }
+  res <- dplyr::mutate(model.variances, type = eval(type))
+  attr(res, "modelType") <- "linear-mixed model"
+
+  return( res )
+}
+
+#' Estimate Explained Variance with Redundancy Analysis
+#'
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model.
+#'
+#' partial Redundancy Analysis (rda): Iterates over given covariates, builds a
+#' model of all covariates that includes one variable as condition/constraint
+#' and then fits it to the feature abundance matrix. The difference in explained
+#' variance between the full- and the constrained-model is then attributed to
+#' the constraint. (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
+#'
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords LM Variance
+#' @param model.form type formula for linear model
+#' @param model.vars covariates to use for model building
+#' @param tmp.cnts extracted count matrix
+#' @param tmp.meta extracted covariate table
+#' @param type String the denotes data source to keep track of process steps
+#' @return df that contains proportions of variance for given covariates
+#' @include mbecs_classes.R
+mbecModelVarianceRDA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                 type) {
+
+  model.variances = data.frame(matrix(nrow = length(model.vars), ncol = 1,
+                                      dimnames = list(model.vars,eval(type))))
+  for( condition.idx in seq_along(model.vars) ) {
+    tmp.formula = stats::as.formula(paste("tmp.cnts", " ~ ",
+                                          paste(model.vars[-eval(condition.idx)], "+", collapse=" "),
+                                          " Condition(", model.vars[eval(condition.idx)],")", sep=""))
+    tmp.rda.covariate <- vegan::rda(tmp.formula, data=tmp.meta)
+    tmp.sig <- stats::anova(tmp.rda.covariate,permutations = permute::how(nperm=999))$`Pr(>FALSE)`[1]
+    model.variances[condition.idx,eval(type)] <- summary(tmp.rda.covariate)$partial.chi*100/summary(tmp.rda.covariate)$tot.chi
+  }
+
+  res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
+  attr(res, "modelType") <- "rda"
+
+  return(res)
+}
+
+#' Estimate Explained Variance with Principal Variance Component Analysis
+#'
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model.
+#'
+#' Principal Variance Component Analysis (pvca): Algorithm - calculate the
+#' correlation of the fxs count-matrix - from there extract the eigenvectors and
+#' eigenvalues and calculate the proportion of explained variance per
+#' eigenvector (i.e. principal component) by dividing the eigenvalues by the
+#' sum of eigenvalues. Now select as many PCs as required to fill a chosen
+#' quota for the total proportion of explained variance. Iterate over all PCs
+#' and fit a linear mixed model that contains all covariates as random effect
+#' and all unique interactions between two covariates. Compute variance
+#' covariance components form the resulting model --> From there we get the
+#' Variance that each covariate(variable) contributes to this particular PC.
+#' Then just standardize variance by dividing it through the sum of variance for
+#' that model. Scale each PCs results by the proportion this PC accounted for in
+#' the first place. And then do it again by dividing it through the total amount
+#' of explained variance, i.e. the cutoff to select the number of PCs to take
+#' (obviously not the cutoff but rather the actual values for the selected PCs).
+#' Finally take the average over each random variable and interaction term and
+#' display in a nice plot.
+#'
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords LM Variance
+#' @param model.form type formula for linear model
+#' @param model.vars covariates to use for model building
+#' @param tmp.cnts extracted count matrix
+#' @param tmp.meta extracted covariate table
+#' @param type String the denotes data source to keep track of process steps
+#' @param pct_threshold Cutoff value
+#' @param na.action Set NA handling, will take global option if not supplied
+#' @return df that contains proportions of variance for given covariates
+#' @include mbecs_classes.R
+mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                  type, pct_threshold, na.action) {
+  n.vars <- length(model.vars)
+  s.names <- rownames(tmp.cnts)
+
+  tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>% t()
+  colnames(tmp.cnts) <- s.names
+  tmp.cor <- stats::cor(tmp.cnts)
+
+  eCor <- eigen(tmp.cor)
+  eVal <- eCor$values
+  eVec <- eCor$vectors
+  rownames(eVec) <- s.names
+  n.eVal <- length(eVal)
+  sum.eVal <- sum(eVal)
+  prop.PCs <- eVal/sum.eVal
+
+  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold, FUN.VALUE=logical(1)))))
+
+  lmm.df <- eVec %>% tibble::as_tibble(.name_repair = "unique") %>%
+    dplyr::select_at(seq_len(eval(n.PCs))) %>%
+    cbind(., tmp.meta)
+
+  f.terms <- paste("(1|",model.vars,")", sep="")
+
+  for(var.idx in seq_len((n.vars-1))) {
+    for(interaction.idx in seq.int(from=(var.idx+1), to=(n.vars), by=1)) {
+      f.terms <- c(f.terms, paste("(1|",model.vars[var.idx],":",model.vars[interaction.idx],")", sep=""))
+    }
+  }
+  n.effects <- length(f.terms) + 1
+  randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
+
+  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",paste(f.terms, collapse = " + "), sep=""))
+
+  for( vec.idx in seq_len(n.PCs) ) {
+    randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula,
+                                                                  lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
+    randomEffectsMatrix[vec.idx,] <- as.numeric(randomEffects[,4])
+  }
+
+  names.effects <- randomEffects[,1]
+  randomEffectsMatrix.std <- randomEffectsMatrix / rowSums(randomEffectsMatrix)
+
+  scaled.eVal <- eVal / sum(eVal)
+  randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
+
+  model.variances <- colSums(randomEffectsMatrix.wgt) / sum(colSums(randomEffectsMatrix.wgt))
+  names(model.variances) <- names.effects
+
+  res <- data.frame(t(model.variances)) %>% dplyr::mutate(type = eval(type))
+  attr(res, "modelType") <- "PVCA - lmm"
+
+  return(res)
+}
+
+#' Estimate Explained Variance with Silhouette Coefficient
+#'
+#' The function offers a selection of methods/algorithms to estimate the
+#' proportion of variance that can be attributed to covariates of interest.
+#' This shows, how much variation is explained by the treatment effect, which
+#' proportion is introduced by processing in batches and the leftover variance,
+#' i.e., residuals that are not currently explained. Covariates of interest
+#' (CoI) are selected by the user and the function will incorporate them into
+#' the model.
+#'
+#' Silhouette Coefficient (s.coef): Calculate principal components and get
+#' sample-wise distances on the resulting (sxPC) matrix. Then iterate over all
+#' the covariates and calculate the cluster silhouette (which is basically
+#' either zero, if the cluster contains only a single element, or it is the
+#' distance to the closest different cluster minus the distance of the sample
+#' within its own cluster divided (scaled) by the maximum distance). Average
+#' over each element in a cluster for all clusters and there is the
+#' representation of how good the clustering is. This shows how good a
+#' particular covariate characterizes the data, i.e., a treatment variable for
+#' instance may differentiate the samples into treated and untreated groups
+#' which implies two clusters. In an ideal scenario, the treatment variable,
+#' i.e., indicator for some biological effect would produce a perfect
+#' clustering. In reality, the confounding variables, e.g., batch, sex or age,
+#' will also influence the ordination of samples. Hence, the clustering
+#' coefficient is somewhat similar to the amount of explained variance metric
+#' that the previous methods used. If used to compare an uncorrected data-set to
+#' a batch-corrected set, the expected result would be an increase of clustering
+#' coefficient for the biological effect (and all other covariates - because a
+#' certain amount of uncertainty was removed from the data) and a decrease for
+#' the batch effect.
+#'
+#' The function returns a data-frame for further analysis - the report functions
+#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
+#' the data-set can be an MbecData-object, a phyloseq-object or a list that
+#' contains counts and covariate data. The covariate table requires an 'sID'
+#' column that contains sample IDs equal to the sample naming in the counts
+#' table. Correct orientation of counts will be handled internally.
+#'
+#' @keywords LM Variance
+#' @param model.form type formula for linear model
+#' @param model.vars covariates to use for model building
+#' @param tmp.cnts extracted count matrix
+#' @param tmp.meta extracted covariate table
+#' @param type String the denotes data source to keep track of process steps
+#' @return df that contains proportions of variance for given covariates
+#' @include mbecs_classes.R
+mbecModelVarianceSCOEF <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                   type) {
+
+  tmp.prcomp <- stats::prcomp(tmp.cnts, center = TRUE, scale = FALSE)
+
+  tmp.dist <- stats::dist(tmp.prcomp$x, method = "euclidian")
+
+  avg.sil.df <- NULL
+  for( var.elem in model.vars ) {
+    print(var.elem)
+
+    tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,eval(var.elem)]), dist = tmp.dist)
+
+    avg.sil.df <- rbind.data.frame(avg.sil.df, data.frame("variable"=var.elem,
+                                                          "cluster"=levels(tmp.meta[,eval(var.elem)]),
+                                                          "sil.coefficient"= c(summary(tmp.sil))$clus.avg.widths))
+  }
+
+  res <- avg.sil.df %>% dplyr::mutate(type = eval(type))
+  attr(res, "modelType") <- "s.coef"
+
+  return(res)
+}
+
 
 
 #' Wrapper for Model Variable Variance Extraction
@@ -1018,74 +1139,97 @@ mbecVarianceStats <- function( model.fit ) {
 
   # linear model
   if( is(model.fit, "lm") ) {
-    # get model coefficients
-    # model.sum <- summary(model.fit)
-    # w.cof2[i] <- model.sum$coefficients[3,1]
 
-    vp = stats::anova(model.fit) %>%
-      data.frame() %>%
-      dplyr::mutate("variance" = dplyr::select(.,"Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
-      t()
+    res <- mbecVarianceStatsLM( model.fit )
 
-  } else if( is(model.fit, "lmerMod") ) {  # linear-mixed model
+  } else if( is(model.fit, "lmerMod") ) {
 
-    # this is the un-adjusted variance --> divide by total variance and done
-    vc <- mbecMixedVariance(model.fit)
-
-    # BUT maybe we want to adjust/condition for one or more variables..
-    # and make this shit more complicated than it needs to be
-    # adjust = NULL # some arbitrary adjustment for development
-    #
-    # # 1. make this adjustment validity check
-    # # check for varying coefficient models - whatever that is.. copy and paste for now
-    # if (max(sapply(varComp, length)) > 1 && !is.null(adjust)) {
-    #   stop("The adjust and adjustAll arguments are not currently supported for varying coefficient models")
-    # }
-    # 2. for all covariates perform the variance calculation - for varying coefficients the total sum is somehow only this particular coefficient + all other variables - BUT the other coefficient level are ignored here
-    # so, we need variances and scaled variance in subsequent steps - but only calculate once if possible
-
-    # meh
-    lib.df <- data.frame("covariates"=colnames(model.fit@frame),
-        row.names=vapply(colnames(model.fit@frame), function(covariate)
-        paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]),
-                    sep=""), collapse = ","), FUN.VALUE = character(1)))
-
-    # and a look-up table to make variance calculations nice and easy
-    total.var.LUT <- unlist(lapply(vc, function(var.comp) {
-      if( length(var.comp) > 1 ) {
-        weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp),
-            collapse = ",")),]]])/nrow(model.fit@frame))
-        var.comp %*% weights
-      } else {
-        names(var.comp) <- NULL
-        var.comp
-      }
-    } ), use.names = TRUE, recursive = FALSE)
-
-    vp <- list()
-    # now just sum total variance from LUT and leave out the current effect
-    # the trick here is to  add the current effect later to the sum -->
-    # in case it is a normal coefficient, it just works as a normal sum
-    # but if it is a vector, i.e., varying coefficients, the separate addition produces a vector
-    # instead of a scalar -> all the varying components can be updated in one fail-swoop *MUHAHAHAHA*
-    for( effect in names(vc) ) {
-
-      # value of this effect divided by the total variance
-      tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in% eval(effect))])
-      vp[[eval(effect)]] <- vc[[eval(effect)]] / (tmp.t.var + vc[[eval(effect)]])
-    }
-
-    vp <- unlist(vp)
-    names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
-    vp <- data.frame(t(vp))
+    res <- mbecVarianceStatsLMM( model.fit )
 
   } else if( is(model.fit, "glm") ) {
-
     ### ToDon't
   }
+  return(res)
+}
+
+
+#' Model Variable Variance Extraction from LM
+#'
+#' For a Linear Model, this function extracts the proportion of variance
+#' that can be explained by terms and interactions and returns a named
+#' row-vector.
+#'
+#' Linear Model: Perform an analysis of variance (ANOVA) on the model.fit and
+#' return the Sum of squares for each term, scaled by the total sum of squares.
+#'
+#' @keywords lm proportion variance
+#' @param model.fit linear model object of class 'lm'
+#' @return a named row-vector, containing proportional variance for model terms
+mbecVarianceStatsLM <- function( model.fit ) {
+
+  vp = stats::anova(model.fit) %>%
+    data.frame() %>%
+    dplyr::mutate("variance" = dplyr::select(.,"Sum.Sq") / sum(dplyr::select(.,"Sum.Sq")), .keep="none") %>%
+    t()
 
   return(vp)
 }
+
+
+#' Model Variable Variance Extraction from LMM
+#'
+#' For a Linear Mixed Model, this function extracts the proportion of variance
+#' that can be explained by terms and interactions and returns a named
+#' row-vector.
+#'
+#' Linear Mixed Model: employ helper function 'mbecMixedVariance' to extract
+#' residuals, random effects and fixed effects components from the model. The
+#' components are then transformed to reflect explained proportions of variance
+#' for the model coefficients. The function implements transformation for
+#' varying coefficients as well, but NO ADJUSTMENT for single or multiple
+#' coefficients at this point.
+#'
+#' @keywords lmm proportion variance
+#' @param model.fit linear mixed model object of class 'lmerMod'
+#' @return a named row-vector, containing proportional variance for model terms
+mbecVarianceStatsLMM <- function( model.fit ) {
+
+  vc <- mbecMixedVariance(model.fit)
+
+  lib.df <- data.frame("covariates"=colnames(model.fit@frame),
+                       row.names=vapply(colnames(model.fit@frame), function(covariate)
+                         paste(paste(covariate, levels(model.fit@frame[,eval(covariate)]),
+                                     sep=""), collapse = ","), FUN.VALUE = character(1)))
+
+  total.var.LUT <- unlist(lapply(vc, function(var.comp) {
+    if( length(var.comp) > 1 ) {
+      weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp),
+                                                          collapse = ",")),]]])/nrow(model.fit@frame))
+      var.comp %*% weights
+    } else {
+      names(var.comp) <- NULL
+      var.comp
+    }
+  } ), use.names = TRUE, recursive = FALSE)
+
+  vp <- list()
+
+  for( effect in names(vc) ) {
+
+    # value of this effect divided by the total variance
+    tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in% eval(effect))])
+    vp[[eval(effect)]] <- vc[[eval(effect)]] / (tmp.t.var + vc[[eval(effect)]])
+  }
+
+  vp <- unlist(vp)
+  names(vp) <- gsub(".(Intercept)", replacement = "", names(vp), fixed=TRUE)
+  vp <- data.frame(t(vp))
+
+  return(vp)
+}
+
+
+
 
 
 #' Mixed Model Variance-Component Extraction
@@ -1114,43 +1258,25 @@ mbecVarianceStats <- function( model.fit ) {
 #' data=datadummy$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
 mbecMixedVariance <- function(model.fit) {
-  # remember: sd == sqrt(var)
 
-  # VarCorr computes var, sd, cov for residuals and random effects
   rVC <- lme4::VarCorr(model.fit)
-  # Standard Deviation of Residuals is stored as 'sc' attribute in rVC - and squared to get variances
-  # iterate over the list(s) of random effects in rVC and squre sd to get variance - and don't forget to unlist()
-  # so, technically this is the residualsRandomVar-vector
-  # diag() is the same as attr(random.eff,"stddev")^2 and return the variances
+
   randomVar <- c("Residuals"=attr(rVC, "sc")^2,
                  lapply(rVC,diag))
-  # scale to number of observations - aka (N-1)/N
+
   n.scaling <- (stats::nobs(model.fit) - 1) / stats::nobs(model.fit)
-  # pp is class 'merPredD' and X is dense model matrix for the fixed-effects parameters
-  # fixedEffect-value
-  # with fixed effects parameters 'fixef()' extract the estimates for the fixed effects parameters
-  # --> The fixed effects variance, σ2f, is the variance of the matrix-multiplication
-  # β∗X (parameter vector by model matrix)
-  #
-  # extract both components and multiply each column by the corresponding value in the effects estimate
-  # and then scale to sample-size, i.e., (N-1)/N
+
   fixedVar <- t(t(model.fit@pp$X) * lme4::fixef(model.fit)) %>%
     as.data.frame() %>%
-    # 1. drop intercept
     dplyr::select(!"(Intercept)") %>%
-    # 2. row-sums for all effects - can calculate total variance
     dplyr::mutate("total.var"=apply(., 1, sum)) %>%
-    # 3. apply to get the scaled variance in each column
     apply(2, function(effect) stats::var(effect) * n.scaling)
 
-  # maybe fancy later, but for now this works
   fixedVar <- lapply(split(
-    utils::head(fixedVar, -1) / sum(utils::head(fixedVar, -1)) * utils::tail(fixedVar, 1),
+    utils::head(fixedVar, -1) / sum(utils::head(fixedVar, -1)) *
+      utils::tail(fixedVar, 1),
     names(utils::head(fixedVar, -1))),unname)
 
-  # add attribute for total.var to every list element - to make the following steps less of a pita
-
-  # concatenate and return the lists
   return(c(randomVar, fixedVar))
 }
 
@@ -1187,52 +1313,6 @@ mbecValidateModel <- function( model.fit, colinearityThreshold=0.999 ) {
     if( colinScore(model.fit) > colinearityThreshold ) {
       stop("Some covariates are strongly correlated. Try again.")
     }
-
-    # ### DEVOPS
-    #
-    # # check that factors are random and continuous variables are fixed
-    # ###################################################################
-    #
-    # # remove backticks with gsub manually
-    # # solve issue that backticks are conserved is some but not all parts of lmer()
-    #
-    # # Simplified testing of random versus fixed effects
-    # # allows (A|B) only where A is continuous
-    #
-    # # variables fit by regression
-    # testVar = attr(attr(model.fit@frame, "terms"), "term.labels")
-    # testVar = gsub("`", "", testVar)
-    #
-    # # get type for each variable
-    # # keep only tested variables
-    # varType = attr(attr(model.fit@frame, "terms"), "dataClasses")[-1]
-    # varType = varType[testVar]
-    #
-    # # random effects
-    # randVar = names(model.fit@flist)
-    #
-    # # fixed effects
-    # # starting with all variables, remove random variables
-    # fixedVar = setdiff(testVar, randVar)
-    #
-    # for( i in 1:length(varType) ){
-    #
-    #   # if factor is not random
-    #   if( (showWarnings && ! dream) && varType[i] %in% c("factor", "character") && (! names(varType)[i] %in% randVar) ){
-    #     stop(paste("Categorical variables modeled as fixed effect:", paste(names(varType)[i], collapse=', '), "\nThe results will not behave as expected and may be very wrong!!"))
-    #   }
-    #
-    #   # If numeric/double is not fixed
-    #   if( (showWarnings && ! dream) && varType[i] %in% c("numeric", "double") && (!names(varType)[i] %in% fixedVar) ){
-    #     stop(paste("Continuous variable cannot be modeled as a random effect:", names(varType)[i]))
-    #   }
-    # }
-    #
-    # # show convergance message
-    # if( showWarnings && !is.null(fit@optinfo$conv$lme4$messages) && (fit@optinfo$conv$lme4$messages != "boundary (singular) fit: see ?isSingular")){
-    #   stop(fit@optinfo$conv$lme4$messages)
-    # }
-
   }
 }
 
@@ -1271,199 +1351,4 @@ colinScore <- function(model.fit) {
   }
   return(score)
 }
-
-
-# VARIANCE PLOTTATION -----------------------------------------------------
-
-
-#' Plot Proportion of Variance for L(M)M
-#'
-#' Covariate-Variances as modeled by linear (mixed) models will be displayed as
-#' box-plots. It works with the output of 'mbecVarianceStats()' for methods 'lm'
-#' and 'lmm'. Format of this output is a data.frame that contains a column for
-#' every model variable and as many rows as there are features
-#' (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
-#' a list - IF the data.frames contain a column named 'type', this function will
-#' use 'facet_grid()' to display side-by-side panels to enable easy comparison.
-#'
-#' @keywords plot proportion variance linear mixed models
-#' @param variance.obj, list or single output of 'mbecVarianceStats' with method lm
-#' @return A ggplot2 box-plot object.
-#' @export
-#'
-#' @examples
-#' # This will return a paneled plot that shows results for the variance
-#' # assessments.
-#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"),
-#' method="lm", type="RAW")
-#' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
-mbecVarianceStatsPlot <- function( variance.obj ) {
-
-  plot.df <- variance.obj %>%
-    dplyr::bind_rows() %>% # this seems to work with single objects and lists
-    tidyr::gather("covariate", "variance", -type) %>%
-    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
-    dplyr::mutate(variance = as.numeric(as.character(variance)))
-
-  leplot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = covariate, y = variance, fill = covariate)) +
-    ggplot2::geom_boxplot() +
-    ggplot2::facet_grid(cols = ggplot2::vars(type)) + ## this is the magic for comparative plotting
-    ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
-          strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
-          axis.text = ggplot2::element_text(size = 12), axis.title = ggplot2::element_text(size = 15),
-          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::labs(x = 'Covariate', y = 'Proportion Variance', name = 'Covariate') + ggplot2::ylim(0,1)
-
-  return(leplot)
-
-}
-
-
-#' Plot Proportion of Variance for pRDA
-#'
-#' Covariate-Variances as modeled by pRDA will be displayed as box-plots.
-#' It works with the output of 'mbecVarianceStats()' for the method 'rda'.
-#' Format of this output is a data.frame that contains a column for every model
-#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
-#' frames may be used as input by putting them into a list - IF the data.frames
-#' contain a column named 'type', this function will use 'facet_grid()' to
-#' display side-by-side panels to enable easy comparison.
-#'
-#' @keywords plot proportion variance partial Redundancy Analysis
-#' @param rda.obj, list or single output of 'mbecVarianceStats' with method rda
-#' @return A ggplot2 box-plot object.
-#' @export
-#'
-#' @examples
-#' # This will return a paneled plot that shows results for three variance
-#' # assessments.
-#' df.var.rda <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="rda", type="RAW")
-#' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
-mbecRDAStatsPlot <- function(rda.obj) {
-  # first tidy-magic to create df for plotting
-  leTest <- rda.obj %>%
-    tidyr::gather("covariate", "variance", -type) %>%
-    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
-    #separate(data=., col = "variance", into = c("variance","significance", "model.variance","model.significance"), sep="\\|") %>%
-    dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
-    dplyr::mutate(variance.r = round(variance, 2))
-
-  # now plot
-  lePlot <- ggplot2::ggplot(data = leTest, ggplot2::aes(x = covariate, y = variance, fill = covariate)) +
-    ggplot2::geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
-    # significance at the top
-    # geom_text(data = leTest, aes(type, 100, label = significance),
-    #           position = position_dodge(width = 0.9), size = 3) +
-    # variance above the bars
-    ggplot2::geom_text(data = leTest, ggplot2::aes(covariate, variance + 2.5, label = variance.r),
-              position = ggplot2::position_dodge(width = 0.9), size = 3) +
-    ggplot2::facet_grid(cols = ggplot2::vars(type)) + ## this is the magic for comparative plotting
-    ggplot2::theme_bw() +
-    ggplot2::labs(y = "Variance explained (%)") +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
-          panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
-          axis.title = ggplot2::element_text(size = 15), legend.title = ggplot2::element_text(size = 15),
-          legend.text = ggplot2::element_text(size = 12)) + ggplot2::ylim(0,100)
-
-  return(lePlot)
-  # FIN
-}
-
-
-#' Plot Proportion of Variance for PVCA
-#'
-#' Covariate-Variances as modeled by PVCA will be displayed as box-plots.
-#' It works with the output of 'mbecVarianceStats()' for the method 'pvca'.
-#' Format of this output is a data.frame that contains a column for every model
-#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
-#' frames may be used as input by putting them into a list - IF the data.frames
-#' contain a column named 'type', this function will use 'facet_grid()' to
-#' display side-by-side panels to enable easy comparison.
-#'
-#' @keywords plot proportion variance pvca
-#' @param pvca.obj, list or single output of 'mbecVarianceStats' with method pvca
-#' @return A ggplot2 box-plot object.
-#' @export
-#'
-#' @examples
-#' # This will return a paneled plot that shows results for the variance
-#' # assessment.
-#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="pvca", type="RAW")
-#' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
-mbecPVCAStatsPlot <- function(pvca.obj) {
-  # first tidy-magic to create df for plotting
-  plot.df <- pvca.obj %>%
-    tidyr::gather("covariate", "variance", -type) %>%
-    dplyr::mutate(covariate=gsub("\\.",":",covariate)) %>%
-    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
-    dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
-    dplyr::mutate(variance.r = round(variance, 2)) %>%
-    dplyr::mutate(variance.p = round(variance*100, 2))
-
-  # now plot
-  lePlot <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = covariate, y = variance.p, fill = covariate)) +
-    ggplot2::geom_bar(stat = "identity", position = 'dodge', colour = 'black') +
-    ggplot2::geom_text(data = plot.df, ggplot2::aes(covariate, variance.p + 2.5, label = variance.p),
-              position = ggplot2::position_dodge(width = 0.9), size = 3) + ggplot2::theme_bw() +
-    ggplot2::facet_grid(cols=ggplot2::vars(type), scales="free", space="free_x", drop=TRUE) +
-    ggplot2::labs(x = "Random effects and Interactions", y = "Variance explained (%)") +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
-          panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
-          axis.title = ggplot2::element_text(size = 15), legend.title = ggplot2::element_text(size = 15),
-          legend.text = ggplot2::element_text(size = 12)) + ggplot2::ylim(0,100)
-
-  return(lePlot)
-  # FIN
-}
-
-
-#' Plot Silhouette Coefficient
-#'
-#' The goodness of clustering assessed by the silhouette coefficient.
-#' It works with the output of 'mbecVarianceStats()' for the method 's.coef'.
-#' Format of this output is a data.frame that contains a column for every model
-#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
-#' frames may be used as input by putting them into a list - IF the data.frames
-#' contain a column named 'type', this function will use 'facet_grid()' to
-#' display side-by-side panels to enable easy comparison.
-#'
-#' @keywords plot proportion variance linear mixed models
-#' @param scoef.obj, list or single output of 'mbecVarianceStats' with method s.coef
-#' @return A ggplot2 dot-plot object.
-#' @export
-#'
-#' @examples
-#' # This will return a paneled plot that shows results for the variance
-#' # assessment.
-#' df.var.scoef <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="s.coef", type="RAW")
-#' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
-mbecSCOEFStatsPlot <- function(scoef.obj) {
-  ## ToDo: make my own colors - with black jack and hookers
-  cols <- pals::tableau20(20)
-  # first tidy-magic to create df for plotting
-  plot.df <- scoef.obj %>%
-    dplyr::mutate(variable=gsub("\\.",":",variable)) %>%
-    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
-    dplyr::mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
-    dplyr::mutate(sil.coefficient.r = round(sil.coefficient, 2))
-
-  # now plot
-  lePlot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
-    ggplot2::geom_point() + ggplot2::facet_grid(cols = ggplot2::vars(type)) + ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
-          strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
-          axis.text = ggplot2::element_text(size = 10), axis.title = ggplot2::element_text(size = 15),
-          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::scale_color_manual(values = cols) +
-    ggplot2::labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
-
-  return(lePlot)
-  # FIN
-}
-
 

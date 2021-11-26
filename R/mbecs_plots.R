@@ -1,3 +1,5 @@
+# PRELIMINARY-ANALYSES PLOTS ----------------------------------------------
+
 #' RLE plotting function
 #'
 #' Takes data.frame from mbecRLE and produces a ggplot2 object.
@@ -110,4 +112,211 @@ mbecMosaicPlot <- function(study.summary, model.vars) {
 }
 
 
+
+# VARIANCE PLOTTATION -----------------------------------------------------
+
+
+#' Plot Proportion of Variance for L(M)M
+#'
+#' Covariate-Variances as modeled by linear (mixed) models will be displayed as
+#' box-plots. It works with the output of 'mbecVarianceStats()' for methods 'lm'
+#' and 'lmm'. Format of this output is a data.frame that contains a column for
+#' every model variable and as many rows as there are features
+#' (OTUs, Genes, ..). Multiple frames may be used as input by putting them into
+#' a list - IF the data.frames contain a column named 'type', this function will
+#' use 'facet_grid()' to display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance linear mixed models
+#' @param variance.obj, output of 'mbecVarianceStats' with method lm
+#' @return A ggplot2 box-plot object.
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessments.
+#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"),
+#' method="lm", type="RAW")
+#' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
+mbecVarianceStatsPlot <- function( variance.obj ) {
+
+  plot.df <- variance.obj %>%
+    dplyr::bind_rows() %>%
+    tidyr::gather("covariate", "variance", -type) %>%
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(variance = as.numeric(as.character(variance)))
+
+  leplot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = covariate, y = variance,
+                                                  fill = covariate)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::facet_grid(cols = ggplot2::vars(type)) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+        strip.text = ggplot2::element_text(size = 12),
+        panel.grid = ggplot2::element_blank(),
+        axis.text = ggplot2::element_text(size = 12),
+        axis.title = ggplot2::element_text(size = 15),
+        legend.title = ggplot2::element_text(size = 15),
+        legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::labs(x = 'Covariate', y = 'Proportion Variance',
+                  name = 'Covariate') + ggplot2::ylim(0,1)
+
+  return(leplot)
+
+}
+
+
+#' Plot Proportion of Variance for pRDA
+#'
+#' Covariate-Variances as modeled by pRDA will be displayed as box-plots.
+#' It works with the output of 'mbecVarianceStats()' for the method 'rda'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance partial Redundancy Analysis
+#' @param rda.obj, list or single output of 'mbecVarianceStats' with method rda
+#' @return A ggplot2 box-plot object.
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for three variance
+#' # assessments.
+#' df.var.rda <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="rda", type="RAW")
+#' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
+mbecRDAStatsPlot <- function(rda.obj) {
+
+    leTest <- rda.obj %>%
+        tidyr::gather("covariate", "variance", -type) %>%
+        dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+        dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
+        dplyr::mutate(variance.r = round(variance, 2))
+
+    lePlot <- ggplot2::ggplot(data = leTest, ggplot2::aes(x = covariate,
+                                                          y = variance,
+                                                          fill = covariate)) +
+        ggplot2::geom_bar(stat = "identity", position = 'dodge',
+                          colour = 'black') +
+        ggplot2::geom_text(data = leTest, ggplot2::aes(covariate, variance+2.5,
+                                                   label = variance.r),
+                       position = ggplot2::position_dodge(width = 0.9),size=3) +
+        ggplot2::facet_grid(cols = ggplot2::vars(type)) +
+        ggplot2::theme_bw() +
+        ggplot2::labs(y = "Variance explained (%)") +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,hjust=1),
+                   panel.grid = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_text(size = 12),
+                   axis.title = ggplot2::element_text(size = 15),
+                   legend.title = ggplot2::element_text(size = 15),
+                   legend.text = ggplot2::element_text(size = 12)) +
+        ggplot2::ylim(0,100)
+
+  return(lePlot)
+  # FIN
+}
+
+
+#' Plot Proportion of Variance for PVCA
+#'
+#' Covariate-Variances as modeled by PVCA will be displayed as box-plots.
+#' It works with the output of 'mbecVarianceStats()' for the method 'pvca'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance pvca
+#' @param pvca.obj, output of 'mbecVarianceStats' with method pvca
+#' @return A ggplot2 box-plot object.
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="pvca", type="RAW")
+#' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
+mbecPVCAStatsPlot <- function(pvca.obj) {
+
+    plot.df <- pvca.obj %>%
+        tidyr::gather("covariate", "variance", -type) %>%
+        dplyr::mutate(covariate=gsub("\\.",":",covariate)) %>%
+        dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+        dplyr::mutate(variance = as.numeric(as.character(variance))) %>%
+        dplyr::mutate(variance.r = round(variance, 2)) %>%
+        dplyr::mutate(variance.p = round(variance*100, 2))
+
+    lePlot <- ggplot2::ggplot(data = plot.df,
+                              ggplot2::aes(x = covariate,
+                                           y = variance.p,
+                                           fill = covariate)) +
+        ggplot2::geom_bar(stat = "identity", position = 'dodge',
+                          colour = 'black') +
+        ggplot2::geom_text(data = plot.df, ggplot2::aes(covariate,
+            variance.p + 2.5,
+            label = variance.p),
+            position = ggplot2::position_dodge(width = 0.9), size = 3) +
+        ggplot2::theme_bw() +
+        ggplot2::facet_grid(cols=ggplot2::vars(type), scales="free",
+                            space="free_x", drop=TRUE) +
+        ggplot2::labs(x = "Random effects and Interactions",
+                      y = "Variance explained (%)") +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+                   panel.grid = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 12),
+                   axis.title = ggplot2::element_text(size = 15), legend.title = ggplot2::element_text(size = 15),
+                   legend.text = ggplot2::element_text(size = 12)) + ggplot2::ylim(0,100)
+
+  return(lePlot)
+  # FIN
+}
+
+
+#' Plot Silhouette Coefficient
+#'
+#' The goodness of clustering assessed by the silhouette coefficient.
+#' It works with the output of 'mbecVarianceStats()' for the method 's.coef'.
+#' Format of this output is a data.frame that contains a column for every model
+#' variable and as many rows as there are features (OTUs, Genes, ..). Multiple
+#' frames may be used as input by putting them into a list - IF the data.frames
+#' contain a column named 'type', this function will use 'facet_grid()' to
+#' display side-by-side panels to enable easy comparison.
+#'
+#' @keywords plot proportion variance linear mixed models
+#' @param scoef.obj, output of 'mbecVarianceStats' with method s.coef
+#' @return A ggplot2 dot-plot object.
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.var.scoef <- mbecModelVariance(input.obj=datadummy,
+#' model.vars=c("group","batch"), method="s.coef", type="RAW")
+#' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
+mbecSCOEFStatsPlot <- function(scoef.obj) {
+  ## ToDo: make my own colors - with black jack and hookers
+  cols <- pals::tableau20(20)
+  # first tidy-magic to create df for plotting
+  plot.df <- scoef.obj %>%
+    dplyr::mutate(variable=gsub("\\.",":",variable)) %>%
+    dplyr::mutate(type = factor(type, levels = unique(type))) %>%
+    dplyr::mutate(sil.coefficient = as.numeric(as.character(sil.coefficient))) %>%
+    dplyr::mutate(sil.coefficient.r = round(sil.coefficient, 2))
+
+  # now plot
+  lePlot <- ggplot2::ggplot(plot.df, ggplot2::aes(x = variable, y = sil.coefficient, color = cluster, shape = variable)) +
+    ggplot2::geom_point() + ggplot2::facet_grid(cols = ggplot2::vars(type)) + ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1),
+                   strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_text(size = 10), axis.title = ggplot2::element_text(size = 15),
+                   legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
+    ggplot2::scale_color_manual(values = cols) +
+    ggplot2::labs(x = 'Type', y = 'Silhouette Coefficient', name = 'Type')
+
+  return(lePlot)
+  # FIN
+}
 

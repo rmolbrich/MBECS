@@ -46,6 +46,7 @@ Collate:
     'mbecs_analyses.R'
     'mbecs_corrections.R'
     'mbecs_helper.R'
+    'mbecs_plots.R'
     'mbecs_reports.R'
     'mbecs_themes.R'
     'utils-pipe.R'
