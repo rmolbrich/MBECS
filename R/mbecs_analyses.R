@@ -39,13 +39,11 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),
 
   cols <- pals::tableau20(20)
 
-  ## check for correct inputs
   tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
     required.col=eval(model.vars))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]] %>%
     tibble::rownames_to_column(., var = "specimen")
 
-  ## SPLIT - COMPUTE - MERGE
   tmp.long <- NULL
   for( g.idx in unique(tmp.meta[,eval(model.vars[1])]) ) {
     message("Calculating RLE for group: ",g.idx)
@@ -53,21 +51,17 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),
     tmp.cnts.group <- dplyr::select(tmp.cnts,
       tmp.meta$specimen[tmp.meta[,eval(model.vars[1])] %in% g.idx])
 
-    # Median per feature in this group
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
     tmp.group.long <- apply(tmp.cnts.group, 2,
-      function(sample.col) sample.col - feature.med) %>% # subtract feature-median from sample
+      function(sample.col) sample.col - feature.med) %>%
       as.data.frame() %>%
       tidyr::pivot_longer(cols = everything(), names_to = "specimen",
-        values_to = "values") # re-arrange to long format
-
+        values_to = "values")
     tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
   }
 
-  # the factor levels of samples need to be in the same order as batches per group
-  # order by group_batch and then set factor levels for samples and batches in that order
-  tmp.long <- dplyr::left_join(tmp.long, tmp.meta, by = "specimen") %>% # merge with sample data
+  tmp.long <- dplyr::left_join(tmp.long, tmp.meta, by = "specimen") %>%
     dplyr::mutate(plot.order = paste(get(model.vars[1]), get(model.vars[2]),
       sep="_")) %>%
     dplyr::arrange(plot.order) %>%
@@ -75,21 +69,8 @@ mbecRLE <- function(input.obj,model.vars=c("group","batch"),
 
   if( return.data ) {
     return(tmp.long)
-  } # else create the plot
-
-  rle.plot <- ggplot2::ggplot(tmp.long, ggplot2::aes(x = specimen, y = values,
-    fill = get(model.vars[2]))) +
-    ggplot2::stat_boxplot(color="black",notch = TRUE,
-                          outlier.colour = "#E42032", outlier.fill = "white",
-                          outlier.shape = 1, outlier.stroke = .5) +
-    #facet_wrap(~Strain, ncol=2) +
-    ggplot2::facet_grid(cols=ggplot2::vars(get(model.vars[1])), scales="free",
-      space="free_x", drop=TRUE) +
-    ggplot2::scale_fill_manual(values = cols) +
-    theme_rle() +
-    ggplot2::guides(fill=ggplot2::guide_legend(title=ggplot2::element_blank()))
-
-  return(rle.plot)
+  }
+  return( mbecRLEPlot(tmp.long, model.vars, cols) )
 }
 
 
@@ -440,10 +421,6 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
 
   cols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17,19)]
 
-  # ## 00. Init and test
-  # method <- match.arg(method)
-  # message(paste("Selection method is: ",method,n, sep=""))
-
   # needs sxf orientation
   tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.var))
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
@@ -455,7 +432,6 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     dplyr::left_join(tmp[[2]], by = c("specimen" = "specimen"))
 
   if( method[1] == "TOP" ) {
-    # calculate IQR and order from largest to smallest
     iqr <- apply(tmp[,otu.idx],2,stats::IQR)
     iqr <- iqr[order(iqr, decreasing=TRUE)]
     otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
@@ -466,7 +442,6 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
   } else if( length(method) >= 2 ) {
     message("'Method' parameter contains multiple elements -
             using to select features.")
-    # calculate IQR and sort as well
     otu.idx <- method
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
@@ -477,44 +452,7 @@ mbecBox <- function(input.obj, method=c("ALL","TOP"), n=10, model.var="batch", r
     return(list(tmp, otu.idx))
   }
 
-  ## Prepare the plots for selected features
-  # upper case first letter for the legend box
-  legend.title <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",model.var,
-                       perl = TRUE)
-  ret.plot <- list()
-
-  for( idx in otu.idx ) {
-    p.box <- ggplot2::ggplot(data = tmp,
-                             ggplot2::aes(x = get(model.var), y = get(idx),
-                                          fill = get(model.var))) +
-      ggplot2::stat_boxplot(geom = "errorbar", width = 0.4) +
-      ggplot2::geom_boxplot() + ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::theme_bw() +
-      theme_box() +
-      ggplot2::labs(fill = legend.title, y = 'value',title = idx)
-
-    p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx),
-                                                   fill = get(model.var))) +
-      ggplot2::geom_density(alpha = 0.5) +
-      ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::labs(title = idx, x = 'Value', fill = legend.title) +
-      theme_box()
-
-    ## Put the plots in grid for plotting
-    # modify legend
-    g <- ggplot2::ggplotGrob(p.box)$grobs
-    # extract legend
-    legend <- g[[which(vapply(g, function(x) x$name,
-                              FUN.VALUE=character(1)) == "guide-box")]]
-
-    # put plot into the list
-    ret.plot[[eval(idx)]] <- gridExtra::arrangeGrob(p.box + ggplot2::theme(legend.position = 'none'),
-                                                    p.density + ggplot2::theme(legend.position = 'none', plot.title = ggplot2::element_blank()),
-                                                    legend,
-                                                    ncol = 1, nrow = 3, heights = c(5,4.5,1))
-  }
-
-  return(ret.plot)
+  return(mbecBoxPlot(tmp, otu.idx, model.var, cols))
 }
 
 
@@ -559,15 +497,10 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
 
   cols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17,19)]
 
-  ## ToDo: adjust legend settings
-  ## ToDo: for phyloseq select taxonomic level?!
-
-  ## needs sxf orientation and the feature names
   tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
   otu.idx <- colnames(tmp[[1]])
 
-  ## CHECK if model.vars are factors
   for( g.idx in c(seq_along(model.vars)) ) {
     if( !is.factor(tmp.meta[,eval(model.vars[g.idx])]) ) {
       warning("Grouping variables need to be factors. Coercing variable: ",
@@ -576,47 +509,24 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
       tmp.meta[,eval(model.vars[g.idx])] <- factor(tmp.meta[,eval(model.vars[g.idx])])
     }
   }
-
-  ## center & scale
   tmp.cnts <- base::scale(tmp.cnts, center = eval(center), scale = eval(scale))
   tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center),
                           scale = eval(scale))
-
   if( method[1] == "TOP" ) {
-    # calculate IQR and order from largest to smallest
     iqr <- apply(tmp.cnts[otu.idx,],1,stats::IQR)
     iqr <- iqr[order(iqr, decreasing=TRUE)]
     otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
-    # select only wanted features
     tmp.cnts <- tmp.cnts[otu.idx,]
   } else if( length(method) >= 2 ) {
     message("'Method' parameter contains multiple elements -
             using to select features.")
-    # calculate IQR and sort as well
     tmp.cnts <- tmp.cnts[method,]
 
   } # else is 'select-all-mode'
-
   if( return.data ) {
     return(list(tmp.cnts, tmp.meta))
   }
-
-  p.title <- paste("Heatmap - Centered: ", center, " Scaled: ", scale, sep="")
-  heat.plot <- pheatmap::pheatmap(tmp.cnts,
-                                  scale = 'none',
-                                  cluster_rows = FALSE,
-                                  cluster_cols = TRUE,
-                                  fontsize_row = 4, fontsize_col = 6,
-                                  fontsize = 8,
-                                  clustering_distance_rows = 'euclidean',
-                                  clustering_method = 'ward.D',
-                                  treeheight_row = 30,
-                                  annotation_col = tmp.meta[,eval(model.vars)],
-                                  #annotation_colors = ad.anno_metabo_colors,
-                                  border_color = 'NA',
-                                  main = p.title)
-
-  return(heat.plot)
+  return(mbecHeatPlot(center, scale, tmp.cnts, tmp.meta, model.vars))
 }
 
 
@@ -654,21 +564,16 @@ mbecHeat <- function(input.obj, model.vars=c("group","batch"), center=TRUE,
 mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
 
   cols <- pals::tableau20(20)
-  ## ToDo: adjust legend settings
-  ## ToDo: for phyloseq select taxonomic level?!
 
-  ## needs sxf orientation
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
+  tmp <- mbecGetData(input.obj,orientation="sxf",required.col=eval(model.vars))
   tmp.meta <- tmp[[2]]
-
 
   if( length(model.vars) < 2 ) {
     message("Only one variable specified for Mosaic-plot, two are required!")
   } else if( length(model.vars) > 2 ) {
-    message("More than two variables specified. Mosaic will take the first two.")
+    message("More than 2 variables specified. Mosaic will take the first two.")
   }
 
-  ## CHECK if grouping variables are factors
   for( g.idx in eval(model.vars) ) {
     if( !is.factor(tmp.meta[,eval(g.idx)]) ) {
       warning("Grouping variables need to be factors. Coercing variable: ",
@@ -677,42 +582,17 @@ mbecMosaic <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
       tmp.meta[,eval(g.idx)] <- as.factor(tmp.meta[,eval(g.idx)])
     }
   }
-
-  # how many samples are there
   n.observations <- base::dim(tmp.meta)[1]
-
   study.summary <- base::table(tmp.meta[,eval(model.vars[1])],
                                tmp.meta[,eval(model.vars[2])]) %>%
     as.data.frame() %>%
     dplyr::mutate("Freq.scaled"=Freq / n.observations)
 
-  # prepare plot-annotation
-  vars.axes <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",
-                    model.vars,perl = TRUE)
-
   if( return.data ) {
     return(study.summary)
   } # else return the plots
 
-  # split by batch
-  plot.v2 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var1, y= Freq.scaled, group = Var2, fill=Var1)) +
-    ggplot2::facet_grid(cols=ggplot2::vars(Var2), scales="free", space="free_x", drop=TRUE) +
-    ggplot2::geom_bar(stat = "identity", width = 0.9) +
-    ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[1]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
-    ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic(legend_position = "bottom")
-
-  # split by treatment
-  plot.v1 <- ggplot2::ggplot(study.summary, ggplot2::aes(x = Var2, y= Freq.scaled, fill=Var2)) +
-    ggplot2::facet_grid(cols=ggplot2::vars(Var1), scales="free", space="free_x", drop=TRUE) +
-    ggplot2::geom_bar(stat = "identity", width = 0.9) +
-    ggplot2::guides(fill = ggplot2::guide_legend(title=eval(vars.axes[2]), reverse = TRUE, keywidth = 1, keyheight = 1)) +
-    ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic()
-
-  mosaic.plot <- gridExtra::grid.arrange(plot.v2, plot.v1, ncol=1, nrow=2, heights=c(1,1))
-
-  return(mosaic.plot)
+  return(mbecMosaicPlot(study.summary, model.vars))
 
 }
 
