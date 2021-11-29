@@ -73,7 +73,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
       if( length(attr(input.obj, "transformations")) >= 1 ) {
         message("We have a comparative post-report!")
 
-        # tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
+        tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
 
       } else {
         # if 'transformations' list is empty - only preliminary report
@@ -135,14 +135,74 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.da
   }
 
   # construct the report
-
   input.obj <- mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars))
-
 
   rmarkdown::render("mbecReport_prelim_TMPLT.Rmd",
                     params = list(report.data=input.obj,
                                   report.vars=model.vars,
                                   report.list=prelim.report.list))
 }
+
+
+#' Constructs an initial report of a single data-set without comparative analyses.
+#' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
+#' @param model.vars, required covariates to build models
+#' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
+#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' @export
+mbecReportPost <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
+  # only three situations here: list with cnts and meta, phyloseq or MbecData
+  rep.prelim <- mbecReportPrelim(input.obj=testdata,
+                                 model.vars=c("group","batch"),
+                                 return.data = TRUE)
+
+  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp.meta <- tmp[[2]]
+
+  transformations <- attr(input.obj, "transformations")
+  report.list <- list()
+  comp.report.list <- list()
+
+  for( t.idx in 1:length(transformations) )
+
+  # calculate the variance statistics
+    comp.report.list[[t.idx]][["linmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lm",
+                                                      type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+
+  comp.report.list[[t.idx]][["linmixmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm",
+                                                         type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+
+  comp.report.list[[t.idx]][["rda"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="rda",
+                                                   type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+
+  comp.report.list[[t.idx]][["pvca"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="pvca",
+                                                    type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+
+  comp.report.list[[t.idx]][["scoef"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef",
+                                                     type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+
+  # to plot or not to plot .. and how
+  # for now just call all stat-plot functions and replace the respective values in the list
+  report.list[["linmod"]] <- mbecVarianceStatsPlot(comp.report.list[[t.idx]][["linmod"]])
+  report.list[["linmixmod"]] <- mbecVarianceStatsPlot(comp.report.list[[t.idx]][["linmixmod"]])
+  report.list[["rda"]] <- mbecRDAStatsPlot(comp.report.list[[t.idx]][["rda"]])
+  report.list[["pvca"]] <- mbecPVCAStatsPlot(comp.report.list[[t.idx]][["pvca"]])
+  report.list[["scoef"]] <- mbecSCOEFStatsPlot(comp.report.list[[t.idx]][["scoef"]])
+
+  if( return.data ) {
+    return(prelim.report.list)
+  }
+
+  # construct the report
+  input.obj <- mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars))
+
+  rmarkdown::render("mbecReport_prelim_TMPLT.Rmd",
+                    params = list(report.data=input.obj,
+                                  report.vars=model.vars,
+                                  report.list=prelim.report.list))
+}
+
+
+
 
 
