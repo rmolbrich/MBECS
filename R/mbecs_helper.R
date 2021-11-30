@@ -14,8 +14,6 @@ mbecUpperCase <- function(input=character()) {
 }
 
 
-
-
 #' Linear (Mixed) Model Feature to Batch Fit
 #'
 #' Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
@@ -341,8 +339,39 @@ clr.transfo = function(x, offset = 0) {
 
 
 
+#' Centered Log-Ratio Transformation
+#'
+#' Internal function that performs CLR-transformation on input-matrix.
+#' Formula is: clr(mtx) = ln( mtx / geometric_mean(mtx_samples))
+#'
+#' @keywords Log Ratio Transformation
+#' @param input.mtx A matrix of counts (samples x features)
+#' @param offset An (OPTIONAL) offset in case of sparse matrix. Function will
+#' add an offset of 1/#features if matrix is sparse and offset not provided.
+#' @return A matrix of transformed counts of same size and orientation as the
+#' input.
+mbecCLR <- function(input.mtx, offset = 0) {
+  if( dim(input.mtx)[2] < 2 ) {
+    message("No basis for transformation. Matrix contains less than 2 features, returning unchanged.")
+    return(input.mtx)
+  }
+  # 1. stop for negative values and NAs
+  if( any(input.mtx < 0 | is.na(input.mtx)) ) {
+    stop("Examine your data for NAs and negative values, CLR transformation requires complete positive values.\n")
+  }
+  if( any(input.mtx==0) & offset==0 ) {
+    message("Found zeros, function will add a small pseudo-count (1/#features) to enable log-ratio transformation.")
+    offset <- 1/ncol(input.mtx)
+  }
+  # add the offset
+  input.mtx <- input.mtx + offset
+  # 1: geometric-mean is n-th root of the product of all values for a sample
+  gman <- apply(input.mtx, 1, function(s.row) exp(mean(log(s.row))))
+  # 2: clr(mtx) <- [ ln(x_sample.i / geometric-mean(x_sample.i))]
+  input.mtx <- log((input.mtx / gman))
 
-
+  return(input.mtx)
+}
 
 
 
