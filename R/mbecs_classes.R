@@ -1,6 +1,11 @@
 # Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
 
 
+
+# DEFINE CLASS ------------------------------------------------------------
+
+
+
 #' Define MbecData-class
 #'
 #' An extension of phyloseq-class that contains the additional fields 'type', 'log' and
@@ -32,7 +37,7 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @param type string type that describes the data, e.g., raw, processed, ..
 #' @param log log that will be filled by the other package functions
 #' @param input.obj either class phyloseq or a matrix of counts
-#' @param meta.obj dataframe of covariate variables
+#' @param meta.obj A table with covariate information, whose row-names correspond to sample-IDs
 #' @param required.col vector of strings that denote required variables in the covariate information
 #' @param tax_table taxonomic table from phyloseq as optional input
 #' @param phy_tree phylogenetic tree as optional input
@@ -50,7 +55,7 @@ MbecData <- function(type=character(),
                      log=character(),
                      input.obj,
                      meta.obj=NULL,
-                     required.col=c("sample","group","batch"),
+                     required.col=c("group","batch"),
                      tax_table=NULL,
                      phy_tree=NULL,
                      refseq=NULL,
@@ -87,6 +92,10 @@ MbecData <- function(type=character(),
     }
   }
 }
+
+
+
+# MbecData Setter ---------------------------------------------------------
 
 
 #' Mbec-Data Setter
@@ -158,6 +167,9 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
   return(input.obj)
 }
 
+
+
+# MbecData Getter ---------------------------------------------------------
 
 #' Mbec-Data Getter
 #'
@@ -377,6 +389,10 @@ setMethod("mbecGetData", "list",
 )
 
 
+
+# mbecProcessInput --------------------------------------------------------
+
+
 #' Mbec-Data Constructor Wrapper
 #'
 #' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
@@ -398,7 +414,7 @@ setMethod("mbecGetData", "list",
 #' # an object of class 'MbecData'.
 #' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
 #'     required.col=c("group","batch"))
-setGeneric("mbecProcessInput", signature="input.obj",
+setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
            function(input.obj, required.col=NULL)
              standardGeneric("mbecProcessInput")
 )
@@ -414,7 +430,6 @@ setGeneric("mbecProcessInput", signature="input.obj",
       stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
     }
   }
-
   # If validation succeeds, just return the input unchanged.
   return(input.obj)
 }

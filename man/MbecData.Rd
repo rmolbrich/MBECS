@@ -9,7 +9,7 @@ MbecData(
   log = character(),
   input.obj,
   meta.obj = NULL,
-  required.col = c("sample", "group", "batch"),
+  required.col = c("group", "batch"),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -21,7 +21,7 @@ MbecData(
   log = character(),
   input.obj,
   meta.obj = NULL,
-  required.col = c("sample", "group", "batch"),
+  required.col = c("group", "batch"),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -35,7 +35,7 @@ MbecData(
 
 \item{input.obj}{either class phyloseq or a matrix of counts}
 
-\item{meta.obj}{dataframe of covariate variables}
+\item{meta.obj}{A table with covariate information, whose row-names correspond to sample-IDs}
 
 \item{required.col}{vector of strings that denote required variables in the covariate information}
 

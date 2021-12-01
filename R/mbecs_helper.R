@@ -117,11 +117,7 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
   method <- match.arg(method)
 
   ## VALIDATE input and change to 'MbecData' if needed
-  if( !is.null(required.col) ) {
-    input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
-  } else {
-    input.obj <- mbecProcessInput(input.obj)
-  }
+  input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 
   ## needs sxf orientation
   tmp <- mbecGetData(input.obj, orientation="sxf")
@@ -133,7 +129,7 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 
   } else if (method == "CLR") {
 
-    tmp.cnts <- clr.transfo(tmp[[1]], offset = offset)
+    tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
   }
 
   # rebuild sample AND feature names for reassembly
@@ -287,6 +283,10 @@ ilr.transfo = function(x, fast = TRUE, offset = 0) {
   return(as.matrix(x.ilr))
 }
 
+
+
+
+
 # 2 - back transformation from ilr to clr space
 clr.backtransfo = function(x) {
   # construct orthonormal basis
@@ -301,42 +301,6 @@ clr.backtransfo = function(x) {
   return(V)
 
 }
-
-# CLR transformation
-clr.transfo = function(x, offset = 0) {
-  if (any(is.na(x) | x < 0)) {
-    stop('\nFor CLR transformation, data must be non-negative with no missing values\n', call. = FALSE)
-  }
-  if(any(x==0) & offset ==0)
-    stop("make sure you use pseudo counts before normalisation to avoid 0 values with log ratio transformation")
-
-  # KA added
-  #offset = min(x[which(x != 0)])*0.01
-
-
-  #if (dim(x)[2] < 2) stop("data must be of dimension greater equal 2")
-  if (dim(x)[2] == 1)
-  {
-    res = list(x.clr = x, gm = rep(1, dim(x)[1]))
-  } else{
-    geometricmean = function (x) {
-      #       if (any(na.omit(x == 0)))
-      #         0
-      #       else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
-      #     }
-      # KA changed to
-      exp(mean(log(x + offset)))
-    }
-    gm = apply(x, 1, geometricmean)
-    # KA changed
-    x.clr = log((x + offset) / (gm))
-    res = x.clr #list(x.clr = x.clr, gm = gm)
-  }
-  ### ToDo: take care of this class-mess!
-  class(res) = c(class(res), "clr")
-  return(res)
-}
-
 
 
 #' Centered Log-Ratio Transformation

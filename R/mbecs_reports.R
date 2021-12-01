@@ -94,11 +94,12 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
-  # only three situations here: list with cnts and meta, phyloseq or MbecData
+  # just start with input processing and transform into MbecData if required
+  input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
   # Prepare the SIX exploratory plots
   prelim.report.list <- list()
-  prelim.report.list[["mosaic"]] <- mbecMosaic( input.obj, model.vars=eval(model.vars) )
+  prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars) )
   prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2))
   prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars))
   prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars))
