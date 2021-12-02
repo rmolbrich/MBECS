@@ -136,7 +136,9 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
   colnames(tmp.cnts) <- colnames(tmp[[1]])
   rownames(tmp.cnts) <- rownames(tmp[[1]])
 
-  phyloseq::otu_table(input.obj) = phyloseq::otu_table(tmp.cnts, taxa_are_rows = FALSE)
+  input.obj <- mbecSetData(input.obj, new.cnts = tmp.cnts, log = method, type = method, update = TRUE)
+
+  #phyloseq::otu_table(input.obj) = phyloseq::otu_table(tmp.cnts, taxa_are_rows = FALSE)
 
   return(input.obj)
 }

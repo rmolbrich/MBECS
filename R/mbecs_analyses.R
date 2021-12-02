@@ -117,8 +117,8 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
                                                         return.data = FALSE) standardGeneric("mbecPCA"))
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
-.mbecPCA <- function(input.obj, model.vars = c("group", "batch"), pca.axes = c(1,
-                                                                               2), return.data = FALSE) {
+.mbecPCA <- function(input.obj, model.vars = c("group", "batch"),
+                     pca.axes = c(1,2), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
