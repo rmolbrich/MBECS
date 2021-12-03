@@ -138,8 +138,8 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
   plot.df <- PCA$x %>%
     data.frame(stringsAsFactors = FALSE) %>%
     dplyr::rename_at(seq_len(axes.number), ~axes.names) %>%
-    tibble::rownames_to_column(var = "sample") %>%
-    dplyr::left_join(tmp.meta, by = "sample")
+    tibble::rownames_to_column(var = "sID") %>%
+    dplyr::left_join(tmp.meta, by = "sID")
 
   metric.df <- data.frame(var.explained = round((100 * PCA$sdev^2)/(sum(PCA$x^2/max(1,
                                                                                     nrow(PCA$x) - 1))), 2), row.names = axes.names) %>%
@@ -167,14 +167,23 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
   title <- paste("PCA:", var.shape, "-", var.color)
 
   if (length(model.vars) >= 2) {
-    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(model.vars[2]),
-                                                          shape = get(model.vars[1]))) + ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = var.color, shape = var.shape) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
-                                                                           metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
-                                                                                                                            metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
-                                                                                                                                                                                                       1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
-                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
+    pMain <- ggplot2::ggplot(data = plot.df,
+                             ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] + 1])),
+                                          y = get(colnames(plot.df[pca.axes[2] + 1])),
+                                          colour = get(model.vars[2]),
+                                          shape = get(model.vars[1]))) +
+      ggplot2::scale_shape_manual(values=c(0, 1, 2, 3, 6, 8, 15, 16, 17, 23, 25, 4, 5, 9)) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::labs(colour = var.color, shape = var.shape) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                    metric.df$axis.max[pca.axes[1]]) +
+      ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                    metric.df$axis.max[pca.axes[2]]) +
+      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] + 1]), ": ",
+                           metric.df$var.explained[pca.axes[1]], "% expl.var")) +
+      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
+                           metric.df$var.explained[pca.axes[2]], "% expl.var")) +
+      theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                     1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) + ggplot2::geom_density(size = 0.2,
