@@ -217,7 +217,7 @@ setGeneric("mbecGetData", signature="input.obj",
 .mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL) {
 
   # in general the input should be of class phyloseq or MbecData - so just get the fields to evaluate here
-  tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE), check.names = FALSE)
+  tmp.meta <- as.data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE), check.names = FALSE)
 
   # enable check of covariates if 'required.col' is supplied
   if( !is.null(required.col) ) {
@@ -227,13 +227,16 @@ setGeneric("mbecGetData", signature="input.obj",
     }
   }
 
-  # 1. if everything is fine
-  if( (!attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "sxf") || (attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "fxs") ) {
-    tmp.cnts <- data.frame(phyloseq::otu_table(input.obj), check.names = FALSE)
+  # put attribute in variable to only check once
+  tar <- attr(phyloseq::otu_table(input.obj), "taxa_are_rows")
 
-  } else if( (!attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "fxs") || (attr(phyloseq::otu_table(input.obj), "taxa_are_rows") & orientation == "sxf") ) {
+  # 1. if everything is fine
+  if( (!tar & orientation == "sxf") || (tar & orientation == "fxs") ) {
+    tmp.cnts <- as.data.frame(as(phyloseq::otu_table(input.obj),"matrix"), check.names = FALSE)
+
+  } else if( (!tar & orientation == "fxs") || (tar & orientation == "sxf") ) {
     # if orientations do not fit - transpose count-matrix
-    tmp.cnts <- data.frame(t(phyloseq::otu_table(input.obj)), check.names = FALSE)
+    tmp.cnts <- as.data.frame(as(t(phyloseq::otu_table(input.obj)),"matrix"), check.names = FALSE)
 
   } else {
     ### If this happens, sth. is severely broken.
@@ -359,7 +362,7 @@ setMethod("mbecGetData", "list",
             message("It is a list!")
             ### for a list input with counts and meta-data, we need to do some more checks
             tmp.cnts <- input.obj[[1]]
-            tmp.meta <- data.frame(input.obj[[2]])
+            tmp.meta <- data.frame(input.obj[[2]], check.names = FALSE)
 
             ## Make all the necessary tests for matrix-like inputs and return counts
             if( !all(apply(tmp.cnts, 2, is.numeric)) ) {
@@ -392,7 +395,7 @@ setMethod("mbecGetData", "list",
               stop("Stop the shenanigans! Either the dimensions of 'count' and 'meta' mtrices do not fit, or you lack col/row-names in your inputs.")
             }
 
-            return(list(data.frame(tmp.cnts), tmp.meta))
+            return(list(data.frame(tmp.cnts, check.names = FALSE), tmp.meta))
           }
 )
 

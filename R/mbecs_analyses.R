@@ -46,7 +46,7 @@ mbecRLE <- function(input.obj, model.vars = c("group",
     tibble::rownames_to_column(., var = "specimen")
 
   tmp.long <- NULL
-  for (g.idx in unique(tmp.meta[, eval(model.vars[1])])) {
+  for(g.idx in unique(tmp.meta[, eval(model.vars[1])])) {
     message("Calculating RLE for group: ", g.idx)
 
     tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,
@@ -791,13 +791,22 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
     message("Construct formula from covariates.")
     tmp.formula = stats::as.formula(paste("y", " ~ ", paste(model.vars, collapse = " + ")))
   }
+
+  # Add a progress bar.
+  features <- colnames(tmp.cnts)
+  lm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3, width = 80, char="=")
+
   model.variances <- NULL
-  for (x in colnames(tmp.cnts)) {
+  for (x in seq_along(features)) {
     y <- tmp.cnts[[eval(x)]]
 
     model.fit <- stats::lm(tmp.formula, data = tmp.meta)
     model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    setTxtProgressBar(lm.pb, x)
   }
+  # close progress bar
+  close(lm.pb)
+
   res <- dplyr::mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- "anova"
 
@@ -851,13 +860,19 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
     tmp.formula <- stats::as.formula(paste(paste("y", model.vars[1], sep = " ~ "),
                                            paste(f.terms[-1], collapse = " + "), sep = " + "))
   }
+  # Add a progress bar.
+  features <- colnames(tmp.cnts)
+  lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3, width = 80, char="=")
+
   model.variances <- NULL
-  for (x in colnames(tmp.cnts)) {
+  for (x in seq_along(features)) {
     y <- tmp.cnts[[eval(x)]]  # meh
 
     model.fit <- lme4::lmer(tmp.formula, data = tmp.meta)
     model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    setTxtProgressBar(lmm.pb, x)
   }
+  close(lmm.pb)
   res <- dplyr::mutate(model.variances, type = eval(type))
   attr(res, "modelType") <- "linear-mixed model"
 
@@ -901,21 +916,30 @@ mbecModelVarianceRDA <- function(model.form,
   model.variances = data.frame(matrix(nrow = length(model.vars),
                                       ncol = 1, dimnames = list(model.vars,
                                                                 eval(type))))
+  # Add a progress bar.
+  rda.pb <- utils::txtProgressBar(min = 0, max = length(model.vars), style = 3, width = 80, char="=")
+
   for (condition.idx in seq_along(model.vars)) {
-    tmp.formula = stats::as.formula(paste("tmp.cnts",
-                                          " ~ ", paste(model.vars[-eval(condition.idx)],
-                                                       "+", collapse = " "), " Condition(",
-                                          model.vars[eval(condition.idx)],
-                                          ")", sep = ""))
+    tmp.formula = stats::as.formula(
+      paste("tmp.cnts"," ~ ",
+            paste(model.vars[-eval(condition.idx)],
+                  "+", collapse = " "), " Condition(",
+            model.vars[eval(condition.idx)],")", sep = ""))
+
     tmp.rda.covariate <- vegan::rda(tmp.formula,
                                     data = tmp.meta)
-    tmp.sig <- stats::anova(tmp.rda.covariate,
-                            permutations = permute::how(nperm = 999))$`Pr(>FALSE)`[1]
-    model.variances[condition.idx,
-                    eval(type)] <- summary(tmp.rda.covariate)$partial.chi *
-      100/summary(tmp.rda.covariate)$tot.chi
-  }
 
+    # tmp.sig <- stats::anova(
+    #   tmp.rda.covariate,
+    #   permutations = permute::how(nperm = 999))$`Pr(>FALSE)`[1]
+
+    model.variances[condition.idx,eval(type)] <-
+      summary(tmp.rda.covariate)$partial.chi *
+      100/summary(tmp.rda.covariate)$tot.chi
+
+    setTxtProgressBar(rda.pb, condition.idx)
+  }
+  close(rda.pb)
   res <- data.frame(t(model.variances)) %>%
     dplyr::mutate(type = eval(type))
   attr(res, "modelType") <- "rda"
@@ -988,11 +1012,11 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
 
   n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold,
                                    FUN.VALUE = logical(1)))))
-
-  lmm.df <- eVec %>%
+  # suppress tibble verbose output
+  suppressMessages(lmm.df <- eVec %>%
     tibble::as_tibble(.name_repair = "unique") %>%
     dplyr::select_at(seq_len(eval(n.PCs))) %>%
-    cbind(., tmp.meta)
+    cbind(., tmp.meta))
 
   f.terms <- paste("(1|", model.vars, ")", sep = "")
 
@@ -1010,7 +1034,7 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
 
   for (vec.idx in seq_len(n.PCs)) {
     randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula,
-                                                                  lmm.df, REML = TRUE, verbose = FALSE, na.action = na.action)))
+                                                                  lmm.df, REML = TRUE, verbose = 0, na.action = na.action)))
     randomEffectsMatrix[vec.idx, ] <- as.numeric(randomEffects[, 4])
   }
 
@@ -1309,18 +1333,10 @@ mbecMixedVariance <- function(model.fit) {
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
   ## ToDo: health & Safety
-
-  # implement for lmm as well
-  if (class(model.fit) %in% "lm") {
-    if (colinScore(model.fit) > colinearityThreshold) {
-      stop("Some covariates are strongly correlated. Try again.")
-    }
-  } else if (class(model.fit) %in% "lmerMod") {
-
-    if (colinScore(model.fit) > colinearityThreshold) {
-      stop("Some covariates are strongly correlated. Try again.")
-    }
+  if (colinScore(model.fit) > colinearityThreshold) {
+    warning("Some covariates are strongly correlated. Please re-evaluate the variable selection and try again.")
   }
+
 }
 
 

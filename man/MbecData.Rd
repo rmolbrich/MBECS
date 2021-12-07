@@ -5,11 +5,10 @@
 \title{Define MbecData-class}
 \usage{
 MbecData(
+  cnt_table = NULL,
+  meta_data = NULL,
   type = character(),
   log = character(),
-  input.obj,
-  meta.obj = NULL,
-  required.col = c("group", "batch"),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -17,11 +16,10 @@ MbecData(
 )
 
 MbecData(
+  cnt_table = NULL,
+  meta_data = NULL,
   type = character(),
   log = character(),
-  input.obj,
-  meta.obj = NULL,
-  required.col = c("group", "batch"),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -33,12 +31,6 @@ MbecData(
 
 \item{log}{log that will be filled by the other package functions}
 
-\item{input.obj}{either class phyloseq or a matrix of counts}
-
-\item{meta.obj}{A table with covariate information, whose row-names correspond to sample-IDs}
-
-\item{required.col}{vector of strings that denote required variables in the covariate information}
-
 \item{tax_table}{taxonomic table from phyloseq as optional input}
 
 \item{phy_tree}{phylogenetic tree as optional input}
@@ -46,6 +38,12 @@ MbecData(
 \item{refseq}{reference sequences as optional input}
 
 \item{transformations}{list to be filled with the result of different correction methods}
+
+\item{input.obj}{either class phyloseq or a matrix of counts}
+
+\item{meta.obj}{A table with covariate information, whose row-names correspond to sample-IDs}
+
+\item{required.col}{vector of strings that denote required variables in the covariate information}
 }
 \value{
 produces an R-object of type MbecData
