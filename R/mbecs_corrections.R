@@ -443,8 +443,8 @@ mbecBMC <- function(input.obj, model.vars) {
 #' @keywords BECA Batch Mean Centering
 #' @param input.obj phyloseq object or numeric matrix (correct orientation is
 #' handeled internally)
-#' @param model.vars two covariates of interest to select by first variable
-#' selects panels and second one determines coloring
+#' @param model.vars First variable determines Batch, second (optional) variable
+#' describes study-group. ToDo: more vars and own models
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
 mbecBat <- function(input.obj, model.vars) {
@@ -455,10 +455,17 @@ mbecBat <- function(input.obj, model.vars) {
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # ToDo: tmp model
-  tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
+  if( length(model.vars) == 1 ) {
+    corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[1]]],
+                                  mod = 1, par.prior = FALSE,
+                                  prior.plots = FALSE)
+  } else {
+    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
 
-  corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[2]]],
-                                mod = tmp.mod, par.prior = FALSE, prior.plots = FALSE)
+    corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[1]]],
+                                  mod = tmp.mod, par.prior = FALSE,
+                                  prior.plots = FALSE)
+  }
   return(corrected.cnts)
 }
 
@@ -480,8 +487,8 @@ mbecBat <- function(input.obj, model.vars) {
 #' @keywords BECA Limma Remove Batch Effects
 #' @param input.obj phyloseq object or numeric matrix (correct orientation is
 #' handeled internally)
-#' @param model.vars two covariates of interest to select by first variable
-#' selects panels and second one determines coloring
+#' @param model.vars First variable determines Batch, second (optional) variable
+#' describes study-group. ToDo: more vars and own models
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
 mbecRBE <- function(input.obj, model.vars) {
@@ -491,11 +498,16 @@ mbecRBE <- function(input.obj, model.vars) {
   tmp <- mbecGetData(input.obj, orientation="fxs")
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  # ToDo: tmp model
-  tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]]) # full model
+  if( length(model.vars) == 1 ) {
+    corrected.cnts <- limma::removeBatchEffect(
+      tmp.cnts,
+      batch = tmp.meta[[model.vars[1]]],design = matrix(1,ncol(tmp.cnts),1))
+  } else {
+    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
 
-  corrected.cnts <- limma::removeBatchEffect(tmp.cnts, batch = tmp.meta[[model.vars[2]]],
-                                             design = tmp.mod)
+    corrected.cnts <- limma::removeBatchEffect(
+      tmp.cnts, batch = tmp.meta[[model.vars[1]]],design = tmp.mod)
+  }
   return(corrected.cnts)
 }
 

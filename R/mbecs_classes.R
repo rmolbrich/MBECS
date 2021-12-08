@@ -159,7 +159,7 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
     message("new log is: ", tmp.log)
 
   } else {
-    # no-UPDATE puts values in a list and does nothing to the log
+    # no-UPDATE puts values in a list and does nothing to the type
     message("Update is: ", update,", adding counts to transformations-list.")
 
     # put new counts into the transformations list

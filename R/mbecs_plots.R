@@ -12,9 +12,13 @@
 #' @return ggplot2 object
 mbecRLEPlot <- function(tmp.long, model.vars, cols) {
 
-  rle.plot <- ggplot2::ggplot(tmp.long, ggplot2::aes(x = specimen, y = values,
-                                                     fill = get(model.vars[2]))) + ggplot2::stat_boxplot(color = "black", notch = TRUE,
-                                                                                                         outlier.colour = "#E42032", outlier.fill = "white", outlier.shape = 1, outlier.stroke = 0.5) +
+  rle.plot <- ggplot2::ggplot(
+    tmp.long,
+    ggplot2::aes(x = specimen, y = values,fill = get(model.vars[2]))) +
+    ggplot2::stat_boxplot(color = "black", notch = FALSE,
+                          outlier.colour = "#E42032", outlier.fill = "white",
+                          outlier.shape = 1, outlier.stroke = 0.5,
+                          outlier.size = 0.5, outlier.alpha=0.5) +
     # facet_wrap(~Strain, ncol=2) +
     ggplot2::facet_grid(cols = ggplot2::vars(get(model.vars[1])), scales = "free",
                         space = "free_x", drop = TRUE) + ggplot2::scale_fill_manual(values = cols) +
