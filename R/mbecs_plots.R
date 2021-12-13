@@ -28,7 +28,16 @@ mbecRLEPlot <- function(tmp.long, model.vars, cols) {
 }
 
 
-
+#' Variability boxes plotting function
+#'
+#' Takes data.frame from mbecBox and produces a ggplot2 object.
+#'
+#' @keywords RLE relative log expression
+#' @param tmpg Count of sselected features.
+#' @param otu.idx Index of selected Otus in the data.
+#' @param model.var Which covariate to group Otus by.
+#' @param cols Color scheme to use for plot.
+#' @return ggplot2 object
 mbecBoxPlot <- function(tmp, otu.idx, model.var,
                         cols) {
 
@@ -68,7 +77,18 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var,
 }
 
 
-
+#' Heatmap plotting function
+#'
+#' Takes data.frame from 'mbecHeat()' and produces a ggplot2 object.
+#'
+#' @keywords RLE relative log expression
+#' @param center Boolean flag to indicate whether data is centered or not.
+#' @param scale Boolean flag to indicate whether data is scaled or not.
+#' @param tmp.cnts Count values of selected features.
+#' @param tmp.meta Covariate information for potting.
+#' @param model.vars Two covariates of interest to select by first variable
+#' selects panels and second one determines coloring.
+#' @return ggplot2 object
 mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
                          model.vars) {
 
@@ -87,7 +107,15 @@ mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
 }
 
 
-
+#' Mosaic plotting function
+#'
+#' Takes data.frame from mbecMosaic and produces a ggplot2 object.
+#'
+#' @keywords RLE relative log expression
+#' @param study.summary 'mbecMosaic' output object.
+#' @param model.vars two covariates of interest to select by first variable
+#' selects panels and second one determines coloring.
+#' @return ggplot2 object
 mbecMosaicPlot <- function(study.summary,
                            model.vars) {
 
@@ -107,7 +135,8 @@ mbecMosaicPlot <- function(study.summary,
                                                  reverse = TRUE,
                                                  keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic(legend_position = "bottom")
+    theme_mosaic(legend_position = "bottom") +
+                ggplot2::theme(plot.margin=ggplot2::unit(c(0.2,0.2,0.05,0.2), "cm"))
 
   plot.v1 <- ggplot2::ggplot(study.summary,
                              ggplot2::aes(x = Var2,
@@ -123,14 +152,139 @@ mbecMosaicPlot <- function(study.summary,
                                                  reverse = TRUE,
                                                  keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic()
+    theme_mosaic()  +
+    ggplot2::theme(plot.margin=ggplot2::unit(c(0.05,0.2,0.2,0.2), "cm"))
 
-  mosaic.plot <- gridExtra::grid.arrange(plot.v2,
-                                         plot.v1, ncol = 1,
-                                         nrow = 2, heights = c(1,
-                                                               1))
+  ## Function to extract legend
+  g_legend <- function(a.gplot){
+    tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(a.gplot))
+    leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend <- tmp$grobs[[leg]]
+    legend
+  }
 
+  legend.v2 <- g_legend(plot.v2)
+  legend.v1 <- g_legend(plot.v1)
+
+  mosaic.plot <- gridExtra::grid.arrange(plot.v2 + ggplot2::theme(legend.position = "none"),
+                                      plot.v1 + ggplot2::theme(legend.position = "none"),
+                                      gridExtra::grid.arrange(legend.v1, legend.v2, ncol=2, nrow=1),
+                                      ncol = 1, nrow = 3, widths = c(1), heights = c(1, 1,0.2),
+                                      padding= -10)
   return(mosaic.plot)
+}
+
+
+#' PCA plotting function
+#'
+#' Takes data.frame from mbecPCA and produces a ggplot2 object.
+#'
+#' @keywords RLE relative log expression
+#' @param plot.df Data.frame containing principal component data.
+#' @param metric.df Data.frame containing covariate data.
+#' @param model.vars two covariates of interest to select by first variable
+#' selects panels and second one determines coloring.
+#' @param pca.axes NMumerical two-piece vector that selects PCs to plot.
+#' @return ggplot2 object
+mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
+  cols <- pals::tableau20(20)
+  ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
+  plot.annotation.top <- paste(colnames(ks.table),
+                               ks.table[1,], sep = ": ", collapse = " \n")
+  plot.annotation.right <- paste(colnames(ks.table),
+                                 ks.table[2,], sep = ": ", collapse = " \n")
+  var.color <- model.vars[1]; var.shape <- model.vars[2]
+  label.col <- mbecUpperCase(model.vars[1])
+  label.sha <- mbecUpperCase(model.vars[2])
+  title <- paste("PCA:", label.sha, "-", label.col)
+  if (length(model.vars) >= 2) {
+    pMain <-
+      ggplot2::ggplot(data = plot.df,
+        ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] + 1])),
+                     y = get(colnames(plot.df[pca.axes[2] + 1])),
+                     colour = get(var.color),shape = get(var.shape))) +
+      ggplot2::scale_shape_manual(values=c(0,1,2,3,6,8,15,16,17,23,25,4,5,9)) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::labs(colour = label.col, shape = label.sha) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                    metric.df$axis.max[pca.axes[1]]) +
+      ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                    metric.df$axis.max[pca.axes[2]]) +
+      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] + 1]), ": ",
+                           metric.df$var.explained[pca.axes[1]], "% expl.var")) +
+      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
+                           metric.df$var.explained[pca.axes[2]], "% expl.var")) +
+      theme_pca()
+
+    pTop <- ggplot2::ggplot(data = plot.df,
+                            ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                              1])), fill = get(var.color),
+                            linetype = get(var.color))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                                                     alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
+      theme_pca() + ggplot2::labs(title = title) +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                     plot.title = ggplot2::element_text(hjust = 0.5,
+                                                        size = ggplot2::rel(1.5))) +
+      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
+
+    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
+                                                                                      1])), fill = get(var.color), linetype = get(var.color))) +
+      ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
+      ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
+      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                   plot.title = ggplot2::element_blank()) +
+      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
+
+  } else {
+    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::labs(colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+                                                                           metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
+                                                                                                                            metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
+                                                                                                                                                                                                       1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
+                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
+
+    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
+                                                                                    1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                          alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
+      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                                                                  axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
+                                                                                                                                                                     size = ggplot2::rel(1.5)))+
+      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
+
+    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
+                                                                                      1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
+                                                                                                                                            alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
+      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
+                                   plot.title = ggplot2::element_blank())+
+      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
+  }
+
+  g <- ggplot2::ggplotGrob(pMain)$grobs
+  legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE = character(1)) ==
+                       "guide-box")]]
+  ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = "none"),
+                                      legend, pMain + ggplot2::theme(legend.position = "none"), pRight + ggplot2::theme(legend.position = "none"),
+                                      ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1, 3))
+
+  return(ret.plot)
+
+
+
+
+
 }
 
 
@@ -173,10 +327,13 @@ mbecVarianceStatsPlot <- function(variance.obj) {
   leplot <- ggplot2::ggplot(plot.df,
                             ggplot2::aes(x = covariate,
                                          y = variance, fill = covariate)) +
-    ggplot2::geom_boxplot() +
+    ggplot2::geom_boxplot(lwd=0.5, fatten=0.75,
+                          outlier.colour = "#E42032", outlier.fill = "white",
+                          outlier.shape = 1, outlier.stroke = 0.5,
+                          outlier.size = 0.5, outlier.alpha=0.5) +
     ggplot2::facet_grid(cols = ggplot2::vars(type)) +
     ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60,
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
                                                        hjust = 1), strip.text = ggplot2::element_text(size = 12),
                    panel.grid = ggplot2::element_blank(),
                    axis.text = ggplot2::element_text(size = 12),

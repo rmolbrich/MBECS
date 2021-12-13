@@ -120,8 +120,6 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 .mbecPCA <- function(input.obj, model.vars = c("batch", "group"),
                      pca.axes = c(1,2), return.data = FALSE) {
 
-  cols <- pals::tableau20(20)
-
   tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]]
@@ -159,108 +157,7 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
     return(list(plot.df, metric.df, pca.axes))
   }
 
-  # statistical test for distribution of groups on principal components
-  ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
-
-
-  #plot.annotation <- paste(rownames(ks.table), paste(colnames(ks.table), ks.table[1,], sep = ": ", collapse = " \n "), sep=": ")
-  plot.annotation.top <- paste(colnames(ks.table), ks.table[1,], sep = ": ", collapse = " \n")
-  plot.annotation.right <- paste(colnames(ks.table), ks.table[2,], sep = ": ", collapse = " \n")
-
-  # Release the Ploten PCA-PLOT change first letter of group denominator to
-  # uppercase for pretty-plotting
-  var.color <- model.vars[1]
-  var.shape <- model.vars[2]
-
-  label.col <- mbecUpperCase(model.vars[1])
-  label.sha <- mbecUpperCase(model.vars[2])
-
-  title <- paste("PCA:", label.sha, "-", label.col)
-
-  if (length(model.vars) >= 2) {
-    pMain <- ggplot2::ggplot(data = plot.df,
-                             ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] + 1])),
-                                          y = get(colnames(plot.df[pca.axes[2] + 1])),
-                                          colour = get(var.color),
-                                          shape = get(var.shape))) +
-      ggplot2::scale_shape_manual(values=c(0, 1, 2, 3, 6, 8, 15, 16, 17, 23, 25, 4, 5, 9)) +
-      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = label.col, shape = label.sha) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
-                    metric.df$axis.max[pca.axes[1]]) +
-      ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
-                    metric.df$axis.max[pca.axes[2]]) +
-      ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] + 1]), ": ",
-                           metric.df$var.explained[pca.axes[1]], "% expl.var")) +
-      ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
-                           metric.df$var.explained[pca.axes[2]], "% expl.var")) +
-      theme_pca()
-
-    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                    1])), fill = get(var.color), linetype = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                                                             alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = title) +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                     axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                     plot.title = ggplot2::element_text(hjust = 0.5,
-                                                        size = ggplot2::rel(1.5))) +
-      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
-
-    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
-                                                                                      1])), fill = get(var.color), linetype = get(var.color))) +
-      ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
-      ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank()) +
-      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
-
-  } else {
-    pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
-      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
-                                                                           metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
-                                                                                                                            metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
-                                                                                                                                                                                                       1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
-                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
-
-    pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                    1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                              alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                                                                  axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
-                                                                                                                                                                     size = ggplot2::rel(1.5)))+
-      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
-
-    pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
-                                                                                      1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                                alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
-      ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
-                                   axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank())+
-      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
-  }
-
-  g <- ggplot2::ggplotGrob(pMain)$grobs
-  # legend <- g[[which(sapply(g, function(x) x$name) == 'guide-box')]]
-  legend <- g[[which(vapply(g, function(x) x$name, FUN.VALUE = character(1)) ==
-                       "guide-box")]]
-
-  ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = "none"),
-                                      legend, pMain + ggplot2::theme(legend.position = "none"), pRight + ggplot2::theme(legend.position = "none"),
-                                      ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1, 3))
-
-  return(ret.plot)
-
+  return(mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes))
 }
 
 
@@ -583,8 +480,8 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
 
   for (g.idx in eval(model.vars)) {
     if (!is.factor(tmp.meta[, eval(g.idx)])) {
-      warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(g.idx), " to factor now, adjust beforehand to get best results.")
+      warning("Grouping variables need to be factors. Coercing variable: '",
+              eval(g.idx), "' to factor now, adjust beforehand to get best results.")
       tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
     }
   }
