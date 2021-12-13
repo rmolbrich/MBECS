@@ -91,10 +91,10 @@ theme_rle <- function(base_size = 18, base_family = "Myriad Pro",legend_position
     ggplot2::theme(legend.position=eval(legend_position),
           legend.text = ggplot2::element_text(color = "black", size=12),
           legend.key = ggplot2::element_rect(size=12),
-          axis.text.x=ggplot2::element_text(angle=35, hjust=1),
+          #axis.text.x=ggplot2::element_text(angle=35, hjust=1),
           axis.title.x = ggplot2::element_blank(),
           panel.background = ggplot2::element_blank(),
-          #axis.text.x=element_blank(),
+          axis.text.x=ggplot2::element_blank(),
           axis.ticks.x=ggplot2::element_blank())
 
 }

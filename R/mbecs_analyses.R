@@ -34,8 +34,8 @@
 #' # This will return the ggplot2 object for display, saving and modification.
 #' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
 #' return.data=FALSE)
-mbecRLE <- function(input.obj, model.vars = c("group",
-                                              "batch"), return.data = FALSE) {
+mbecRLE <- function(input.obj, model.vars = c("batch",
+                                              "group"), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
@@ -46,11 +46,11 @@ mbecRLE <- function(input.obj, model.vars = c("group",
     tibble::rownames_to_column(., var = "specimen")
 
   tmp.long <- NULL
-  for(g.idx in unique(tmp.meta[, eval(model.vars[1])])) {
+  for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
     message("Calculating RLE for group: ", g.idx)
 
     tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,
-                                                                         eval(model.vars[1])] %in% g.idx])
+                                                                         eval(model.vars[2])] %in% g.idx])
 
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
@@ -64,8 +64,8 @@ mbecRLE <- function(input.obj, model.vars = c("group",
 
   tmp.long <- dplyr::left_join(tmp.long, tmp.meta,
                                by = "specimen") %>%
-    dplyr::mutate(plot.order = paste(get(model.vars[1]),
-                                     get(model.vars[2]), sep = "_")) %>%
+    dplyr::mutate(plot.order = paste(get(model.vars[2]),
+                                     get(model.vars[1]), sep = "_")) %>%
     dplyr::arrange(plot.order) %>%
     dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
 
@@ -95,7 +95,7 @@ mbecRLE <- function(input.obj, model.vars = c("group",
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
 #' orientation is handled internally)
 #' @param model.vars two covariates of interest to select by first variable
-#' selects shape and second one determines coloring
+#' selects color (batch) and second one determines shape (group)
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting (NO plotting or saving here bucko)
@@ -113,11 +113,11 @@ mbecRLE <- function(input.obj, model.vars = c("group",
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
-                                                        model.vars = c("group", "batch"), pca.axes = c(1, 2),
+                                                        model.vars = c("batch", "group"), pca.axes = c(1, 2),
                                                         return.data = FALSE) standardGeneric("mbecPCA"))
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
-.mbecPCA <- function(input.obj, model.vars = c("group", "batch"),
+.mbecPCA <- function(input.obj, model.vars = c("batch", "group"),
                      pca.axes = c(1,2), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
@@ -146,7 +146,7 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
     dplyr::mutate(axis.min = floor(apply(PCA$x, 2, function(col) min(col)))) %>%
     dplyr::mutate(axis.max = ceiling(apply(PCA$x, 2, function(col) max(col))))
 
-  for (idx in c(seq_along(model.vars))) {
+  for (idx in seq_along(model.vars) ) {
     if (!is.factor(plot.df[, eval(model.vars[idx])])) {
       warning("Grouping variables need to be factors.
               Coercing to factor now, adjust beforehand to get best results.")
@@ -159,22 +159,33 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
     return(list(plot.df, metric.df, pca.axes))
   }
 
+  # statistical test for distribution of groups on principal components
+  ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
+
+
+  #plot.annotation <- paste(rownames(ks.table), paste(colnames(ks.table), ks.table[1,], sep = ": ", collapse = " \n "), sep=": ")
+  plot.annotation.top <- paste(colnames(ks.table), ks.table[1,], sep = ": ", collapse = " \n")
+  plot.annotation.right <- paste(colnames(ks.table), ks.table[2,], sep = ": ", collapse = " \n")
+
   # Release the Ploten PCA-PLOT change first letter of group denominator to
   # uppercase for pretty-plotting
-  var.shape <- mbecUpperCase(model.vars[1])
-  var.color <- mbecUpperCase(model.vars[2])
+  var.color <- model.vars[1]
+  var.shape <- model.vars[2]
 
-  title <- paste("PCA:", var.shape, "-", var.color)
+  label.col <- mbecUpperCase(model.vars[1])
+  label.sha <- mbecUpperCase(model.vars[2])
+
+  title <- paste("PCA:", label.sha, "-", label.col)
 
   if (length(model.vars) >= 2) {
     pMain <- ggplot2::ggplot(data = plot.df,
                              ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] + 1])),
                                           y = get(colnames(plot.df[pca.axes[2] + 1])),
-                                          colour = get(model.vars[2]),
-                                          shape = get(model.vars[1]))) +
+                                          colour = get(var.color),
+                                          shape = get(var.shape))) +
       ggplot2::scale_shape_manual(values=c(0, 1, 2, 3, 6, 8, 15, 16, 17, 23, 25, 4, 5, 9)) +
       ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = var.color, shape = var.shape) +
+      ggplot2::labs(colour = label.col, shape = label.sha) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                     metric.df$axis.max[pca.axes[1]]) +
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
@@ -186,46 +197,57 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
       theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                    1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) + ggplot2::geom_density(size = 0.2,
+                                                                                    1])), fill = get(var.color), linetype = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                                                              alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                                                                  axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
-                                                                                                                                                                     size = ggplot2::rel(1.5)))
+      theme_pca() + ggplot2::labs(title = title) +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
+                     plot.title = ggplot2::element_text(hjust = 0.5,
+                                                        size = ggplot2::rel(1.5))) +
+      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
-                                                                                      1])), fill = get(model.vars[2]), linetype = get(model.vars[2]))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                                                               alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+                                                                                      1])), fill = get(var.color), linetype = get(var.color))) +
+      ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
+      ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank())
+                                   plot.title = ggplot2::element_blank()) +
+      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
 
   } else {
     pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(model.vars[1]))) +
+                                                                                     1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
       ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(colour = var.color, shape = var.shape) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+      ggplot2::labs(colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                                                                            metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
                                                                                                                             metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
                                                                                                                                                                                                        1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
                                                                                                                                                                                                                                                                                                                  1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
-                                                                                    1])), fill = get(model.vars[1]))) + ggplot2::geom_density(size = 0.2,
+                                                                                    1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                               alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
-                                                                                                                                                                     size = ggplot2::rel(1.5)))
+                                                                                                                                                                     size = ggplot2::rel(1.5)))+
+      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
-                                                                                      1])), fill = get(model.vars[1]))) + ggplot2::geom_density(size = 0.2,
+                                                                                      1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                                 alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank())
+                                   plot.title = ggplot2::element_blank())+
+      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+                        colour = "#666666", size = ggplot2::rel(3))
   }
 
   g <- ggplot2::ggplotGrob(pMain)$grobs
@@ -276,8 +298,7 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("group",
-                                                                    "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
   .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
            return.data = return.data)
 })
@@ -317,8 +338,7 @@ setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("group",
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("group",
-                                                                    "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
   .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
            return.data = return.data)
 })
@@ -361,8 +381,7 @@ setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("group",
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "list", function(input.obj, model.vars = c("group",
-                                                                "batch"), pca.axes = c(1, 2), return.data = FALSE) {
+setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
   .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
            return.data = return.data)
 })
@@ -480,7 +499,7 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #' # This will return the ggplot2 object of the top 15 most variable features.
 #' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='TOP', n=15, return.data=FALSE)
-mbecHeat <- function(input.obj, model.vars = c("group", "batch"), center = TRUE,
+mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
                      scale = TRUE, method = "TOP", n = 10, return.data = FALSE) {
 
   cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
@@ -549,7 +568,7 @@ mbecHeat <- function(input.obj, model.vars = c("group", "batch"), center = TRUE,
 #' # Return the ggplot2 object of the samples grouped by group and batch
 #' plot.Mosaic <- mbecMosaic(input.obj=datadummy,
 #' model.vars=c('group','batch'), return.data=FALSE)
-mbecMosaic <- function(input.obj, model.vars = c("group", "batch"), return.data = FALSE) {
+mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
@@ -687,11 +706,11 @@ mbecMosaic <- function(input.obj, model.vars = c("group", "batch"), return.data 
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
 #' df.var.lm <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c('group','batch'), method='lm', type='RAW')
+#' model.vars=c("batch", "group"), method='lm', type='RAW')
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
 #' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c('group','batch'), method='pvca')
+#' model.vars=c("batch", "group"), method='pvca')
 mbecModelVariance <- function(input.obj, model.vars = character(), method = c("lm",
                                                                               "lmm", "rda", "pvca", "s.coef"), model.form = NULL, type = "NONE", no.warning = TRUE,
                               na.action = NULL) {
@@ -857,9 +876,12 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
   } else {
     message("Construct formula from covariates.")
     f.terms <- paste("(1|", model.vars, ")", sep = "")
-    tmp.formula <- stats::as.formula(paste(paste("y", model.vars[1], sep = " ~ "),
-                                           paste(f.terms[-1], collapse = " + "), sep = " + "))
+
+        tmp.formula <- stats::as.formula(paste(paste("y", paste(model.vars[-1], collapse = " + "), sep = " ~ "),
+                                           paste(f.terms[1], collapse = " + "), sep = " + "))
+
   }
+
   # Add a progress bar.
   features <- colnames(tmp.cnts)
   lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3, width = 80, char="=")

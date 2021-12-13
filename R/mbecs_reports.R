@@ -103,7 +103,7 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.da
   prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2))
   prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars))
   prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars))
-  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[2] )
+  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1] )
   # Dendrogramm needs better function if possible
   #prelim.report.list[["dendro"]] <- mbecDendro(input.obj, method="TOP", n=5, model.var=eval(model.vars)[2] )
 
@@ -111,8 +111,8 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.da
   prelim.report.list[["linmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lm",
                                                       type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
 
-  # prelim.report.list[["linmixmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm",
-  #                                                        type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+  prelim.report.list[["linmixmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm",
+                                                          type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
 
   prelim.report.list[["rda"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="rda",
                                                    type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
@@ -126,7 +126,7 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.da
   # to plot or not to plot .. and how
   # for now just call all stat-plot functions and replace the respective values in the list
   prelim.report.list[["linmod"]] <- mbecVarianceStatsPlot(prelim.report.list[["linmod"]])
-  # prelim.report.list[["linmixmod"]] <- mbecVarianceStatsPlot(prelim.report.list[["linmixmod"]])
+  prelim.report.list[["linmixmod"]] <- mbecVarianceStatsPlot(prelim.report.list[["linmixmod"]])
   prelim.report.list[["rda"]] <- mbecRDAStatsPlot(prelim.report.list[["rda"]])
   prelim.report.list[["pvca"]] <- mbecPVCAStatsPlot(prelim.report.list[["pvca"]])
   prelim.report.list[["scoef"]] <- mbecSCOEFStatsPlot(prelim.report.list[["scoef"]])

@@ -75,11 +75,13 @@ mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
   p.title <- paste("Heatmap - Centered: ", center, " Scaled: ",
                    scale, sep = "")
   heat.plot <- pheatmap::pheatmap(tmp.cnts, scale = "none",
-                                  cluster_rows = FALSE, cluster_cols = TRUE, fontsize_row = 4,
+                                  cluster_rows = FALSE, cluster_cols = FALSE, fontsize_row = 4,
                                   fontsize_col = 6, fontsize = 8, clustering_distance_rows = "euclidean",
                                   clustering_method = "ward.D", treeheight_row = 30,
                                   annotation_col = tmp.meta[, eval(model.vars)], border_color = "NA",
-                                  main = p.title)
+                                  main = p.title,
+                                  annotation_names_col = TRUE,
+                                  show_colnames = FALSE)
 
   return(heat.plot)
 }
@@ -181,10 +183,12 @@ mbecVarianceStatsPlot <- function(variance.obj) {
                    axis.title = ggplot2::element_text(size = 15),
                    legend.title = ggplot2::element_text(size = 15),
                    legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::labs(x = "Covariate",
+    ggplot2::labs(x = "Linear (Mixed) Model",
                   y = "Proportion Variance",
                   name = "Covariate") +
-    ggplot2::ylim(0, 1)
+    ggplot2::ylim(0, 1) +
+    ggplot2::facet_grid(cols = ggplot2::vars(type), scales = "free",
+                        space = "free_x", drop = TRUE)
 
   return(leplot)
 
@@ -228,14 +232,17 @@ mbecRDAStatsPlot <- function(rda.obj) {
                                                    variance + 2.5, label = variance.r),
                        position = ggplot2::position_dodge(width = 0.9),
                        size = 3) + ggplot2::facet_grid(cols = ggplot2::vars(type)) +
-    ggplot2::theme_bw() + ggplot2::labs(y = "Variance explained (%)") +
+    ggplot2::theme_bw() + ggplot2::labs(x = "RDA",
+                                        y = "Variance explained (%)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60,
                                                        hjust = 1), panel.grid = ggplot2::element_blank(),
                    axis.text = ggplot2::element_text(size = 12),
                    axis.title = ggplot2::element_text(size = 15),
                    legend.title = ggplot2::element_text(size = 15),
                    legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::ylim(0, 100)
+    ggplot2::ylim(0, 100) +
+    ggplot2::facet_grid(cols = ggplot2::vars(type), scales = "free",
+                        space = "free_x", drop = TRUE)
 
   return(lePlot)
   # FIN
@@ -289,7 +296,7 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
                        size = 3) + ggplot2::theme_bw() +
     ggplot2::facet_grid(cols = ggplot2::vars(type),
                         scales = "free", space = "free_x",
-                        drop = TRUE) + ggplot2::labs(x = "Random effects and Interactions",
+                        drop = TRUE) + ggplot2::labs(x = "PVCA - Random effects and Interactions",
                                                      y = "Variance explained (%)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60,
                                                        hjust = 1), panel.grid = ggplot2::element_blank(),
@@ -297,7 +304,9 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
                    axis.title = ggplot2::element_text(size = 15),
                    legend.title = ggplot2::element_text(size = 15),
                    legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::ylim(0, 100)
+    ggplot2::ylim(0, 100)+
+    ggplot2::facet_grid(cols = ggplot2::vars(type), scales = "free",
+                        space = "free_x", drop = TRUE)
 
   return(lePlot)
   # FIN
@@ -342,8 +351,10 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
                                                                              hjust = 1), strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
                                          axis.text = ggplot2::element_text(size = 10), axis.title = ggplot2::element_text(size = 15),
                                          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::scale_color_manual(values = cols) + ggplot2::labs(x = "Type", y = "Silhouette Coefficient",
-                                                               name = "Type")
+    ggplot2::scale_color_manual(values = cols) + ggplot2::labs(x = "Silhouette Coefficient", y = "Silhouette Coefficient",
+                                                               name = "Type") +
+    ggplot2::facet_grid(cols = ggplot2::vars(type), scales = "free",
+                        space = "free_x", drop = TRUE)
 
   return(lePlot)
   # FIN

@@ -16,7 +16,7 @@ params:
   report.data: !r list()
   report.vars: !r character()
   report.list: !r list()
-  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","linmod","linmixmod,"rda","pvca","scoef"))))
+  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","linmod","linmixmod","rda","pvca","scoef"))))
   something: !r c(1,2,3)
 
 ---
