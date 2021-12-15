@@ -343,8 +343,7 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
     tmp <- tmp %>%
       dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
 
-  } else if (length(method) >= 2)
-  {
+  } else if (length(method) >= 2) {
     message("'Method' parameter contains multiple elements -
             using to select features.")
     otu.idx <- method

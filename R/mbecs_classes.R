@@ -159,7 +159,15 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
     message("Update is: ", update,", adding counts to transformations-list.")
 
     # put new counts into the transformations list
-    attr(input.obj, "transformations")[[eval(type)]] <- new.cnts
+    ## 1. figure out orientation and adjust accordingly
+    if( all(phyloseq::sample_names(input.obj) %in% colnames(new.cnts)) ) {
+      # fxs orientation
+      attr(input.obj, "transformations")[[eval(type)]] <- new.cnts
+
+    } else if( all(phyloseq::sample_names(input.obj) %in% rownames(new.cnts)) ) {
+      # change from sxf to fxs orientation
+      attr(input.obj, "transformations")[[eval(type)]] <- t(new.cnts)
+    }
 
     # append log
     tmp.log <- attr(input.obj, "log")
@@ -191,6 +199,8 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @param transformation Default is 'NULL', otherwise give name or index of
+#' matrix in transformation-list attribute for extraction.
 #' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
@@ -205,12 +215,12 @@ mbecSetData <- function(input.obj, new.cnts=NULL, log=character(), type=characte
 #' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
 #'     required.col=c("group","batch"))
 setGeneric("mbecGetData", signature="input.obj",
-           function(input.obj, orientation="fxs", required.col=NULL)
+           function(input.obj, orientation="fxs", required.col=NULL, transformation=NULL)
              standardGeneric("mbecGetData")
 )
 
 #IMPLEMENT function to use a vector as input
-.mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL) {
+.mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL, transformation=NULL) {
 
   # in general the input should be of class phyloseq or MbecData - so just get the fields to evaluate here
   tmp.meta <- as.data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE), check.names = FALSE)
@@ -223,20 +233,40 @@ setGeneric("mbecGetData", signature="input.obj",
     }
   }
 
-  # put attribute in variable to only check once
-  tar <- attr(phyloseq::otu_table(input.obj), "taxa_are_rows")
+  if( is.null(transformation) ) {
+    # put attribute in variable to only check once
+    tar <- attr(phyloseq::otu_table(input.obj), "taxa_are_rows")
 
-  # 1. if everything is fine
-  if( (!tar & orientation == "sxf") || (tar & orientation == "fxs") ) {
-    tmp.cnts <- as.data.frame(as(phyloseq::otu_table(input.obj),"matrix"), check.names = FALSE)
+    # 1. if everything is fine
+    if( (!tar & orientation == "sxf") || (tar & orientation == "fxs") ) {
+      tmp.cnts <- as.data.frame(as(phyloseq::otu_table(input.obj),"matrix"), check.names = FALSE)
 
-  } else if( (!tar & orientation == "fxs") || (tar & orientation == "sxf") ) {
-    # if orientations do not fit - transpose count-matrix
-    tmp.cnts <- as.data.frame(as(t(phyloseq::otu_table(input.obj)),"matrix"), check.names = FALSE)
+    } else if( (!tar & orientation == "fxs") || (tar & orientation == "sxf") ) {
+      # if orientations do not fit - transpose count-matrix
+      tmp.cnts <- as.data.frame(as(t(phyloseq::otu_table(input.obj)),"matrix"), check.names = FALSE)
 
+    } else {
+      ### If this happens, sth. is severely broken.
+      stop("Stop the shenanigans!")
+    }
   } else {
-    ### If this happens, sth. is severely broken.
-    stop("Stop the shenanigans!")
+    # for character inputs check if it exists
+    if( (is(transformation, "character") &&
+         !(transformation %in% names(input.obj@transformations))) ||
+        (is(transformation, "numeric") &&
+         !(transformation <= length(input.obj@transformations))) )
+      stop("Selected matrix is not part of this data-set.")
+
+    # The matrix should be in fxs orientation by default, but it could have been
+    # set by user so check again.
+    tmp.cnts <- input.obj@transformations[[eval(transformation)]]
+    ## 1. figure out orientation and adjust accordingly
+    if( (all(phyloseq::sample_names(input.obj) %in% colnames(tmp.cnts))
+        && orientation == "sxf") ||
+        (all(phyloseq::sample_names(input.obj) %in% rownames(tmp.cnts))
+        && orientation == "fxs") ) {
+      tmp.cnts <- t(tmp.cnts)
+    }
   }
 
   # meta has always the same orientation
@@ -301,6 +331,8 @@ setMethod("mbecGetData", "phyloseq",
 #' @param input.obj MbecData-object
 #' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
 #' @param required.col Vector of column names that are required from the covariate-table.
+#' @param transformation Default is 'NULL', otherwise give name or index of
+#' matrix in transformation-list attribute for extraction.
 #' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
 #' @export
 #'
@@ -315,8 +347,10 @@ setMethod("mbecGetData", "phyloseq",
 #' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
 #'     required.col=c("group","batch"))
 setMethod("mbecGetData", "MbecData",
-          function(input.obj, orientation="fxs", required.col=NULL) {
-            .mbecGetData(input.obj, orientation=orientation, required.col=required.col)
+          function(input.obj, orientation="fxs", required.col=NULL, transformation=NULL) {
+            .mbecGetData(input.obj, orientation=orientation,
+                         required.col=required.col,
+                         transformation=transformation)
           }
 )
 

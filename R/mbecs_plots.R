@@ -108,7 +108,7 @@ mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
   p.title <- paste("Heatmap - Centered: ", center, " Scaled: ",
                    scale, sep = "")
   heat.plot <- pheatmap::pheatmap(tmp.cnts, scale = "none",
-                                  cluster_rows = FALSE, cluster_cols = FALSE, fontsize_row = 4,
+                                  cluster_rows = FALSE, cluster_cols = TRUE, fontsize_row = 4,
                                   fontsize_col = 6, fontsize = 8, clustering_distance_rows = "euclidean",
                                   clustering_method = "ward.D", treeheight_row = 30,
                                   annotation_col = tmp.meta[, eval(model.vars)], border_color = "NA",
@@ -232,7 +232,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
     pTop <- ggplot2::ggplot(data = plot.df,
                             ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                               1])), fill = get(var.color),
-                            linetype = get(var.color))) + ggplot2::geom_density(size = 0.2,
+                            linetype = get(var.shape))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                                                      alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() + ggplot2::labs(title = title) +
@@ -244,7 +244,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                         colour = "#666666", size = ggplot2::rel(3))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
-                                                                                      1])), fill = get(var.color), linetype = get(var.color))) +
+                                                                                      1])), fill = get(var.color), linetype = get(var.shape))) +
       ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
       ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
@@ -290,7 +290,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                        "guide-box")]]
   ret.plot <- gridExtra::grid.arrange(pTop + ggplot2::theme(legend.position = "none"),
                                       legend, pMain + ggplot2::theme(legend.position = "none"), pRight + ggplot2::theme(legend.position = "none"),
-                                      ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1, 3))
+                                      ncol = 2, nrow = 2, widths = c(3, 1), heights = c(1.5, 3))
 
   return(ret.plot)
 
