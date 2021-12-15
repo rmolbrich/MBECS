@@ -6,7 +6,7 @@
 \usage{
 \S4method{mbecPCA}{list}(
   input.obj,
-  model.vars = c("group", "batch"),
+  model.vars = c("batch", "group"),
   pca.axes = c(1, 2),
   return.data = FALSE
 )

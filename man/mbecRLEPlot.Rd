@@ -4,7 +4,7 @@
 \alias{mbecRLEPlot}
 \title{RLE plotting function}
 \usage{
-mbecRLEPlot(tmp.long, model.vars, cols)
+mbecRLEPlot(tmp.long, model.vars, mbecCols)
 }
 \arguments{
 \item{tmp.long}{'mbecRLE' output}
@@ -12,7 +12,7 @@ mbecRLEPlot(tmp.long, model.vars, cols)
 \item{model.vars}{two covariates of interest to select by first variable
 selects panels and second one determines coloring}
 
-\item{cols}{vector of hex-colors to use}
+\item{mbecCols}{vector of hex-colors to use}
 }
 \value{
 ggplot2 object

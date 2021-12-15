@@ -4,7 +4,7 @@
 \alias{mbecMosaic}
 \title{Mosaic Sample Group Allocation}
 \usage{
-mbecMosaic(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
+mbecMosaic(input.obj, model.vars = c("batch", "group"), return.data = FALSE)
 }
 \arguments{
 \item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct

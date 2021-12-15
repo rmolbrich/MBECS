@@ -218,9 +218,6 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
 #' handeled internally)
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring
-#' @param nc.features (OPTIONAL) A vector of features names to be used as
-#' negative controls in RUV-3. If not supplied, the algorithm will use an 'lm'
-#' to find pseudo-negative controls
 #' @return SOMETHING
 #' @include mbecs_classes.R
 mbecSVA <- function(input.obj, model.vars) {
@@ -468,6 +465,11 @@ mbecBat <- function(input.obj, model.vars) {
   }
   return(corrected.cnts)
 }
+
+
+
+
+
 
 
 #' Remove Batch Effects (RBE)

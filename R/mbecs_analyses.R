@@ -37,7 +37,7 @@
 mbecRLE <- function(input.obj, model.vars = c("batch",
                                               "group"), return.data = FALSE) {
 
-  cols <- pals::tableau20(20)
+  mbecCols <- pals::tableau20(20)
 
   tmp <- mbecGetData(input.obj = input.obj, orientation = "fxs",
                      required.col = eval(model.vars))
@@ -49,8 +49,9 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
   for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
     message("Calculating RLE for group: ", g.idx)
 
-    tmp.cnts.group <- dplyr::select(tmp.cnts, tmp.meta$specimen[tmp.meta[,
-                                                                         eval(model.vars[2])] %in% g.idx])
+    tmp.cnts.group <-
+      dplyr::select(
+        tmp.cnts,tmp.meta$specimen[tmp.meta[,eval(model.vars[2])] %in% g.idx])
 
     feature.med = apply(tmp.cnts.group, 1, stats::median)
 
@@ -72,7 +73,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
   if (return.data) {
     return(tmp.long)
   }
-  return(mbecRLEPlot(tmp.long, model.vars, cols))
+  return(mbecRLEPlot(tmp.long, model.vars, mbecCols))
 }
 
 
@@ -236,7 +237,7 @@ setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "gr
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
-  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes,
            return.data = return.data)
 })
 
@@ -279,7 +280,7 @@ setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "gr
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
-  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes,
            return.data = return.data)
 })
 
@@ -789,6 +790,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
 
     model.fit <- lme4::lmer(tmp.formula, data = tmp.meta)
     model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+
     setTxtProgressBar(lmm.pb, x)
   }
   close(lmm.pb)
@@ -1252,7 +1254,7 @@ mbecMixedVariance <- function(model.fit) {
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
   ## ToDo: health & Safety
-  if (colinScore(model.fit) > colinearityThreshold) {
+  if( colinScore(model.fit) > colinearityThreshold) {
     warning("Some covariates are strongly correlated. Please re-evaluate the variable selection and try again.")
   }
 

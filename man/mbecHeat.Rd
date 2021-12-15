@@ -6,7 +6,7 @@
 \usage{
 mbecHeat(
   input.obj,
-  model.vars = c("group", "batch"),
+  model.vars = c("batch", "group"),
   center = TRUE,
   scale = TRUE,
   method = "TOP",

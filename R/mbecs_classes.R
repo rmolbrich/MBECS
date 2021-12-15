@@ -1,9 +1,6 @@
 # Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
 
-
-
 # DEFINE CLASS ------------------------------------------------------------
-
 
 
 #' Define MbecData-class
@@ -13,9 +10,9 @@
 #' @keywords MBECS Class
 #' @slot type User defined denominator for this data, e.g., 'RAW', 'normalized'.
 #' @slot log log that will be filled by the other package functions
-#' @slot input.obj either class phyloseq or a matrix of counts
-#' @slot meta.obj dataframe of covariate variables
-#' @slot required.col vector of strings that denote required variables in the covariate information
+#' @slot otu_table Class phyloseq::otu_table, (usually sparse) matrix of
+#' abundance values.
+#' @slot sample_data Dataframe of covariate variables.
 #' @slot tax_table taxonomic table from phyloseq as optional input
 #' @slot phy_tree phylogenetic tree as optional input
 #' @slot refseq reference sequences as optional input
@@ -26,7 +23,7 @@
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
-#' mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+#' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character", log="character", transformations="list"))
 
 #' Mbec-Data Constructor
@@ -36,9 +33,8 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @keywords MBECS Constructor
 #' @param type string type that describes the data, e.g., raw, processed, ..
 #' @param log log that will be filled by the other package functions
-#' @param input.obj either class phyloseq or a matrix of counts
-#' @param meta.obj A table with covariate information, whose row-names correspond to sample-IDs
-#' @param required.col vector of strings that denote required variables in the covariate information
+#' @param cnt_table either class phyloseq or a matrix of counts
+#' @param meta_data A table with covariate information, whose row-names correspond to sample-IDs
 #' @param tax_table taxonomic table from phyloseq as optional input
 #' @param phy_tree phylogenetic tree as optional input
 #' @param refseq reference sequences as optional input
@@ -50,7 +46,7 @@ MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="charac
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
-#' mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+#' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 MbecData <- function( cnt_table=NULL,
                       meta_data=NULL,
                       type=character(),

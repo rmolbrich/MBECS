@@ -27,6 +27,10 @@ MbecData(
 )
 }
 \arguments{
+\item{cnt_table}{either class phyloseq or a matrix of counts}
+
+\item{meta_data}{A table with covariate information, whose row-names correspond to sample-IDs}
+
 \item{type}{string type that describes the data, e.g., raw, processed, ..}
 
 \item{log}{log that will be filled by the other package functions}
@@ -38,12 +42,6 @@ MbecData(
 \item{refseq}{reference sequences as optional input}
 
 \item{transformations}{list to be filled with the result of different correction methods}
-
-\item{input.obj}{either class phyloseq or a matrix of counts}
-
-\item{meta.obj}{A table with covariate information, whose row-names correspond to sample-IDs}
-
-\item{required.col}{vector of strings that denote required variables in the covariate information}
 }
 \value{
 produces an R-object of type MbecData
@@ -62,11 +60,10 @@ and a data-frame of covariate variables for model-building.
 
 \item{\code{log}}{log that will be filled by the other package functions}
 
-\item{\code{input.obj}}{either class phyloseq or a matrix of counts}
+\item{\code{otu_table}}{Class phyloseq::otu_table, (usually sparse) matrix of
+abundance values.}
 
-\item{\code{meta.obj}}{dataframe of covariate variables}
-
-\item{\code{required.col}}{vector of strings that denote required variables in the covariate information}
+\item{\code{sample_data}}{Dataframe of covariate variables.}
 
 \item{\code{tax_table}}{taxonomic table from phyloseq as optional input}
 
@@ -80,10 +77,10 @@ and a data-frame of covariate variables for model-building.
 \examples{
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
-mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
-mbec.obj <- MbecData(input.obj=datadummy$cnts, meta.obj = datadummy$meta)
+mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 }
 \keyword{Class}
 \keyword{Constructor}

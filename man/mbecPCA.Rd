@@ -6,7 +6,7 @@
 \usage{
 mbecPCA(
   input.obj,
-  model.vars = c("group", "batch"),
+  model.vars = c("batch", "group"),
   pca.axes = c(1, 2),
   return.data = FALSE
 )
@@ -16,7 +16,7 @@ mbecPCA(
 orientation is handled internally)}
 
 \item{model.vars}{two covariates of interest to select by first variable
-selects shape and second one determines coloring}
+selects color (batch) and second one determines shape (group)}
 
 \item{pca.axes}{numeric vector which axes to plot, first is X and second is Y}
 

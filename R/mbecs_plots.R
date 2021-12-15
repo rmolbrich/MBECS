@@ -8,20 +8,33 @@
 #' @param tmp.long 'mbecRLE' output
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring
-#' @param cols vector of hex-colors to use
+#' @param mbecCols vector of hex-colors to use
 #' @return ggplot2 object
-mbecRLEPlot <- function(tmp.long, model.vars, cols) {
+mbecRLEPlot <- function(tmp.long, model.vars, mbecCols) {
+
+  n.tiles <- dim(unique(tmp.long[,eval(model.vars[2])]))[1]
+
+  if( n.tiles <= 3 ) {
+    ncols = n.tiles
+    nrows = 1
+  } else {
+    ncols = 3
+    nrows = (n.tiles / 3)
+  }
 
   rle.plot <- ggplot2::ggplot(
     tmp.long,
-    ggplot2::aes(x = specimen, y = values,fill = get(model.vars[2]))) +
+    ggplot2::aes(x = specimen, y = values,fill = get(model.vars[1]))) +
     ggplot2::stat_boxplot(color = "black", notch = FALSE,
+                          lwd=0.5, fatten=0.75,
                           outlier.colour = "#E42032", outlier.fill = "white",
                           outlier.shape = 1, outlier.stroke = 0.5,
                           outlier.size = 0.5, outlier.alpha=0.5) +
-    # facet_wrap(~Strain, ncol=2) +
-    ggplot2::facet_grid(cols = ggplot2::vars(get(model.vars[1])), scales = "free",
-                        space = "free_x", drop = TRUE) + ggplot2::scale_fill_manual(values = cols) +
+    ggplot2::facet_wrap(~get(model.vars[2]), ncol=ncols,nrow = nrows , scales = "free_x",
+                        drop = TRUE) + ggplot2::theme(plot.margin=ggplot2::unit(c(0.2,0.2,0.05,0.2), "cm")) +
+    # ggplot2::facet_grid(cols = ggplot2::vars(get(model.vars[2])), scales = "free",
+    #                     space = "free_x", drop = TRUE) +
+    ggplot2::scale_fill_manual(values = mbecCols) +
     theme_rle() + ggplot2::guides(fill = ggplot2::guide_legend(title = ggplot2::element_blank()))
 
   return(rle.plot)
@@ -33,13 +46,13 @@ mbecRLEPlot <- function(tmp.long, model.vars, cols) {
 #' Takes data.frame from mbecBox and produces a ggplot2 object.
 #'
 #' @keywords RLE relative log expression
-#' @param tmpg Count of sselected features.
+#' @param tmp Count of selected features.
 #' @param otu.idx Index of selected Otus in the data.
 #' @param model.var Which covariate to group Otus by.
-#' @param cols Color scheme to use for plot.
+#' @param mbecCols Color scheme to use for plot.
 #' @return ggplot2 object
 mbecBoxPlot <- function(tmp, otu.idx, model.var,
-                        cols) {
+                        mbecCols) {
 
   legend.title <- gsub("(^|[[:space:]])([[:alpha:]])",
                        "\\1\\U\\2", model.var, perl = TRUE)
@@ -50,14 +63,14 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var,
                                                       y = get(idx), fill = get(model.var))) +
       ggplot2::stat_boxplot(geom = "errorbar",
                             width = 0.4) + ggplot2::geom_boxplot() +
-      ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::theme_bw() + theme_box() +
       ggplot2::labs(fill = legend.title, y = "value",
                     title = idx)
 
     p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx),
                                                    fill = get(model.var))) + ggplot2::geom_density(alpha = 0.5) +
-      ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::labs(title = idx, x = "Value",
                     fill = legend.title) + theme_box()
 
@@ -187,7 +200,7 @@ mbecMosaicPlot <- function(study.summary,
 #' @param pca.axes NMumerical two-piece vector that selects PCs to plot.
 #' @return ggplot2 object
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
-  cols <- pals::tableau20(20)
+  mbecCols <- pals::tableau20(20)
   ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
   plot.annotation.top <- paste(colnames(ks.table),
                                ks.table[1,], sep = ": ", collapse = " \n")
@@ -204,7 +217,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                      y = get(colnames(plot.df[pca.axes[2] + 1])),
                      colour = get(var.color),shape = get(var.shape))) +
       ggplot2::scale_shape_manual(values=c(0,1,2,3,6,8,15,16,17,23,25,4,5,9)) +
-      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = mbecCols) +
       ggplot2::labs(colour = label.col, shape = label.sha) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                     metric.df$axis.max[pca.axes[1]]) +
@@ -220,7 +233,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                             ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                               1])), fill = get(var.color),
                             linetype = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                                                     alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+                                                                                                                                                                     alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() + ggplot2::labs(title = title) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
@@ -233,7 +246,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
                                                                                       1])), fill = get(var.color), linetype = get(var.color))) +
       ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
-      ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+      ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
@@ -244,7 +257,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
   } else {
     pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                      1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
-      ggplot2::geom_point() + ggplot2::scale_color_manual(values = cols) +
+      ggplot2::geom_point() + ggplot2::scale_color_manual(values = mbecCols) +
       ggplot2::labs(colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                                                                            metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
                                                                                                                             metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
@@ -253,7 +266,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                     1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                          alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+                                                                                                                                          alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
       theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
@@ -263,7 +276,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
                                                                                       1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
-                                                                                                                                            alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = cols) +
+                                                                                                                                            alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
       theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),

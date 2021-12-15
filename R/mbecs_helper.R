@@ -1,5 +1,58 @@
 # HELPER FUNCTIONS --------------------------------------------------------
 
+#' Check If Model Is Estimable
+#'
+#' Applies Limma's 'nonEstimable()' to a given model and returns NULL if
+#' everything works out, or a warning and a vector of problematic covariates in
+#' case there is a problem.
+#'
+#' The usefull part is that you can just put in all the covariates of interest
+#' as model.vars and the function will build a simple linear model and its
+#' model.matrix for testing. You can also provide more complex linear models
+#' and the function will do the rest.
+#'
+#' @keywords uppercase
+#' @param input.obj, mbecData object or numeric matrix (correct orientation is handeled internally)
+#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
+#' @param model.form Formular for a linear model to test.
+#' a list of length 2 that contains lists with result objects of 'ks.test()'
+#' named like the performed comparisons i.e. Batch1 to Batch2, etc..
+#' @return Either NULL if everything is fine or a vector of strings that denote
+#' covariates and their respective problematic levels.
+#' @export
+#' @include mbecs_classes.R
+#'
+#' @examples
+#' # This will return NULL because it is estimable.
+#' val.score <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
+mbecTestModel <- function(input.obj, model.vars, model.form=NULL) {
+  # 1. extract covariate information
+  tmp <- mbecGetData(input.obj, orientation="fxs")
+  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+
+  # 2. check if model-formula was supplied
+  if( is.null(model.form) ) {
+    # construct linear model from covariates
+    message("Construct lm-formula from covariates.")
+
+    model.form = stats::as.formula(paste("y", " ~ ", paste(model.vars, collapse = " + ")))
+
+  }
+  # if model.form is complete --> remove LHS
+  if( length(model.form) == 3 ) model.form <- model.form[-2]
+
+  # create model matrix from RHS
+  model.mtx <- stats::model.matrix(model.form, tmp.meta)
+
+  res.est <- limma::nonEstimable(model.mtx)
+
+  if( !is.null(res.est) ) {
+    message("There is a problem with the estimatibility of your model. Check out covariate: ", paste("'",res.est, "'", sep="", collapse=", "))
+  }
+  return(res.est)
+}
+
+
 #' Compare Distributions of Principal Component Values per Group
 #'
 #' For the selected Principal Components in PCA-plot perform Kolmogorov-Smirnov

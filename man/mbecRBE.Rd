@@ -10,8 +10,8 @@ mbecRBE(input.obj, model.vars)
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is
 handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+\item{model.vars}{First variable determines Batch, second (optional) variable
+describes study-group. ToDo: more vars and own models}
 }
 \value{
 A matrix of batch-effect corrected counts
