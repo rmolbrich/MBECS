@@ -416,11 +416,11 @@ mbecBMC <- function(input.obj, model.vars) {
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # get unique batches
-  input.batches <- unique(tmp.meta[[model.vars[2]]])
+  input.batches <- unique(tmp.meta[[model.vars[1]]])
 
   corrected.cnts <- NULL
   for( batch.idx in input.batches ) {
-    tmp <- scale(tmp.cnts[tmp.meta$sample[tmp.meta[[model.vars[2]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
+    tmp <- scale(tmp.cnts[tmp.meta$sample[tmp.meta[[model.vars[1]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
     corrected.cnts <- rbind.data.frame(corrected.cnts, tmp)
   }
 
@@ -465,11 +465,6 @@ mbecBat <- function(input.obj, model.vars) {
   }
   return(corrected.cnts)
 }
-
-
-
-
-
 
 
 #' Remove Batch Effects (RBE)
@@ -584,11 +579,11 @@ mbecPN <- function(input.obj, model.vars) {
   tmp <- mbecGetData(input.obj, orientation="sxf")
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
   # check for case/control design
-  if( nlevels(tmp.meta[,eval(model.vars[1])]) != 2 ) {
+  if( nlevels(tmp.meta[,eval(model.vars[2])]) != 2 ) {
     warning("Grouping/Treatment contains ",
-            nlevels(tmp.meta[,eval(model.vars[1])]),
-            " classes. Percentile normalization is designed to work with 2
-            classes only, i.e., case/control studies.")
+            nlevels(tmp.meta[,eval(model.vars[2])]),
+            " different categories. Percentile normalization is designed to work
+            with 2 classes only, i.e., case/control studies.")
   }
   # check/adjust for zero-values
   if( any(tmp.cnts == 0) ) {

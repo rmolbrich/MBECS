@@ -26,6 +26,13 @@
 #' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character", log="character", transformations="list"))
 
+
+# MbecData <- setClass("MbecData", contains = "phyloseq",slots = list(type="character",
+#                                                                     log="character",
+#                                                                     assessments="list",
+#                                                                     corrections="list",
+#                                                                     tss="matrix",
+#                                                                     clr="matrix"))
 #' Mbec-Data Constructor
 #'
 #' Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts

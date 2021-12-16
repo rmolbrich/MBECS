@@ -200,7 +200,7 @@ mbecMosaicPlot <- function(study.summary,
 #' @param pca.axes NMumerical two-piece vector that selects PCs to plot.
 #' @return ggplot2 object
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
-  mbecCols <- pals::tableau20(20)
+  mbecCols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17)]
   ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
   plot.annotation.top <- paste(colnames(ks.table),
                                ks.table[1,], sep = ": ", collapse = " \n")

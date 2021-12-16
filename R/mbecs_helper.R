@@ -276,22 +276,22 @@ LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0,
 #' # This will return a matrix of normalised counts, according to the covariate
 #' # information in meta
 #' mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
-#' meta=datadummy$meta[,c("group","batch")])
+#' meta=datadummy$meta[,c("batch","group")])
 percentileNorm <- function(cnts, meta) {
 
-  ref.group <- levels(meta[,1])[1]
+  ref.group <- levels(meta[,2])[1]
   message("Group ",ref.group, " is considered control group, i.e., reference for normalization procedure. To change reference please 'relevel()' grouping factor accordingly.")
 
   norm.cnts <- cnts; norm.cnts[,] <- NA
 
   # for every batch
-  for( b.idx in levels(meta[,2]) ) {
+  for( b.idx in levels(meta[,1]) ) {
     # for every feature
     for( f.idx in seq_len(ncol(cnts)) ) {
       # which are the control-group values
-      ctrl.group.vec <- cnts[which((meta[,1] %in% ref.group) & (meta[,2] %in% b.idx)), f.idx]
+      ctrl.group.vec <- cnts[which((meta[,2] %in% ref.group) & (meta[,1] %in% b.idx)), f.idx]
       # for every sample in the batch
-      for( s.idx in which(meta[,2] %in% b.idx) ) {
+      for( s.idx in which(meta[,1] %in% b.idx) ) {
         # call 'poscore' and get normalized value
         norm.cnts[s.idx, f.idx] <- poscore(ctrl.group.vec, cnts[s.idx, f.idx], "mean")
 
