@@ -235,7 +235,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                             linetype = get(var.shape))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                                                      alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = title) +
+      theme_pca() + ggplot2::labs(title = ggplot2::element_blank()) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                      axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5,
@@ -268,7 +268,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                                                                                     1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                           alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = title) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+      theme_pca() + ggplot2::labs(title = ggplot2::element_blank()) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
                                                                                                                                                                      size = ggplot2::rel(1.5)))+
       ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,

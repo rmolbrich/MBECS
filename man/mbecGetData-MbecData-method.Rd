@@ -4,7 +4,12 @@
 \alias{mbecGetData,MbecData-method}
 \title{Mbec-Data Getter MbecDdata}
 \usage{
-\S4method{mbecGetData}{MbecData}(input.obj, orientation = "fxs", required.col = NULL)
+\S4method{mbecGetData}{MbecData}(
+  input.obj,
+  orientation = "fxs",
+  required.col = NULL,
+  transformation = NULL
+)
 }
 \arguments{
 \item{input.obj}{MbecData-object}
@@ -12,6 +17,9 @@
 \item{orientation, }{Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively}
 
 \item{required.col}{Vector of column names that are required from the covariate-table.}
+
+\item{transformation}{Default is 'NULL', otherwise give name or index of
+matrix in transformation-list attribute for extraction.}
 }
 \value{
 A list that contains count-matrix (in chosen orientation) and meta-data table.
