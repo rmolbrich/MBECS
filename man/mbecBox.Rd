@@ -9,6 +9,8 @@ mbecBox(
   method = c("ALL", "TOP"),
   n = 10,
   model.var = "batch",
+  type = "clr",
+  label = character(),
   return.data = FALSE
 )
 }
@@ -22,6 +24,10 @@ is 'ALL'}
 \item{n}{number of OTUs to display for 'TOP' method}
 
 \item{model.var}{covariate to group by, default is batch}
+
+\item{type}{Which abundance matrix to use for the calculation.}
+
+\item{label}{Which corrected abundance matrix to use for analysis.}
 
 \item{return.data}{logical if TRUE returns the data.frame required for
 plotting (NO plotting or saving here bucko)}
