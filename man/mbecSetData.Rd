@@ -7,9 +7,8 @@
 mbecSetData(
   input.obj,
   new.cnts = NULL,
-  log = character(),
-  type = character(),
-  update = TRUE
+  type = c("otu", "ass", "cor", "clr", "tss"),
+  label = character()
 )
 }
 \arguments{
@@ -17,9 +16,11 @@ mbecSetData(
 
 \item{new.cnts}{matrix-like object with same dimension as 'otu_table' in input.obj}
 
-\item{log}{character to add to the log string}
-
 \item{type}{character to replace type-attribute or as name tag for added count-matrix}
+
+\item{label}{For types 'ass' and 'cor' this sets the name within the list.}
+
+\item{log}{character to add to the log string}
 
 \item{update}{logical (TRUE) replace input fields (FALSE) add to the input.obj}
 }

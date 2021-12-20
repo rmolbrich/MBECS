@@ -30,7 +30,7 @@ in the counts table. Correct orientation of counts will be handled internally.
 # This will return a matrix of normalised counts, according to the covariate
 # information in meta
 mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
-meta=datadummy$meta[,c("group","batch")])
+meta=datadummy$meta[,c("batch","group")])
 }
 \keyword{Log}
 \keyword{Ratio}

@@ -4,7 +4,7 @@
 \alias{mbecLM}
 \title{Linear (Mixed) Model Feature to Batch Fit}
 \usage{
-mbecLM(input.obj, method = c("lm", "lmm"), model.vars = c("group", "batch"))
+mbecLM(input.obj, method = c("lm", "lmm"), model.vars = c("batch", "group"))
 }
 \arguments{
 \item{input.obj, }{mbecData object or numeric matrix (correct orientation is handeled internally)}
@@ -30,7 +30,7 @@ the counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return p-value for the linear model fit of every feature.
-val.score <- mbecLM(input.obj=datadummy, model.vars=c("group","batch"),
+val.score <- mbecLM(input.obj=datadummy, model.vars=c("batch","group"),
 method="lm")
 }
 \keyword{Batch}

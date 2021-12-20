@@ -8,7 +8,8 @@
   input.obj,
   orientation = "fxs",
   required.col = NULL,
-  transformation = NULL
+  type = c("otu", "ass", "cor", "clr", "tss"),
+  label = character()
 )
 }
 \arguments{

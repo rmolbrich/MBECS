@@ -12,7 +12,10 @@ MbecData(
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
-  transformations = list()
+  assessments = list(),
+  corrections = list(),
+  tss = NULL,
+  clr = NULL
 )
 
 MbecData(
@@ -23,7 +26,10 @@ MbecData(
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
-  transformations = list()
+  assessments = list(),
+  corrections = list(),
+  tss = NULL,
+  clr = NULL
 )
 }
 \arguments{
@@ -40,8 +46,6 @@ MbecData(
 \item{phy_tree}{phylogenetic tree as optional input}
 
 \item{refseq}{reference sequences as optional input}
-
-\item{transformations}{list to be filled with the result of different correction methods}
 }
 \value{
 produces an R-object of type MbecData
@@ -71,7 +75,21 @@ abundance values.}
 
 \item{\code{refseq}}{reference sequences as optional input}
 
-\item{\code{transformations}}{list to be filled with the result of different correction methods}
+\item{\code{assessments}}{A list for the results of BEAAs.}
+
+\item{\code{corrections}}{A list for the results of BECAs.}
+
+\item{\code{tss}}{Total-sum-squared features matrix.}
+
+\item{\code{clr}}{Cumulative log-ratio transformed feature matrix.}
+
+\item{\code{assessments}}{A list for the results of BEAAs.}
+
+\item{\code{corrections}}{A list for the results of BECAs.}
+
+\item{\code{tss}}{Total-sum-squared features matrix.}
+
+\item{\code{clr}}{Cumulative log-ratio transformed feature matrix.}
 }}
 
 \examples{

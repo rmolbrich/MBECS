@@ -20,7 +20,9 @@
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
 #' orientation is handeled internally)
 #' @param model.vars two covariates of interest to select by first variable
-#' selects panels and second one determines coloring
+#' selects panels and second one determines coloring.
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting (NO plotting here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
@@ -35,15 +37,14 @@
 #' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
 #' return.data=FALSE)
 mbecRLE <- function(input.obj, model.vars = c("batch",
-                                              "group"), return.data = FALSE) {
+                                              "group"), type="clr", label=character(), return.data = FALSE) {
 
   mbecCols <- pals::tableau20(20)
 
   tmp <- mbecGetData(input.obj = input.obj, orientation = "fxs",
-                     required.col = eval(model.vars))
+                     required.col = eval(model.vars), type=eval(type), label=label)
   tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]] %>%
-    tibble::rownames_to_column(., var = "specimen")
+  tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var = "specimen")
 
   tmp.long <- NULL
   for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
@@ -98,6 +99,8 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #' @param model.vars two covariates of interest to select by first variable
 #' selects color (batch) and second one determines shape (group)
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
@@ -114,14 +117,16 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
-                                                        model.vars = c("batch", "group"), pca.axes = c(1, 2),
+                                                        model.vars = c("batch", "group"), pca.axes = c(1, 2), type="clr", label=character(),
                                                         return.data = FALSE) standardGeneric("mbecPCA"))
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
 .mbecPCA <- function(input.obj, model.vars = c("batch", "group"),
-                     pca.axes = c(1,2), return.data = FALSE) {
+                     pca.axes = c(1,2), type="clr", label=character(), return.data = FALSE) {
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                     required.col = eval(model.vars), type=eval(type), label=label)
+
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]]
 
@@ -196,8 +201,9 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
-  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes,
+setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "group"),
+                                          pca.axes = c(1, 2), type="clr", label=character(), return.data = FALSE) {
+  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes, type=type, label=label,
            return.data = return.data)
 })
 
@@ -236,8 +242,8 @@ setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "gr
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
-  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes,
+setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
+  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
            return.data = return.data)
 })
 
@@ -279,8 +285,8 @@ setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "gr
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=datadummy,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), return.data = FALSE) {
-  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes,
+setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
+  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
            return.data = return.data)
 })
 
@@ -306,6 +312,8 @@ setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"
 #' is 'ALL'
 #' @param n number of OTUs to display for 'TOP' method
 #' @param model.var covariate to group by, default is batch
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
@@ -320,13 +328,14 @@ setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"
 #' # This will return the ggplot2 object of the top 15 most variable features.
 #' plot.Box <- mbecBox(input.obj=datadummy, method='TOP', n=15,
 #' model.var='batch', return.data=FALSE)
-mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch",
+mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch", type="clr", label=character(),
                     return.data = FALSE) {
 
   cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
   # needs sxf orientation
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.var))
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                     required.col = eval(model.vars), type=eval(type), label=label)
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
   otu.idx <- colnames(tmp[[1]])
@@ -382,6 +391,8 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #' @param scale flag to activate scaling
 #' @param method one of 'ALL' or 'TOP' or a vector of feature names
 #' @param n number of features to select in method TOP
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting (NO plotting or saving here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
@@ -397,11 +408,12 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='TOP', n=15, return.data=FALSE)
 mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
-                     scale = TRUE, method = "TOP", n = 10, return.data = FALSE) {
+                     scale = TRUE, method = "TOP", n = 10, type="clr", label=character(), return.data = FALSE) {
 
   cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                     required.col = eval(model.vars), type=eval(type), label=label)
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]]
   otu.idx <- colnames(tmp[[1]])
@@ -608,8 +620,9 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
 #' # group and batch according to linear additive model.
 #' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
 #' model.vars=c("batch", "group"), method='pvca')
-mbecModelVariance <- function(input.obj, model.vars = character(), method = c("lm",
-                                                                              "lmm", "rda", "pvca", "s.coef"), model.form = NULL, type = "NONE", no.warning = TRUE,
+mbecModelVariance <- function(input.obj, model.vars = character(),
+                              method = c("lm","lmm", "rda", "pvca", "s.coef"),
+                              model.form = NULL, type = "clr", label=character(), no.warning = TRUE,
                               na.action = NULL) {
   oldw <- getOption("warn")
   if (no.warning) {
@@ -625,7 +638,11 @@ mbecModelVariance <- function(input.obj, model.vars = character(), method = c("l
   ## PVCA stuff
   pct_threshold = 0.5876  # threshold for explained variances
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                     required.col = eval(model.vars), type=eval(type), label=label)
+
+  # ToDo: include working on correction lists right here
+
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]]
 

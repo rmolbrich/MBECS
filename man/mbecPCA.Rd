@@ -8,6 +8,8 @@ mbecPCA(
   input.obj,
   model.vars = c("batch", "group"),
   pca.axes = c(1, 2),
+  type = "clr",
+  label = character(),
   return.data = FALSE
 )
 }
@@ -19,6 +21,10 @@ orientation is handled internally)}
 selects color (batch) and second one determines shape (group)}
 
 \item{pca.axes}{numeric vector which axes to plot, first is X and second is Y}
+
+\item{type}{Which abundance matrix to use for the calculation.}
+
+\item{label}{Which corrected abundance matrix to use for analysis.}
 
 \item{return.data}{logical if TRUE returns the data.frame required for
 plotting (NO plotting or saving here bucko)}

@@ -8,7 +8,8 @@ mbecGetData(
   input.obj,
   orientation = "fxs",
   required.col = NULL,
-  transformation = NULL
+  type = c("otu", "ass", "cor", "clr", "tss"),
+  label = character()
 )
 }
 \arguments{
@@ -25,7 +26,7 @@ matrix in transformation-list attribute for extraction.}
 A list that contains count-matrix (in chosen orientation) and meta-data table.
 }
 \description{
-This function extracts abundance matrix and meta-data in the chosen orientation from the input.
+This mow function extracts abundance matrix and meta-data in the chosen orientation from the input.
 }
 \details{
 The parameter 'orientation' determines if the output has features as columns (sxf) or if the

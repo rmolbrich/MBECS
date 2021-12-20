@@ -27,8 +27,7 @@
 #' val.score <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
 mbecTestModel <- function(input.obj, model.vars, model.form=NULL) {
   # 1. extract covariate information
-  tmp <- mbecGetData(input.obj, orientation="fxs")
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+  tmp.meta <- phyloseq::sample_data(input.obj)
 
   # 2. check if model-formula was supplied
   if( is.null(model.form) ) {
@@ -145,9 +144,9 @@ mbecUpperCase <- function(input=character()) {
 #'
 #' @examples
 #' # This will return p-value for the linear model fit of every feature.
-#' val.score <- mbecLM(input.obj=datadummy, model.vars=c("group","batch"),
+#' val.score <- mbecLM(input.obj=datadummy, model.vars=c("batch","group"),
 #' method="lm")
-mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch")) {
+mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group")) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
   #       alternative correction methods
   #       auto mode selection procedure --> detect unbalanced design?!
@@ -172,11 +171,11 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 
   } else if( method == "lmm" ) {
     # overkill, but just keep it for now
-    f.terms <- paste("(1|",model.vars[2],")", sep="")
+    f.terms <- paste("(1|",model.vars[1],")", sep="")
 
     tmp.group.p <- apply(tmp.cnts, 2, FUN = function(x) {
 
-      tmp.formula <- stats::as.formula(paste(paste("x", model.vars[1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
+      tmp.formula <- stats::as.formula(paste(paste("x", model.vars[-1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
       nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula), data = tmp.meta)))
       nc.lmm.summary <- summary(nc.lmm)
       p <- nc.lmm.summary$coefficients[2,5]
@@ -215,39 +214,49 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("group","batch"
 #'
 #' @examples
 #' # This will return the cumulative log-ratio transformed counts in an MbecData object
-#' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+#' \dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
 #' method="CLR", offset=0)}
 #'
 #' # This will return the inverse log-ratio transformed counts in an MbecData object
-#' \dontrun{mbec.LRT <- LRTransform(input.obj=list(counts, covariates),
+#' \dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
-LRTransform <- function(input.obj, method = c("none", "CLR", "ILR"), offset = 0, required.col=NULL) {
+mbecTransform <- function(input.obj, method = c("none", "clr", "ilr","tss"), offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments
-  method <- match.arg(method)
-
+  method <- match.arg(method, choices = c("none", "clr", "ilr","tss"))
   ## VALIDATE input and change to 'MbecData' if needed
   input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 
   ## needs sxf orientation
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+  tmp <- mbecGetData(input.obj, orientation="sxf", type="otu")
 
-  if (method == "ILR") {
+  if( method == "ilr" ) {
     if (!is(input.obj, "ilr")) {
       tmp.cnts = ilr.transfo(tmp[[1]], offset = offset)
     }
+    # rebuild sample AND feature names for reassembly
+    colnames(tmp.cnts) <- colnames(tmp[[1]])
+    rownames(tmp.cnts) <- rownames(tmp[[1]])
+    # ToDo: check if I really want to include this
+    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr", label=NULL)
 
-  } else if (method == "CLR") {
+  } else if( method == "clr" ) {
 
     tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
+    # rebuild sample AND feature names for reassembly
+    colnames(tmp.cnts) <- colnames(tmp[[1]])
+    rownames(tmp.cnts) <- rownames(tmp[[1]])
+
+    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr", label=NULL)
+  } else if( method == "ilr" ) {
+    # FixMe: actually include this transformation here - at the latest when i have to test 'pn'^^
+    tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
+    # rebuild sample AND feature names for reassembly
+    colnames(tmp.cnts) <- colnames(tmp[[1]])
+    rownames(tmp.cnts) <- rownames(tmp[[1]])
   }
 
-  # rebuild sample AND feature names for reassembly
-  colnames(tmp.cnts) <- colnames(tmp[[1]])
-  rownames(tmp.cnts) <- rownames(tmp[[1]])
 
-  input.obj <- mbecSetData(input.obj, new.cnts = tmp.cnts, log = method, type = method, update = TRUE)
 
-  #phyloseq::otu_table(input.obj) = phyloseq::otu_table(tmp.cnts, taxa_are_rows = FALSE)
 
   return(input.obj)
 }

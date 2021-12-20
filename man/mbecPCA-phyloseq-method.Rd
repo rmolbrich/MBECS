@@ -8,6 +8,7 @@
   input.obj,
   model.vars = c("batch", "group"),
   pca.axes = c(1, 2),
+  type = "otu",
   return.data = FALSE
 )
 }

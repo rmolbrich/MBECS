@@ -11,6 +11,8 @@ mbecHeat(
   scale = TRUE,
   method = "TOP",
   n = 10,
+  type = "clr",
+  label = character(),
   return.data = FALSE
 )
 }
@@ -27,6 +29,10 @@ orientation is handeled internally)}
 \item{method}{one of 'ALL' or 'TOP' or a vector of feature names}
 
 \item{n}{number of features to select in method TOP}
+
+\item{type}{Which abundance matrix to use for the calculation.}
+
+\item{label}{Which corrected abundance matrix to use for analysis.}
 
 \item{return.data}{logical if TRUE returns the data.frame required for
 plotting (NO plotting or saving here bucko)}

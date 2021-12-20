@@ -9,7 +9,8 @@ mbecModelVariance(
   model.vars = character(),
   method = c("lm", "lmm", "rda", "pvca", "s.coef"),
   model.form = NULL,
-  type = "NONE",
+  type = "clr",
+  label = character(),
   no.warning = TRUE,
   na.action = NULL
 )

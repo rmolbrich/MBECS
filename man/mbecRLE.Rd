@@ -4,14 +4,24 @@
 \alias{mbecRLE}
 \title{Relative Log Expression Plot}
 \usage{
-mbecRLE(input.obj, model.vars = c("batch", "group"), return.data = FALSE)
+mbecRLE(
+  input.obj,
+  model.vars = c("batch", "group"),
+  type = "clr",
+  label = character(),
+  return.data = FALSE
+)
 }
 \arguments{
 \item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
 orientation is handeled internally)}
 
 \item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+selects panels and second one determines coloring.}
+
+\item{type}{Which abundance matrix to use for the calculation.}
+
+\item{label}{Which corrected abundance matrix to use for analysis.}
 
 \item{return.data}{logical if TRUE returns the data.frame required for
 plotting (NO plotting here bucko)}
