@@ -231,6 +231,7 @@ setMethod("mbecSetData", "MbecData",
   } else if( type == "clr" ) {
     input.obj@clr <- new.cnts
   } else if( type == "tss" ) {
+    message("Set tss-transformed counts.")
     input.obj@tss <- new.cnts
   } else if( type == "ass" ) {
     if( length(label) == 0 )

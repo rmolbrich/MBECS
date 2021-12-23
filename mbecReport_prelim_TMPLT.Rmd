@@ -132,10 +132,13 @@ Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all sampl
 
 # ToDo: implement some logic to organize and format these plots
 for( p.idx in params$report.list$box ) {
-  
+
   plot(p.idx)
-  
+
 }
+
+# gridExtra::marrangeGrob(grobs=params$report.list$box, ncol = 2, nrow=5)
+
 
 ```
 

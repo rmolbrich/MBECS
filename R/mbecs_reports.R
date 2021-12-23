@@ -93,7 +93,7 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 #' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
-mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
+mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), type="clr", return.data = FALSE) {
   # just start with input processing and transform into MbecData if required
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
@@ -109,19 +109,19 @@ mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), return.da
 
   # calculate the variance statistics
   prelim.report.list[["linmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lm",
-                                                      type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+                                                      type=eval(type))
 
   prelim.report.list[["linmixmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm",
-                                                          type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+                                                          type=eval(type))
 
   prelim.report.list[["rda"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="rda",
-                                                   type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+                                                   type=eval(type))
 
   prelim.report.list[["pvca"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="pvca",
-                                                    type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+                                                    type=eval(type))
 
   prelim.report.list[["scoef"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef",
-                                                     type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
+                                                     type=eval(type))
 
   # to plot or not to plot .. and how
   # for now just call all stat-plot functions and replace the respective values in the list

@@ -96,12 +96,6 @@ mbecRunCorrections <- function(input.obj, model.vars=c("group","batch"),
 #' full-model-effect, e.g., treatment. As of now the mbecs-correction only uses the first input
 #' for batch-effect grouping. ToDo: think about implementing a version for more complex models.
 #'
-#' FAbatch: Implemented in the bapred-package this method is based on the approach described in
-#' Hornung et al. 2017. "It is a combination of two commonly used approaches: location-and-scale
-#' adjustment and data cleaning by adjustment for distortions due to latent factors."
-#' HOWEVER, since it can't handle the zero inflated counts of compositional microbiome-data -->
-#' maybe just remove this - or keep in case of non-microbiome data?!
-#'
 #' Percentile Normalization (PN): this method was actually developed specifically to facilitate
 #' the integration of microbiome data from different studies/experimental set-ups. This problem is
 #' similar to the mitigation of BEs, i.e., when collectively analyzing two or more data-sets,
@@ -152,7 +146,7 @@ mbecRunCorrections <- function(input.obj, model.vars=c("group","batch"),
 #' method="pn", update=TRUE)
 mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc",
-                                    "bat","rbe","fab","pn","svd"),
+                                    "bat","rbe","pn","svd"),
                            update=TRUE, nc.features=NULL) {
 
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
@@ -184,8 +178,6 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
     res.correct <- mbecBat(input.obj, model.vars)
   } else if( method == "rbe" ) {
     res.correct <- mbecRBE(input.obj, model.vars)
-  } else if( method == "fab" ) {
-    res.correct <- mbecFAB(input.obj, model.vars)
   } else if( method == "pn" ) {
     res.correct <- mbecPN(input.obj, model.vars)
   } else if( method == "svd" ) {
@@ -409,10 +401,11 @@ mbecRUV3 <- function(input.obj, model.vars, nc.features=NULL) {
 #' selects panels and second one determines coloring
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecBMC <- function(input.obj, model.vars) {
-
+mbecBMC <- function(input.obj, model.vars, type="clr") {
   message("Applying Batch Mean-Centering (BMC) for batch-correction.")
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # get unique batches
@@ -444,11 +437,12 @@ mbecBMC <- function(input.obj, model.vars) {
 #' describes study-group. ToDo: more vars and own models
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecBat <- function(input.obj, model.vars) {
+mbecBat <- function(input.obj, model.vars, type="clr") {
 
   message("Applying ComBat (sva) for batch-correction.")
   ## ComBat requires 'fxs' orientation for inputs
-  tmp <- mbecGetData(input.obj, orientation="fxs")
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # ToDo: tmp model
@@ -488,11 +482,12 @@ mbecBat <- function(input.obj, model.vars) {
 #' describes study-group. ToDo: more vars and own models
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecRBE <- function(input.obj, model.vars) {
+mbecRBE <- function(input.obj, model.vars, type="clr") {
 
   message("Applying 'removeBatchEffect' (limma) for batch-correction.")
   ## removeBatchEffect requires 'fxs' orientation for inputs
-  tmp <- mbecGetData(input.obj, orientation="fxs")
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   if( length(model.vars) == 1 ) {
@@ -505,40 +500,6 @@ mbecRBE <- function(input.obj, model.vars) {
     corrected.cnts <- limma::removeBatchEffect(
       tmp.cnts, batch = tmp.meta[[model.vars[1]]],design = tmp.mod)
   }
-  return(corrected.cnts)
-}
-
-
-#' FAbatch
-#'
-#' Implemented in the bapred-package this method is based on the approach
-#' described in Hornung et al. 2017. "It is a combination of two commonly used
-#' approaches: location-and-scale adjustment and data cleaning by adjustment
-#' for distortions due to latent factors." HOWEVER, since it can't handle the
-#' zero inflated counts of compositional microbiome-data --> maybe just remove
-#' this - or keep in case of non-microbiome data?!
-#'
-#' The function returns a matrix of corrected counts Correct orientation of
-#' counts will be handled internally.
-#'
-#' @keywords BECA Hornung FABatch
-#' @param input.obj phyloseq object or numeric matrix (correct orientation is
-#' handeled internally)
-#' @param model.vars two covariates of interest to select by first variable
-#' selects panels and second one determines coloring
-#' @return A matrix of batch-effect corrected counts
-#' @include mbecs_classes.R
-mbecFAB <- function(input.obj, model.vars) {
-
-  message("Applying FAbatch for batch-correction.")
-  ## FAbatch requires 'sxf' orientation for inputs
-  tmp <- mbecGetData(input.obj, orientation="sxf")
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
-
-  # covariates have to be 'numeric' factors ...
-  corrected.cnts <- bapred::fabatch(x=as.matrix(tmp.cnts),
-                                    y=as.factor(as.numeric(tmp.meta[[model.vars[1]]])),
-                                    batch = as.factor(as.numeric(tmp.meta[[model.vars[2]]])))
   return(corrected.cnts)
 }
 
@@ -572,11 +533,12 @@ mbecFAB <- function(input.obj, model.vars) {
 #' selects panels and second one determines coloring
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecPN <- function(input.obj, model.vars) {
+mbecPN <- function(input.obj, model.vars, type="tss") {
 
   message("Applying Percentile Normalization (PN) for batch-correction.")
   ## Percentile Normalization requires 'sxf' orientation for inputs
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
   # check for case/control design
   if( nlevels(tmp.meta[,eval(model.vars[2])]) != 2 ) {
@@ -620,11 +582,12 @@ mbecPN <- function(input.obj, model.vars) {
 #' selects panels and second one determines coloring
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecSVD <- function(input.obj, model.vars) {
+mbecSVD <- function(input.obj, model.vars, type="clr") {
 
   message("Applying Singular Value Decomposition (SVD) for batch-correction.")
   ## SVD requires 'sxf' orientation for inputs
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
   # sd, mean, scale
   tmp.sd <- apply(tmp.cnts, 2, stats::sd)

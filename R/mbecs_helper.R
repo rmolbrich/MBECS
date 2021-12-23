@@ -68,6 +68,9 @@ mbecTestModel <- function(input.obj, model.vars, model.form=NULL) {
 #' @return A data.frame with #principal components rows and n!/(2!(n-2)!)
 #' .columns
 mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
+  ## FixME: this might not be a good idea because the batches probably contain the class effect to a certai degree --> test if it makes a difference when class effect is significant within batches and also the influence of distribution of groups within batches
+
+
   # very ugly, but it'll do for now
   dist.check <- plot.df[, c(eval(colnames(plot.df[pca.axes[1] + 1])),eval(colnames(plot.df[pca.axes[2] + 1])), eval(model.vars))]
 
@@ -124,18 +127,21 @@ mbecUpperCase <- function(input=character()) {
 
 #' Linear (Mixed) Model Feature to Batch Fit
 #'
-#' Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
-#' data-set. Returns the fdr corrected significance value for the "treatment" variable. The method
-#' 'lm' will fit the linear model\code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model
-#' will consider the second term as random effect, i.e., \code{y ~ model.vars[1] + (1|model.vars[2])}.
+#' Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to
+#' every feature in the data-set. Returns the fdr corrected significance value
+#' for the "treatment" variable. The method 'lm' will fit the linear model
+#' \code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model will
+#' consider the second term as random effect, i.e.,
+#' \code{y ~ model.vars[1] + (1|model.vars[2])}.
 #'
-#' The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-#' be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-#' the counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object.
+#' Input for th data-set can be an MbecData-object, a phyloseq-object or a list
+#' that contains counts and covariate data. The covariate table requires an
+#' 'sID' column that contains sample IDs equal to the sample naming in the
+#' counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Significance Linear Mixed Model Batch
-#' @param input.obj, mbecData object or numeric matrix (correct orientation is handeled internally)
+#' @param input.obj, mbecData object
 #' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
 #' @param method, either 'lm' or 'lmm' for linear (mixed) models or 'auto' to detect correct method (not implemented yet)
 #' @return vector of fdr corrected p-values that show significance of treatment for every feature
@@ -146,13 +152,15 @@ mbecUpperCase <- function(input=character()) {
 #' # This will return p-value for the linear model fit of every feature.
 #' val.score <- mbecLM(input.obj=datadummy, model.vars=c("batch","group"),
 #' method="lm")
-mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group")) {
+mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"), type="clr", label=character()) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
   #       alternative correction methods
   #       auto mode selection procedure --> detect unbalanced design?!
 
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
   ## check and prepare inputs
-  tmp <- mbecGetData(input.obj, orientation="sxf", required.col=eval(model.vars))
+  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                     required.col = eval(model.vars), type=eval(type), label=eval(label))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   if( method == "auto" ) {
@@ -220,43 +228,32 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 #' # This will return the inverse log-ratio transformed counts in an MbecData object
 #' \dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
 #' method="ILR", offset=0)}
-mbecTransform <- function(input.obj, method = c("none", "clr", "ilr","tss"), offset = 0, required.col=NULL) {
+mbecTransform <- function(input.obj, method = "clr",
+                          offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments
-  method <- match.arg(method, choices = c("none", "clr", "ilr","tss"))
+  method <- match.arg(method, choices = c("none", "clr","tss"))
   ## VALIDATE input and change to 'MbecData' if needed
   input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 
   ## needs sxf orientation
   tmp <- mbecGetData(input.obj, orientation="sxf", type="otu")
 
-  if( method == "ilr" ) {
-    if (!is(input.obj, "ilr")) {
-      tmp.cnts = ilr.transfo(tmp[[1]], offset = offset)
-    }
-    # rebuild sample AND feature names for reassembly
-    colnames(tmp.cnts) <- colnames(tmp[[1]])
-    rownames(tmp.cnts) <- rownames(tmp[[1]])
-    # ToDo: check if I really want to include this
-    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr", label=NULL)
-
-  } else if( method == "clr" ) {
+  if( method == "clr" ) {
 
     tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
     # rebuild sample AND feature names for reassembly
     colnames(tmp.cnts) <- colnames(tmp[[1]])
     rownames(tmp.cnts) <- rownames(tmp[[1]])
 
-    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr", label=NULL)
-  } else if( method == "ilr" ) {
-    # FixMe: actually include this transformation here - at the latest when i have to test 'pn'^^
-    tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
+    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr")
+  } else if( method == "tss" ) {
+    tmp.cnts <- t(apply(tmp[[1]], 1, function(x){x/sum(x)}))
     # rebuild sample AND feature names for reassembly
     colnames(tmp.cnts) <- colnames(tmp[[1]])
     rownames(tmp.cnts) <- rownames(tmp[[1]])
+
+    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="tss")
   }
-
-
-
 
   return(input.obj)
 }
@@ -289,7 +286,9 @@ mbecTransform <- function(input.obj, method = c("none", "clr", "ilr","tss"), off
 percentileNorm <- function(cnts, meta) {
 
   ref.group <- levels(meta[,2])[1]
-  message("Group ",ref.group, " is considered control group, i.e., reference for normalization procedure. To change reference please 'relevel()' grouping factor accordingly.")
+  message("Group ",ref.group, " is considered control group, i.e., reference
+          for normalization procedure. To change reference please 'relevel()'
+          grouping factor accordingly.")
 
   norm.cnts <- cnts; norm.cnts[,] <- NA
 
@@ -298,12 +297,13 @@ percentileNorm <- function(cnts, meta) {
     # for every feature
     for( f.idx in seq_len(ncol(cnts)) ) {
       # which are the control-group values
-      ctrl.group.vec <- cnts[which((meta[,2] %in% ref.group) & (meta[,1] %in% b.idx)), f.idx]
+      ctrl.group.vec <- cnts[which((meta[,2] %in% ref.group) &
+                                   (meta[,1] %in% b.idx)), f.idx]
       # for every sample in the batch
       for( s.idx in which(meta[,1] %in% b.idx) ) {
         # call 'poscore' and get normalized value
-        norm.cnts[s.idx, f.idx] <- poscore(ctrl.group.vec, cnts[s.idx, f.idx], "mean")
-
+        norm.cnts[s.idx, f.idx] <- poscore(ctrl.group.vec, cnts[s.idx, f.idx],
+                                           "mean")
       }
     }
   }
@@ -366,62 +366,6 @@ poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
 }
 
 
-# EXTERNAL FUNCTIONS ------------------------------------------------------
-
-### NOT MINE - reference or do sth. else
-# 1 - ilr transform of the data, isoLMR function from robCompositions package, with changes
-# https://github.com/matthias-da/robCompositions/blob/master/R/isomLR.R
-# ---
-
-#' KA changed the function to add a min value when many zeroes in data (prob with log and division by 0 otherwise)
-#' @param fast if TRUE, it is approx. 10 times faster but numerical problems may occur for high dimensional data
-#' @noRd
-ilr.transfo = function(x, fast = TRUE, offset = 0) {
-  if(any(x==0) & offset ==0)
-    stop("make sure you use pseudo counts before normalisation to avoid 0 values with log ratio transformation")
-  # ilr transformation
-  x.ilr = matrix(NA, nrow = nrow(x), ncol = ncol(x)-1)
-  D = ncol(x)
-  # KA added: a little something to avoid 0 values
-  if (fast)
-  {
-    for (i in seq_len(ncol(x.ilr)) )
-    {
-      #x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(((apply(as.matrix(x[, (i+1) : D, drop = FALSE]), 1, prod) + offset)^(1 / (D-i))) / (x[,i]+ offset)) ToDo: remove once it works
-      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(((apply(as.matrix(x[, seq.int(from=(i+1),to=D,by=1), drop = FALSE]), 1, prod) + offset)^(1 / (D-i))) / (x[,i]+ offset))
-      #x.ilr[,i] = sqrt((D-i)/(D-i+1))*log(((apply(as.matrix(x[,(i+1):D,drop = FALSE]),1,prod))^(1/(D-i)))/(x[,i]))
-    }
-  } else {
-    for (i in seq_len(ncol(x.ilr)) )
-    {
-      x.ilr[,i] = sqrt((D-i) / (D-i+1)) * log(apply(as.matrix(x[, seq.int(from=(i+1),to=D,by=1)]), 1, function(x){exp(log(x))})/(x[, i]+ offset) + offset)
-      #x.ilr[,i] = sqrt((D-i)/(D-i+1))*log(apply(as.matrix(x[,(i+1):D]), 1, function(x){exp(log(x))})/(x[,i]))
-    }
-  }
-  ### ToDo: take care of this class-mess!
-  class(x.ilr) = c(class(x.ilr), 'ilr')
-  return(as.matrix(x.ilr))
-}
-
-
-
-
-
-# 2 - back transformation from ilr to clr space
-clr.backtransfo = function(x) {
-  # construct orthonormal basis
-  V = matrix(0, nrow = ncol(x), ncol = ncol(x)-1)
-  for( i in seq_len(ncol(V)) )
-  {
-    V[seq_len(i), i] = 1/i
-    V[i+1, i] = (-1)
-    V[, i] = V[, i] * sqrt(i/(i+1))
-  }
-  rownames(V) = colnames(x)
-  return(V)
-
-}
-
 
 #' Centered Log-Ratio Transformation
 #'
@@ -436,15 +380,18 @@ clr.backtransfo = function(x) {
 #' input.
 mbecCLR <- function(input.mtx, offset = 0) {
   if( dim(input.mtx)[2] < 2 ) {
-    message("No basis for transformation. Matrix contains less than 2 features, returning unchanged.")
+    message("No basis for transformation. Matrix contains less than 2 features,
+            returning unchanged.")
     return(input.mtx)
   }
   # 1. stop for negative values and NAs
   if( any(input.mtx < 0 | is.na(input.mtx)) ) {
-    stop("Examine your data for NAs and negative values, CLR transformation requires complete positive values.\n")
+    stop("Examine your data for NAs and negative values, CLR transformation
+         requires complete positive values.\n")
   }
   if( any(input.mtx==0) & offset==0 ) {
-    message("Found zeros, function will add a small pseudo-count (1/#features) to enable log-ratio transformation.")
+    message("Found zeros, function will add a small pseudo-count (1/#features)
+            to enable log-ratio transformation.")
     offset <- 1/ncol(input.mtx)
   }
   # add the offset

@@ -782,7 +782,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
   message("Fitting linear-mixed model to every feature and extract proportion
           of variance explained by covariates.")
 
-  control = lme4::lmerControl(calc.derivs = FALSE, check.rankX = "stop.deficient")
+  control = lme4::lmerControl(calc.derivs = TRUE, check.rankX = "stop.deficient")
 
   if (!is.null(model.form)) {
     message("Use provided model formula.")
@@ -804,7 +804,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
   for (x in seq_along(features)) {
     y <- tmp.cnts[[eval(x)]]  # meh
 
-    model.fit <- lme4::lmer(tmp.formula, data = tmp.meta)
+    model.fit <- lme4::lmer(tmp.formula, data = tmp.meta, control = control)
     model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
 
     setTxtProgressBar(lmm.pb, x)
@@ -957,8 +957,8 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
 
   f.terms <- paste("(1|", model.vars, ")", sep = "")
 
-  for (var.idx in seq_len((n.vars - 1))) {
-    for (interaction.idx in seq.int(from = (var.idx + 1), to = (n.vars), by = 1)) {
+  for( var.idx in seq_len((n.vars - 1)) ) {
+    for( interaction.idx in seq.int(from = (var.idx + 1), to = (n.vars), by = 1) ) {
       f.terms <- c(f.terms, paste("(1|", model.vars[var.idx], ":", model.vars[interaction.idx],
                                   ")", sep = ""))
     }
