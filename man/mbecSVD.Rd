@@ -4,7 +4,7 @@
 \alias{mbecSVD}
 \title{Singular Value Decomposition (SVD)}
 \usage{
-mbecSVD(input.obj, model.vars)
+mbecSVD(input.obj, model.vars, type = "clr")
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

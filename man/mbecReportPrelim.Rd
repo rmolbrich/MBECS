@@ -7,6 +7,7 @@
 mbecReportPrelim(
   input.obj,
   model.vars = c("group", "batch"),
+  type = "clr",
   return.data = FALSE
 )
 }

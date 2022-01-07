@@ -4,14 +4,14 @@
 \alias{mbecTestModel}
 \title{Check If Model Is Estimable}
 \usage{
-mbecTestModel(input.obj, model.vars, model.form = NULL)
+mbecTestModel(input.obj, model.vars = NULL, model.form = NULL)
 }
 \arguments{
 \item{input.obj, }{mbecData object or numeric matrix (correct orientation is handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
+\item{model.vars}{covariates to construct formula from}
 
-\item{model.form}{Formular for a linear model to test.
+\item{model.form}{Formula for a linear model to test.
 a list of length 2 that contains lists with result objects of 'ks.test()'
 named like the performed comparisons i.e. Batch1 to Batch2, etc..}
 }
@@ -32,6 +32,6 @@ and the function will do the rest.
 }
 \examples{
 # This will return NULL because it is estimable.
-val.score <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
+eval.obj <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
 }
 \keyword{uppercase}

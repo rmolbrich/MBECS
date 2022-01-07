@@ -35,7 +35,17 @@ mbecRLEPlot <- function(tmp.long, model.vars, mbecCols) {
     # ggplot2::facet_grid(cols = ggplot2::vars(get(model.vars[2])), scales = "free",
     #                     space = "free_x", drop = TRUE) +
     ggplot2::scale_fill_manual(values = mbecCols) +
-    theme_rle() + ggplot2::guides(fill = ggplot2::guide_legend(title = ggplot2::element_blank()))
+    ggplot2::theme_bw() +
+    # adjustments for the legend
+    ggplot2::theme(legend.position="bottom",
+                   legend.text = ggplot2::element_text(color = "black", size=12),
+                   legend.key = ggplot2::element_rect(size=12),
+                   #axis.text.x=ggplot2::element_text(angle=35, hjust=1),
+                   axis.title.x = ggplot2::element_blank(),
+                   panel.background = ggplot2::element_blank(),
+                   axis.text.x=ggplot2::element_blank(),
+                   axis.ticks.x=ggplot2::element_blank())
+    ggplot2::guides(fill = ggplot2::guide_legend(title = ggplot2::element_blank()))
 
   return(rle.plot)
 }
@@ -54,6 +64,13 @@ mbecRLEPlot <- function(tmp.long, model.vars, mbecCols) {
 mbecBoxPlot <- function(tmp, otu.idx, model.var,
                         mbecCols) {
 
+  x.angle = 0
+  x.hjust = 0.5
+  density.lwd = 0.2
+  title.cex = 1.5
+  legend.cex = 0.7
+  legend.title.cex =0.75
+
   legend.title <- gsub("(^|[[:space:]])([[:alpha:]])",
                        "\\1\\U\\2", model.var, perl = TRUE)
   ret.plot <- list()
@@ -64,15 +81,52 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var,
       ggplot2::stat_boxplot(geom = "errorbar",
                             width = 0.4) + ggplot2::geom_boxplot() +
       ggplot2::scale_fill_manual(values = mbecCols) +
-      ggplot2::theme_bw() + theme_box() +
+      ggplot2::theme_bw() +
+        ggplot2::theme(
+          panel.background = ggplot2::element_blank(),
+          axis.line = ggplot2::element_blank(),
+          axis.ticks = ggplot2::element_blank(),
+          axis.text.x = ggplot2::element_text(angle = x.angle, hjust = x.hjust), panel.grid = ggplot2::element_blank(),
+          axis.title.x = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 10),
+          axis.title = ggplot2::element_text(size = 12),
+          plot.title = ggplot2::element_text(hjust = 0.5),
+
+          legend.position = 'bottom', legend.box = 'horizontal',
+          legend.direction = 'horizontal',
+          legend.key.height = ggplot2::unit(0.8, 'cm'),
+          legend.key.width = ggplot2::unit(0.4, 'cm'),
+          legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+          legend.spacing.x = ggplot2::unit(0.4, 'cm'),
+          legend.spacing.y = ggplot2::unit(0.4, 'cm'),
+          legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))
+        ) +
       ggplot2::labs(fill = legend.title, y = "value",
                     title = idx)
 
     p.density <- ggplot2::ggplot(tmp, ggplot2::aes(x = get(idx),
-                                                   fill = get(model.var))) + ggplot2::geom_density(alpha = 0.5) +
+                                                   fill = get(model.var))) +
+      ggplot2::geom_density(alpha = 0.5) +
       ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::labs(title = idx, x = "Value",
-                    fill = legend.title) + theme_box()
+                    fill = legend.title) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        panel.background = ggplot2::element_blank(),
+        axis.line = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        axis.text.x = ggplot2::element_text(angle = x.angle, hjust = x.hjust), panel.grid = ggplot2::element_blank(),
+        axis.title.x = ggplot2::element_blank(), axis.text = ggplot2::element_text(size = 10),
+        axis.title = ggplot2::element_text(size = 12),
+        plot.title = ggplot2::element_text(hjust = 0.5),
+
+        legend.position = 'bottom', legend.box = 'horizontal',
+        legend.direction = 'horizontal',
+        legend.key.height = ggplot2::unit(0.8, 'cm'),
+        legend.key.width = ggplot2::unit(0.4, 'cm'),
+        legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+        legend.spacing.x = ggplot2::unit(0.4, 'cm'),
+        legend.spacing.y = ggplot2::unit(0.4, 'cm'),
+        legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex)))
 
     g <- ggplot2::ggplotGrob(p.box)$grobs
 
@@ -132,6 +186,14 @@ mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
 mbecMosaicPlot <- function(study.summary,
                            model.vars) {
 
+  main_color = "#004B5A"
+  x.angle = 0
+  x.hjust = 0.5
+  density.lwd = 0.2
+  title.cex = 1.5
+  legend.cex = 0.7
+  legend.title.cex =0.75
+
   vars.axes <- mbecUpperCase(model.vars)
 
   plot.v2 <- ggplot2::ggplot(study.summary,
@@ -148,7 +210,20 @@ mbecMosaicPlot <- function(study.summary,
                                                  reverse = TRUE,
                                                  keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic(legend_position = "bottom") +
+    ggplot2::theme(axis.text.x=ggplot2::element_blank(),
+                   axis.text.y=ggplot2::element_text(color = eval(main_color), size=12),
+                   axis.ticks = ggplot2::element_blank(),
+                   axis.line = ggplot2::element_line(color = "#7F7F7F"),
+                   axis.title.x = ggplot2::element_blank(),
+                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(1), angle = 90),
+                   legend.position = 'bottom', legend.box = 'horizontal',
+                   legend.direction = 'horizontal',
+                   legend.key.height = ggplot2::unit(0.2, 'cm'),
+                   legend.key.width = ggplot2::unit(0.1, 'cm'),
+                   legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+                   legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+                   legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+                   legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))) +
                 ggplot2::theme(plot.margin=ggplot2::unit(c(0.2,0.2,0.05,0.2), "cm"))
 
   plot.v1 <- ggplot2::ggplot(study.summary,
@@ -165,7 +240,20 @@ mbecMosaicPlot <- function(study.summary,
                                                  reverse = TRUE,
                                                  keywidth = 1, keyheight = 1)) +
     ggplot2::ylab("Proportion of all observations") +
-    theme_mosaic()  +
+    ggplot2::theme(axis.text.x=ggplot2::element_blank(),
+      axis.text.y=ggplot2::element_text(color = eval(main_color), size=12),
+      axis.ticks = ggplot2::element_blank(),
+      axis.line = ggplot2::element_line(color = "#7F7F7F"),
+      axis.title.x = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_text(size = ggplot2::rel(1), angle = 90),
+      legend.position = 'bottom', legend.box = 'horizontal',
+      legend.direction = 'horizontal',
+      legend.key.height = ggplot2::unit(0.2, 'cm'),
+      legend.key.width = ggplot2::unit(0.1, 'cm'),
+      legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+      legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+      legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+      legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))) +
     ggplot2::theme(plot.margin=ggplot2::unit(c(0.05,0.2,0.2,0.2), "cm"))
 
   ## Function to extract legend
@@ -201,11 +289,21 @@ mbecMosaicPlot <- function(study.summary,
 #' @return ggplot2 object
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
   mbecCols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17)]
+  x.angle = 0
+  x.hjust = 0.5
+  # density.lwd = 0.2
+  # title.cex = 1.5
+  legend.cex = 0.7
+  legend.title.cex =0.75
+
+  # meh
   ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
   plot.annotation.top <- paste(colnames(ks.table),
                                ks.table[1,], sep = ": ", collapse = " \n")
   plot.annotation.right <- paste(colnames(ks.table),
                                  ks.table[2,], sep = ": ", collapse = " \n")
+  # meh
+
   var.color <- model.vars[1]; var.shape <- model.vars[2]
   label.col <- mbecUpperCase(model.vars[1])
   label.sha <- mbecUpperCase(model.vars[2])
@@ -227,7 +325,21 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                            metric.df$var.explained[pca.axes[1]], "% expl.var")) +
       ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
                            metric.df$var.explained[pca.axes[2]], "% expl.var")) +
-      theme_pca()
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+
+        panel.background = ggplot2::element_blank(),
+        axis.line = ggplot2::element_blank(),
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        legend.position = 'right', legend.box = 'horizontal',
+        legend.direction = 'vertical',
+        legend.key.height = ggplot2::unit(0.2, 'cm'),
+        legend.key.width = ggplot2::unit(0.1, 'cm'),
+        legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+        legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+        legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+        legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex)))
 
     pTop <- ggplot2::ggplot(data = plot.df,
                             ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
@@ -235,7 +347,22 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                             linetype = get(var.shape))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                                                      alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = ggplot2::element_blank()) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+
+        panel.background = ggplot2::element_blank(),
+        axis.line = ggplot2::element_blank(),
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        legend.position = 'right', legend.box = 'horizontal',
+        legend.direction = 'vertical',
+        legend.key.height = ggplot2::unit(0.2, 'cm'),
+        legend.key.width = ggplot2::unit(0.1, 'cm'),
+        legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+        legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+        legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+        legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))) +
+      ggplot2::labs(title = ggplot2::element_blank()) +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                      axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5,
@@ -248,7 +375,22 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
       ggplot2::geom_density(size = 0.2,alpha = 0.5) + ggplot2::coord_flip() +
       ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+
+        panel.background = ggplot2::element_blank(),
+        axis.line = ggplot2::element_blank(),
+        axis.text = ggplot2::element_blank(),
+        axis.ticks = ggplot2::element_blank(),
+        legend.position = 'right', legend.box = 'horizontal',
+        legend.direction = 'vertical',
+        legend.key.height = ggplot2::unit(0.2, 'cm'),
+        legend.key.width = ggplot2::unit(0.1, 'cm'),
+        legend.title = ggplot2::element_text(size = ggplot2::rel(legend.title.cex)),
+        legend.spacing.x = ggplot2::unit(0.1, 'cm'),
+        legend.spacing.y = ggplot2::unit(0.1, 'cm'),
+        legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))) +
+      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                                    plot.title = ggplot2::element_blank()) +
       ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,

@@ -4,10 +4,16 @@
 \alias{mbecLM}
 \title{Linear (Mixed) Model Feature to Batch Fit}
 \usage{
-mbecLM(input.obj, method = c("lm", "lmm"), model.vars = c("batch", "group"))
+mbecLM(
+  input.obj,
+  method = c("lm", "lmm"),
+  model.vars = c("batch", "group"),
+  type = "clr",
+  label = character()
+)
 }
 \arguments{
-\item{input.obj, }{mbecData object or numeric matrix (correct orientation is handeled internally)}
+\item{input.obj, }{mbecData object}
 
 \item{method, }{either 'lm' or 'lmm' for linear (mixed) models or 'auto' to detect correct method (not implemented yet)}
 
@@ -17,16 +23,19 @@ mbecLM(input.obj, method = c("lm", "lmm"), model.vars = c("batch", "group"))
 vector of fdr corrected p-values that show significance of treatment for every feature
 }
 \description{
-Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to every feature in the
-data-set. Returns the fdr corrected significance value for the "treatment" variable. The method
-'lm' will fit the linear model\code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model
-will consider the second term as random effect, i.e., \code{y ~ model.vars[1] + (1|model.vars[2])}.
+Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to
+every feature in the data-set. Returns the fdr corrected significance value
+for the "treatment" variable. The method 'lm' will fit the linear model
+\code{y ~ model.vars[1] + model.vars[2]} and the linear mixed model will
+consider the second term as random effect, i.e.,
+\code{y ~ model.vars[1] + (1|model.vars[2])}.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object. Input for th data-set can
-be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data. The
-covariate table requires an 'sID' column that contains sample IDs equal to the sample naming in
-the counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object.
+Input for th data-set can be an MbecData-object, a phyloseq-object or a list
+that contains counts and covariate data. The covariate table requires an
+'sID' column that contains sample IDs equal to the sample naming in the
+counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return p-value for the linear model fit of every feature.

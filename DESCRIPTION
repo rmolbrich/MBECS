@@ -48,7 +48,6 @@ Collate:
     'mbecs_helper.R'
     'mbecs_plots.R'
     'mbecs_reports.R'
-    'mbecs_themes.R'
     'utils-pipe.R'
 VignetteBuilder: knitr
 Config/testthat/edition: 3

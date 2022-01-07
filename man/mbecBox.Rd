@@ -56,7 +56,7 @@ return.data=TRUE)
 
 # This will return the ggplot2 object of the top 15 most variable features.
 plot.Box <- mbecBox(input.obj=datadummy, method='TOP', n=15,
-model.var='batch', return.data=FALSE)
+model.var='batch', type="otu", return.data=FALSE)
 }
 \keyword{Box}
 \keyword{abundance}

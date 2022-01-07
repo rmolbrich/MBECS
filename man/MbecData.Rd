@@ -7,8 +7,6 @@
 MbecData(
   cnt_table = NULL,
   meta_data = NULL,
-  type = character(),
-  log = character(),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -21,8 +19,6 @@ MbecData(
 MbecData(
   cnt_table = NULL,
   meta_data = NULL,
-  type = character(),
-  log = character(),
   tax_table = NULL,
   phy_tree = NULL,
   refseq = NULL,
@@ -36,10 +32,6 @@ MbecData(
 \item{cnt_table}{either class phyloseq or a matrix of counts}
 
 \item{meta_data}{A table with covariate information, whose row-names correspond to sample-IDs}
-
-\item{type}{string type that describes the data, e.g., raw, processed, ..}
-
-\item{log}{log that will be filled by the other package functions}
 
 \item{tax_table}{taxonomic table from phyloseq as optional input}
 
@@ -60,10 +52,6 @@ and a data-frame of covariate variables for model-building.
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{User defined denominator for this data, e.g., 'RAW', 'normalized'.}
-
-\item{\code{log}}{log that will be filled by the other package functions}
-
 \item{\code{otu_table}}{Class phyloseq::otu_table, (usually sparse) matrix of
 abundance values.}
 

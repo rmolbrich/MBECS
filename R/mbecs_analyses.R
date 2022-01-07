@@ -327,15 +327,16 @@ setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"
 #'
 #' # This will return the ggplot2 object of the top 15 most variable features.
 #' plot.Box <- mbecBox(input.obj=datadummy, method='TOP', n=15,
-#' model.var='batch', return.data=FALSE)
+#' model.var='batch', type="otu", return.data=FALSE)
 mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch", type="clr", label=character(),
                     return.data = FALSE) {
 
   cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
+  input.obj <- mbecProcessInput(input.obj = input.obj, required.col = model.var)
   # needs sxf orientation
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.vars), type=eval(type), label=label)
+                     required.col = eval(model.var), type=eval(type), label=label)
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
   otu.idx <- colnames(tmp[[1]])

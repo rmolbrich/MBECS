@@ -4,7 +4,7 @@
 \alias{mbecBMC}
 \title{Batch Mean Centering (BMC)}
 \usage{
-mbecBMC(input.obj, model.vars)
+mbecBMC(input.obj, model.vars, type = "clr")
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

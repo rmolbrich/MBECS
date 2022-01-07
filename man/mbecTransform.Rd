@@ -4,12 +4,7 @@
 \alias{mbecTransform}
 \title{Log-Ratio Transformation}
 \usage{
-mbecTransform(
-  input.obj,
-  method = c("none", "clr", "ilr", "tss"),
-  offset = 0,
-  required.col = NULL
-)
+mbecTransform(input.obj, method = "clr", offset = 0, required.col = NULL)
 }
 \arguments{
 \item{input.obj}{either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)}

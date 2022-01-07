@@ -8,8 +8,6 @@
 #' An extension of phyloseq-class that contains the additional fields 'type', 'log' and
 #' 'transformations' to accommodate MBECS functionality.
 #' @keywords MBECS Class
-#' @slot type User defined denominator for this data, e.g., 'RAW', 'normalized'.
-#' @slot log log that will be filled by the other package functions
 #' @slot otu_table Class phyloseq::otu_table, (usually sparse) matrix of
 #' abundance values.
 #' @slot sample_data Dataframe of covariate variables.
@@ -28,8 +26,7 @@
 #' # and meta-data table.
 #' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",
-                     slots = list(type="character",   log="character",
-                                  assessments="list", corrections="list",
+                     slots = list(assessments="list", corrections="list",
                                   tss="matrix",       clr="matrix"))
 
 
@@ -38,8 +35,6 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #' Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
 #' and a data-frame of covariate variables for model-building.
 #' @keywords MBECS Constructor
-#' @param type string type that describes the data, e.g., raw, processed, ..
-#' @param log log that will be filled by the other package functions
 #' @param cnt_table either class phyloseq or a matrix of counts
 #' @param meta_data A table with covariate information, whose row-names correspond to sample-IDs
 #' @param tax_table taxonomic table from phyloseq as optional input
@@ -59,8 +54,6 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
 MbecData <- function( cnt_table=NULL,
                       meta_data=NULL,
-                      type=character(),
-                      log=character(),
                       tax_table=NULL,
                       phy_tree=NULL,
                       refseq=NULL,
@@ -96,10 +89,10 @@ MbecData <- function( cnt_table=NULL,
 
   if( !is.null(tss) ) {
     ## 1. figure out orientation and adjust accordingly
-    if( all(phyloseq::sample_names(input.obj) %in% colnames(tss)) ) {
+    if( all(meta_data$sID %in% colnames(tss)) ) {
       # fxs orientation do nothing
 
-    } else if( all(phyloseq::sample_names(input.obj) %in% rownames(tss)) ) {
+    } else if( all(meta_data$sID %in% rownames(tss)) ) {
       # change from sxf to fxs orientation
       tss <- t(tss)
 
@@ -112,10 +105,10 @@ MbecData <- function( cnt_table=NULL,
 
   if( !is.null(clr) ) {
     ## 1. figure out orientation and adjust accordingly
-    if( all(phyloseq::sample_names(input.obj) %in% colnames(clr)) ) {
+    if( all(meta_data$sID %in% colnames(clr)) ) {
       # fxs orientation do nothing
 
-    } else if( all(phyloseq::sample_names(input.obj) %in% rownames(clr)) ) {
+    } else if( all(meta_data$sID %in% rownames(clr)) ) {
       # change from sxf to fxs orientation
       clr <- t(clr)
 
@@ -130,7 +123,7 @@ MbecData <- function( cnt_table=NULL,
     # check orientation of counts for phyloseq-constructor - meta_data needs to be sxf anyway (if not then FU)
     if( dim(cnt_table)[1] == length(meta_data[,"sID"]) ) {
       # taxa are columns
-      return( new("MbecData", type=type, log=log,
+      return( new("MbecData",
                   phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows = FALSE),
                                                                      phyloseq::sample_data(meta_data),
                                                                      phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
@@ -141,7 +134,7 @@ MbecData <- function( cnt_table=NULL,
               tss=tss,
               clr=clr))
     } else {
-      return( new("MbecData", type=type, log=log,
+      return( new("MbecData",
                   phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows = TRUE),
                                                                      phyloseq::sample_data(meta_data),
                                                                      phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
@@ -235,12 +228,12 @@ setMethod("mbecSetData", "MbecData",
     input.obj@tss <- new.cnts
   } else if( type == "ass" ) {
     if( length(label) == 0 )
-      label <- paste("item",(length(input.obj@ass)+1), sep="_")
-    input.obj@ass[[eval(label)]] <- new.cnts
+      label <- paste("item",(length(input.obj@assessments)+1), sep="_")
+    input.obj@assessments[[eval(label)]] <- new.cnts
   } else if( type == "cor" ) {
     if( length(label) == 0 )
-      label <- paste("item",(length(input.obj@cor)+1), sep="_")
-    input.obj@cor[[eval(label)]] <- new.cnts
+      label <- paste("item",(length(input.obj@corrections)+1), sep="_")
+    input.obj@corrections[[eval(label)]] <- new.cnts
   }
 
   return(input.obj)
@@ -318,20 +311,20 @@ setGeneric("mbecGetData", signature="input.obj",
   } else if( type == "tss" ) {
     tmp.cnts <- data.frame(input.obj@tss, check.names = FALSE)
   } else if( type == "ass" ) {
-    if( length(label) == 0 || !(label %in% names(input.obj@ass)) ) {
+    if( length(label) == 0 || !(label %in% names(input.obj@assessments)) ) {
       message("The given matrix (label parameter) is not part of this object.
               Returning the complete assessments list.")
-      tmp.cnts <- input.obj@ass
+      tmp.cnts <- input.obj@assessments
     } else {
-      tmp.cnts <- data.frame(input.obj@ass[[eval(label)]], check.names = FALSE)
+      tmp.cnts <- data.frame(input.obj@assessments[[eval(label)]], check.names = FALSE)
     }
   } else if( type == "cor" ) {
-    if( length(label) == 0 || !(label %in% names(input.obj@cor)) ) {
+    if( length(label) == 0 || !(label %in% names(input.obj@corrections)) ) {
       message("The given matrix (label parameter) is not part of this object.
               Returning the complete corrections list.")
-      tmp.cnts <- input.obj@cor
+      tmp.cnts <- input.obj@corrections
     } else {
-      tmp.cnts <- data.frame(input.obj@cor[[eval(label)]], check.names = FALSE)
+      tmp.cnts <- data.frame(input.obj@corrections[[eval(label)]], check.names = FALSE)
     }
   }
 
@@ -344,8 +337,7 @@ setGeneric("mbecGetData", signature="input.obj",
       tmp.cnts <- data.frame(t(tmp.cnts), check.names = FALSE)
     }
   } else {
-    # ToDo: this is not correct - FixMe: I work but the message is flawed
-    message("Returning a list-object. Correct orientation will not be checked.")
+    # This will just return the otu object.
   }
 
   return(list(tmp.cnts, tmp.meta))
@@ -505,8 +497,6 @@ setMethod("mbecProcessInput", "phyloseq",
 
             return.obj <- MbecData(cnt_table = phyloseq::otu_table(input.obj, taxa_are_rows = TRUE),
                                    meta_data = phyloseq::sample_data(input.obj),
-                                   type="raw",
-                                   log="newobject",
                                    tax_table = phyloseq::tax_table(input.obj, errorIfNULL = FALSE),
                                    phy_tree = phyloseq::phy_tree(input.obj, errorIfNULL = FALSE),
                                    refseq = phyloseq::refseq(input.obj, errorIfNULL = FALSE))
@@ -540,8 +530,6 @@ setMethod("mbecProcessInput", "phyloseq",
 setMethod("mbecProcessInput", "list",
           function(input.obj, required.col=NULL) {
 
-            message("DEBUG: input for mbecProcessInput is of type list")
-
             if( length(input.obj) != 2 ) {
               stop("Stop: Please provide an abundance-table as first element
                    and meta-data as second element of the list.")
@@ -556,9 +544,7 @@ setMethod("mbecProcessInput", "list",
             }
 
             return.obj <- MbecData(cnt_table = input.obj[[1]],
-                                   meta_data = input.obj[[2]],
-                                   type="raw",
-                                   log="newobject")
+                                   meta_data = input.obj[[2]])
 
             return(return.obj)
           }

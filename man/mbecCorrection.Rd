@@ -7,8 +7,8 @@
 mbecCorrection(
   input.obj,
   model.vars = c("group", "batch"),
-  method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "fab",
-    "pn", "svd"),
+  method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "pn",
+    "svd"),
   update = TRUE,
   nc.features = NULL
 )
@@ -84,12 +84,6 @@ covariates whose effect should not be removed, and a model that only contains th
 The difference between these models produces a residual matrix that (should) contain only the
 full-model-effect, e.g., treatment. As of now the mbecs-correction only uses the first input
 for batch-effect grouping. ToDo: think about implementing a version for more complex models.
-
-FAbatch: Implemented in the bapred-package this method is based on the approach described in
-Hornung et al. 2017. "It is a combination of two commonly used approaches: location-and-scale
-adjustment and data cleaning by adjustment for distortions due to latent factors."
-HOWEVER, since it can't handle the zero inflated counts of compositional microbiome-data -->
-maybe just remove this - or keep in case of non-microbiome data?!
 
 Percentile Normalization (PN): this method was actually developed specifically to facilitate
 the integration of microbiome data from different studies/experimental set-ups. This problem is

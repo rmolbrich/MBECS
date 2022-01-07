@@ -4,7 +4,7 @@
 \alias{mbecRBE}
 \title{Remove Batch Effects (RBE)}
 \usage{
-mbecRBE(input.obj, model.vars)
+mbecRBE(input.obj, model.vars, type = "clr")
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

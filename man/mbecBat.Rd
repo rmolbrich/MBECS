@@ -4,7 +4,7 @@
 \alias{mbecBat}
 \title{Combat Batch Effects (ComBat)}
 \usage{
-mbecBat(input.obj, model.vars)
+mbecBat(input.obj, model.vars, type = "clr")
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

@@ -13,8 +13,8 @@
 #'
 #' @keywords uppercase
 #' @param input.obj, mbecData object or numeric matrix (correct orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param model.form Formular for a linear model to test.
+#' @param model.vars covariates to construct formula from
+#' @param model.form Formula for a linear model to test.
 #' a list of length 2 that contains lists with result objects of 'ks.test()'
 #' named like the performed comparisons i.e. Batch1 to Batch2, etc..
 #' @return Either NULL if everything is fine or a vector of strings that denote
@@ -24,13 +24,17 @@
 #'
 #' @examples
 #' # This will return NULL because it is estimable.
-#' val.score <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
-mbecTestModel <- function(input.obj, model.vars, model.form=NULL) {
+#' eval.obj <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
+mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
+  if( is.null(model.vars) && is.null(model.form) )
+    stop("Please supply covariates and/or model-formula.")
+  input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
+
   # 1. extract covariate information
-  tmp.meta <- phyloseq::sample_data(input.obj)
+  tmp.meta <- mbecGetData(input.obj)[[2]]
 
   # 2. check if model-formula was supplied
-  if( is.null(model.form) ) {
+  if( is.null(model.form) || !is(model.form, "formula") ) {
     # construct linear model from covariates
     message("Construct lm-formula from covariates.")
 
@@ -69,8 +73,6 @@ mbecTestModel <- function(input.obj, model.vars, model.form=NULL) {
 #' .columns
 mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
   ## FixME: this might not be a good idea because the batches probably contain the class effect to a certai degree --> test if it makes a difference when class effect is significant within batches and also the influence of distribution of groups within batches
-
-
   # very ugly, but it'll do for now
   dist.check <- plot.df[, c(eval(colnames(plot.df[pca.axes[1] + 1])),eval(colnames(plot.df[pca.axes[2] + 1])), eval(model.vars))]
 
@@ -159,6 +161,7 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 
   type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
   ## check and prepare inputs
+  input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
                      required.col = eval(model.vars), type=eval(type), label=eval(label))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
@@ -181,9 +184,9 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
     # overkill, but just keep it for now
     f.terms <- paste("(1|",model.vars[1],")", sep="")
 
-    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(x) {
-
-      tmp.formula <- stats::as.formula(paste(paste("x", model.vars[-1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
+    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y) {
+      # FixMe: one-off formula construction should also work, but i'm in no mood to break stuff right now
+      tmp.formula <- stats::as.formula(paste(paste("y", model.vars[-1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
       nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula), data = tmp.meta)))
       nc.lmm.summary <- summary(nc.lmm)
       p <- nc.lmm.summary$coefficients[2,5]
@@ -231,7 +234,7 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 mbecTransform <- function(input.obj, method = "clr",
                           offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments
-  method <- match.arg(method, choices = c("none", "clr","tss"))
+  method <- match.arg(method, choices = c("clr","tss"))
   ## VALIDATE input and change to 'MbecData' if needed
   input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 
