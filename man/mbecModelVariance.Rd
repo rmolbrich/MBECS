@@ -120,11 +120,11 @@ table. Correct orientation of counts will be handled internally.
 \examples{
 # This will return a data-frame that contains the variance attributable to
 # group and batch according to linear additive model.
-df.var.lm <- mbecModelVariance(input.obj=datadummy,
-model.vars=c("batch", "group"), method='lm', type='RAW')
+df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
+model.vars=c("batch", "group"), method='lm', type='clr')
 # This will return a data-frame that contains the variance attributable to
 # group and batch according to linear additive model.
-df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 model.vars=c("batch", "group"), method='pvca')
 }
 \keyword{Evaluation}

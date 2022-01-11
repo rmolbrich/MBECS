@@ -8,10 +8,18 @@
 #' @param tmp.long 'mbecRLE' output
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring
-#' @param mbecCols vector of hex-colors to use
 #' @return ggplot2 object
-mbecRLEPlot <- function(tmp.long, model.vars, mbecCols) {
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.rle <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
+#' type="clr", return.data=TRUE)
+#' plot.rle <- mbecRLEPlot(df.rle, c('group','batch'))
+mbecRLEPlot <- function(tmp.long, model.vars) {
 
+  mbecCols <- pals::tableau20(20)
   n.tiles <- dim(unique(tmp.long[,eval(model.vars[2])]))[1]
 
   if( n.tiles <= 3 ) {
@@ -61,9 +69,17 @@ mbecRLEPlot <- function(tmp.long, model.vars, mbecCols) {
 #' @param model.var Which covariate to group Otus by.
 #' @param mbecCols Color scheme to use for plot.
 #' @return ggplot2 object
-mbecBoxPlot <- function(tmp, otu.idx, model.var,
-                        mbecCols) {
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
+#' model.var='batch', type="otu", return.data=TRUE)
+#' plot.box <- mbecBoxPlot(df.box[[1]], df.box[[2]], 'batch')
+mbecBoxPlot <- function(tmp, otu.idx, model.var) {
 
+  mbecCols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
   x.angle = 0
   x.hjust = 0.5
   density.lwd = 0.2
@@ -156,6 +172,15 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var,
 #' @param model.vars Two covariates of interest to select by first variable
 #' selects panels and second one determines coloring.
 #' @return ggplot2 object
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
+#' center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
+#' plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=df.heat[[1]],
+#' tmp.meta=df.heat[[2]], model.vars=c('group','batch'))
 mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
                          model.vars) {
 
@@ -183,6 +208,15 @@ mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta,
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring.
 #' @return ggplot2 object
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.mosaic <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
+#' return.data=TRUE)
+#' plot.mosaic <- mbecMosaicPlot(study.summary=df.mosaic,
+#' model.vars=c('group','batch'))
 mbecMosaicPlot <- function(study.summary,
                            model.vars) {
 
@@ -287,6 +321,15 @@ mbecMosaicPlot <- function(study.summary,
 #' selects panels and second one determines coloring.
 #' @param pca.axes NMumerical two-piece vector that selects PCs to plot.
 #' @return ggplot2 object
+#' @export
+#'
+#' @examples
+#' # This will return a paneled plot that shows results for the variance
+#' # assessment.
+#' df.pca <- mbecPCA(input.obj=dummy.mbec,
+#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
+#' plot.pca <- mbecPCAPlot(plot.df=df.pca[[1]], metric.df=df.pca[[2]],
+#' model.vars=c('group','batch'), pca.axes=c(1,2))
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
   mbecCols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17)]
   x.angle = 0
@@ -404,13 +447,14 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                                                                            metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
                                                                                                                             metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
                                                                                                                                                                                                        1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
-                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) + theme_pca()
+                                                                                                                                                                                                                                                                                                                 1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) #+ theme_pca()
 
     pTop <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                     1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                           alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      theme_pca() + ggplot2::labs(title = ggplot2::element_blank()) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+      #theme_pca() +
+      ggplot2::labs(title = ggplot2::element_blank()) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
                                                                                                                                                                      size = ggplot2::rel(1.5)))+
       ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
@@ -420,7 +464,8 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                                                                                       1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                             alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      theme_pca() + ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
+      #theme_pca() +
+      ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                                    plot.title = ggplot2::element_blank())+
       ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
@@ -465,9 +510,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
 #' @examples
 #' # This will return a paneled plot that shows results for the variance
 #' # assessments.
-#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
+#' df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'),
-#' method='lm', type='RAW')
+#' method='lm', type='clr')
 #' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 mbecVarianceStatsPlot <- function(variance.obj) {
 
@@ -525,8 +570,8 @@ mbecVarianceStatsPlot <- function(variance.obj) {
 #' @examples
 #' # This will return a paneled plot that shows results for three variance
 #' # assessments.
-#' df.var.rda <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c('group','batch'), method='rda', type='RAW')
+#' df.var.rda <- mbecModelVariance(input.obj=dummy.mbec,
+#' model.vars=c('group','batch'), method='rda', type='clr')
 #' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 mbecRDAStatsPlot <- function(rda.obj) {
 
@@ -579,8 +624,8 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' @examples
 #' # This will return a paneled plot that shows results for the variance
 #' # assessment.
-#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c('group','batch'), method='pvca', type='RAW')
+#' df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
+#' model.vars=c('group','batch'), method='pvca', type='clr')
 #' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 mbecPVCAStatsPlot <- function(pvca.obj) {
 
@@ -643,8 +688,8 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' @examples
 #' # This will return a paneled plot that shows results for the variance
 #' # assessment.
-#' df.var.scoef <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c('group','batch'), method='s.coef', type='RAW')
+#' df.var.scoef <- mbecModelVariance(input.obj=dummy.mbec,
+#' model.vars=c('group','batch'), method='s.coef', type='clr')
 #' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 mbecSCOEFStatsPlot <- function(scoef.obj) {
   ## ToDo: make my own colors - with black jack and hookers

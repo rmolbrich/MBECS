@@ -4,7 +4,7 @@
 \alias{mbecRUV3}
 \title{Remove Unwanted Variation 3 (RUV-3)}
 \usage{
-mbecRUV3(input.obj, model.vars, nc.features = NULL)
+mbecRUV3(input.obj, model.vars, type = "clr", nc.features = NULL)
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

@@ -34,14 +34,14 @@ transformed counts to the input (update=FALSE).
 \examples{
 # This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
 # log and change the type to 'rbe' to indicate current status.
-MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
-    log='rbe',type='corrected', update=TRUE)
+MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+    type='tss')
 
 # This will add the corrected data to the list of transformations named like the type argument.
 # The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
 # matrix wasn't replaced.
-MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
-    log='rbe',type='corrected', update=FALSE)
+MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+    type='cor', label="nameOfMethod")
 }
 \keyword{MBECS}
 \keyword{Setter}

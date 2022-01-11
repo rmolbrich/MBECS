@@ -39,7 +39,7 @@ counts table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return p-value for the linear model fit of every feature.
-val.score <- mbecLM(input.obj=datadummy, model.vars=c("batch","group"),
+val.score <- mbecLM(input.obj=dummy.mbec, model.vars=c("batch","group"),
 method="lm")
 }
 \keyword{Batch}

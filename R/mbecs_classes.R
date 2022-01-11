@@ -170,14 +170,14 @@ MbecData <- function( cnt_table=NULL,
 #' @examples
 #' # This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
 #' # log and change the type to 'rbe' to indicate current status.
-#' MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
-#'     log='rbe',type='corrected', update=TRUE)
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='tss')
 #'
 #' # This will add the corrected data to the list of transformations named like the type argument.
 #' # The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
 #' # matrix wasn't replaced.
-#' MBEC.obj <- mbecSetData(input.obj=datadummy, new.cnts=datadummy$cnts,
-#'     log='rbe',type='corrected', update=FALSE)
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='cor', label="nameOfMethod")
 setGeneric("mbecSetData", signature="input.obj",
            function(input.obj, new.cnts=NULL, type=c("otu","ass","cor","clr","tss"),
                     label=character())
@@ -267,13 +267,13 @@ setMethod("mbecSetData", "MbecData",
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
-#'     required.col=c("group","batch"))
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+#'     required.col=c("group","batch"), type="otu")
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
 #' # of variables 'group' and 'batch' in the meta-data.
-#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
-#'     required.col=c("group","batch"))
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
+#'     required.col=c("group","batch"), type="otu")
 setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL,
                     type=c("otu","ass","cor","clr","tss"), label=character())
@@ -369,13 +369,13 @@ setGeneric("mbecGetData", signature="input.obj",
 #' @examples
 #' # This will return the abundance matrix with samples as rows and check for the presence of
 #' # variables 'group' and 'batch' in the meta-data.
-#' list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
-#'     required.col=c("group","batch"))
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+#'     required.col=c("group","batch"), type="otu")
 #'
 #' # This will return the abundance matrix with samples as columns and check for the presence
 #' # of variables 'group' and 'batch' in the meta-data.
-#' list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
-#'     required.col=c("group","batch"))
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
+#'     required.col=c("group","batch"), type="clr")
 setMethod("mbecGetData", "MbecData",
           function(input.obj, orientation="fxs", required.col=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {

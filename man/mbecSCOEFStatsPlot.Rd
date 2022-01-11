@@ -24,8 +24,8 @@ display side-by-side panels to enable easy comparison.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
-df.var.scoef <- mbecModelVariance(input.obj=datadummy,
-model.vars=c('group','batch'), method='s.coef', type='RAW')
+df.var.scoef <- mbecModelVariance(input.obj=dummy.mbec,
+model.vars=c('group','batch'), method='s.coef', type='clr')
 plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 }
 \keyword{linear}

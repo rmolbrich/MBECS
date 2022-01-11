@@ -6,8 +6,8 @@
 \usage{
 mbecRunCorrections(
   input.obj,
-  model.vars = c("group", "batch"),
-  method = c("ruv3", "bmc", "bat", "rbe", "fab", "pn", "svd"),
+  model.vars = c("batch", "group"),
+  method = c("ruv3", "bmc", "bat", "rbe", "pn", "svd"),
   nc.features = NULL
 )
 }
@@ -24,18 +24,18 @@ mbecRunCorrections(
 an object of class MbecDataSet
 }
 \description{
-Run all corerction algorithms selected by method and add corrected counts
+Run all correction algorithms selected by method and add corrected counts
 as matrices to the data-set.
 }
 \examples{
 # This call will use 'ComBat' for batch effect correction and store the new
 # counts in a list-obj in the output.
-study.obj <- mbecRunCorrections(input.obj=datadummy,
-model.vars=c("group","batch"), method=c("bat","bmc"))
+study.obj <- mbecRunCorrections(input.obj=dummy.mbec,
+model.vars=c("batch","group"), method=c("bat","bmc"))
 
 # This call will use 'Percentile Normalization' for batch effect correction
 # and replace the old count matrix.
-study.obj <- mbecRunCorrections(datadummy, model.vars=c("group","batch"),
+study.obj <- mbecRunCorrections(dummy.mbec, model.vars=c("batch","group"),
 method=c("pn"))
 }
 \keyword{Batch-Effect}

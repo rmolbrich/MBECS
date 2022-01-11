@@ -4,7 +4,7 @@
 \alias{mbecBoxPlot}
 \title{Variability boxes plotting function}
 \usage{
-mbecBoxPlot(tmp, otu.idx, model.var, mbecCols)
+mbecBoxPlot(tmp, otu.idx, model.var)
 }
 \arguments{
 \item{tmp}{Count of selected features.}
@@ -20,6 +20,13 @@ ggplot2 object
 }
 \description{
 Takes data.frame from mbecBox and produces a ggplot2 object.
+}
+\examples{
+# This will return a paneled plot that shows results for the variance
+# assessment.
+df.box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
+model.var='batch', type="otu", return.data=TRUE)
+plot.box <- mbecBoxPlot(df.box[[1]], df.box[[2]], 'batch')
 }
 \keyword{RLE}
 \keyword{expression}

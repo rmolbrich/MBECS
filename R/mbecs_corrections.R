@@ -1,8 +1,9 @@
-# CORRECTION FUNCTIONS ----------------------------------------------------
+
+# CORRECTIONS WRAPPER -----------------------------------------------------
 
 #' Run Correction Pipeline
 #'
-#' Run all corerction algorithms selected by method and add corrected counts
+#' Run all correction algorithms selected by method and add corrected counts
 #' as matrices to the data-set.
 #'
 #' @keywords Batch-Effect Correction Pipeline
@@ -17,21 +18,21 @@
 #' @examples
 #' # This call will use 'ComBat' for batch effect correction and store the new
 #' # counts in a list-obj in the output.
-#' study.obj <- mbecRunCorrections(input.obj=datadummy,
-#' model.vars=c("group","batch"), method=c("bat","bmc"))
+#' study.obj <- mbecRunCorrections(input.obj=dummy.mbec,
+#' model.vars=c("batch","group"), method=c("bat","bmc"))
 #'
 #' # This call will use 'Percentile Normalization' for batch effect correction
 #' # and replace the old count matrix.
-#' study.obj <- mbecRunCorrections(datadummy, model.vars=c("group","batch"),
+#' study.obj <- mbecRunCorrections(dummy.mbec, model.vars=c("batch","group"),
 #' method=c("pn"))
-mbecRunCorrections <- function(input.obj, model.vars=c("group","batch"),
-                           method=c("ruv3","bmc","bat","rbe","fab","pn","svd"),
+mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"),
+                           method=c("ruv3","bmc","bat","rbe","pn","svd"),
                            nc.features=NULL) {
 
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
   for( m.idx in method ) {
-    input.obj <- mbecCorrection(input.obj = input.obj, method = eval(m.idx), update = FALSE)
+    input.obj <- mbecCorrection(input.obj = input.obj, method = eval(m.idx))
   }
 
   return(input.obj)
@@ -128,7 +129,6 @@ mbecRunCorrections <- function(input.obj, model.vars=c("group","batch"),
 #' @param input.obj phyloseq object or numeric matrix (correct orientation is handeled internally)
 #' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
 #' @param method algorithm to use
-#' @param update either update the input counts or create a new matrix of corrected counts within the input
 #' @param nc.features (OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls
 #' @return an object of class MbecDataSet
 #' @export
@@ -137,24 +137,24 @@ mbecRunCorrections <- function(input.obj, model.vars=c("group","batch"),
 #' @examples
 #' # This call will use 'ComBat' for batch effect correction and store the new
 #' # counts in a list-obj in the output.
-#' study.obj <- mbecCorrection(input.obj=datadummy,
-#' model.vars=c("group","batch"), method="bat", update=FALSE)
+#' study.obj <- mbecCorrection(input.obj=dummy.mbec,
+#' model.vars=c("batch","group"), method="bat")
 #'
 #' # This call will use 'Percentile Normalization' for batch effect correction
 #' # and replace the old count matrix.
-#' study.obj <- mbecCorrection(datadummy, model.vars=c("group","batch"),
-#' method="pn", update=TRUE)
+#' study.obj <- mbecCorrection(dummy.mbec, model.vars=c("batch","group"),
+#' method="pn")
 mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc",
                                     "bat","rbe","pn","svd"),
-                           update=TRUE, nc.features=NULL) {
+                           nc.features=NULL) {
 
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
-  ## 00. Check if 'method' was chosen correctly.
+  ##  Check if 'method' was chosen correctly.
   method <- match.arg(method, choices = c("lm","lmm","sva","ruv2","ruv4","ruv3",
-                                          "bmc","bat","rbe","fab","pn","svd"))
-  # START WITH ASSESSMENT METHODS
+                                          "bmc","bat","rbe","pn","svd"))
+  ## START WITH ASSESSMENT METHODS
   if( method == "lm" ) {
     message("Applying Linear Model (LM) to account for batch-effects.")
     res.assess <- mbecLM(input.obj = input.obj, method = "lm",
@@ -183,15 +183,22 @@ mbecCorrection <- function(input.obj, model.vars=c("group","batch"),
   } else if( method == "svd" ) {
     res.correct <- mbecSVD(input.obj, model.vars)
   }
-  ## Prepare return-object
-  message("Calling 'mbecSetData' - log is: ", attr(input.obj, "log"))
-  # If 'update' is TRUE the counts will be updated - otherwise the corrected counts will be placed in a list.
-  return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.correct,
-                            log=method, type=method, update=update)
+
+  ## figure out where to put the result
+  if( method %in% c("lm","lmm","sva","ruv2","ruv4") ) {
+    return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.assess,
+                              type = "ass", label = eval(method))
+  } else if( method %in% c("ruv3","bmc","bat","rbe","pn", "svd") ) {
+    return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.correct,
+                              type = "cor", label = eval(method))
+  }
+
   return(return.obj)
-  # Point of no return. *badum tsss*
+  ## Point of no return. *badum tsss*
 }
 
+
+# ASSESSMENT FUNCTIONS ----------------------------------------------------
 
 #' Surrogate variable Analysis (SVA)
 #'
@@ -262,8 +269,10 @@ mbecSVA <- function(input.obj, model.vars) {
 #' to find pseudo-negative controls
 #' @return SOMETHING
 #' @include mbecs_classes.R
-mbecRUV2 <- function(input.obj, model.vars, nc.features=NULL) {
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
+
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   ## check for neg. controls or generate pseudo negatives
@@ -310,8 +319,9 @@ mbecRUV2 <- function(input.obj, model.vars, nc.features=NULL) {
 #' to find pseudo-negative controls
 #' @return SOMETHING
 #' @include mbecs_classes.R
-mbecRUV4 <- function(input.obj, model.vars, nc.features=NULL) {
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   ## check for neg. controls or generate pseudo negatives
@@ -357,8 +367,10 @@ mbecRUV4 <- function(input.obj, model.vars, nc.features=NULL) {
 #' to find pseudo-negative controls
 #' @return A matrix of batch-effect corrected counts
 #' @include mbecs_classes.R
-mbecRUV3 <- function(input.obj, model.vars, nc.features=NULL) {
-  tmp <- mbecGetData(input.obj, orientation="sxf")
+mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
+
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   ## check for neg. controls or generate pseudo negatives
@@ -384,6 +396,9 @@ mbecRUV3 <- function(input.obj, model.vars, nc.features=NULL) {
 
   return(corrected.cnts)
 }
+
+
+# CORRECTION FUNCTIONS ----------------------------------------------------
 
 
 #' Batch Mean Centering (BMC)
@@ -413,9 +428,12 @@ mbecBMC <- function(input.obj, model.vars, type="clr") {
 
   corrected.cnts <- NULL
   for( batch.idx in input.batches ) {
-    tmp <- scale(tmp.cnts[tmp.meta$sample[tmp.meta[[model.vars[1]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
+    tmp <- scale(tmp.cnts[tmp.meta$sID[tmp.meta[[model.vars[1]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
     corrected.cnts <- rbind.data.frame(corrected.cnts, tmp)
   }
+
+  # reorder according to meta-table
+  corrected.cnts <- corrected.cnts[tmp.meta$sID,]
 
   return(corrected.cnts)
 }
@@ -560,7 +578,7 @@ mbecPN <- function(input.obj, model.vars, type="tss") {
 }
 
 
-#'Singular Value Decomposition (SVD)
+#' Singular Value Decomposition (SVD)
 #'
 #' Basically perform matrix factorization and compute singular eigenvectors
 #' (SEV). Assume that the first SEV captures the batch-effect and remove this
@@ -621,11 +639,3 @@ mbecSVD <- function(input.obj, model.vars, type="clr") {
 
   return(corrected.cnts)
 }
-
-
-
-
-
-
-
-

@@ -47,12 +47,12 @@ table. Correct orientation of counts will be handled internally.
 }
 \examples{
 # This will return the data.frame for plotting.
-data.RLE <- mbecRLE(input.obj=datadummy,
+data.RLE <- mbecRLE(input.obj=dummy.mbec, type="clr",
 model.vars=c('group','batch'), return.data=TRUE)
 
 # This will return the ggplot2 object for display, saving and modification.
-plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
-return.data=FALSE)
+plot.RLE <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
+type="clr", return.data=FALSE)
 }
 \keyword{RLE}
 \keyword{expression}

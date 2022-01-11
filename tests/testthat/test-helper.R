@@ -54,7 +54,6 @@ test_that("linear mixed modeling works", {
 
 # TEST TRANSFORMATION SECTION ---------------------------------------------
 
-
 test_that("Transformation wrapper works", {
   # creat small dataset for testing
   cnts <- matrix(1:16, nrow=4, ncol=4,
@@ -110,6 +109,4 @@ test_that("CLR transformation works", {
   # test deterministic result!?
   expect_equal(mbecCLR(cnts) ,cnts.norm)
 })
-
-
 

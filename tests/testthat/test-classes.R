@@ -25,6 +25,7 @@ test_that("class constructor works", {
 })
 
 
+
 # SETTER ------------------------------------------------------------------
 
 test_that("tss setter works", {
@@ -81,6 +82,7 @@ test_that("corrections setter works", {
                                           type="cor", label="cortest"))
   expect_identical(t(set.res$result@corrections[["cortest"]]), datadummy$cnts)
 })
+
 
 
 # GETTER ------------------------------------------------------------------
@@ -157,6 +159,7 @@ test_that("assessment getter works", {
   expect_identical(names(get.res$result[[2]]), c("sample","group","batch","replicate","sID"))
 })
 
+
 test_that("correction getter works", {
 
   testdummy <- mbecSetData(input.obj=MbecData(cnt_table=datadummy$cnts, meta_data=datadummy$meta), new.cnts=datadummy$cnts,
@@ -215,25 +218,4 @@ test_that("phyloseq process input works", {
   # error missing column
   expect_error(mbecProcessInput(ps.dummy, required.col = c("missing")), "You need to supply a meta-frame that contains the columns: missing")
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

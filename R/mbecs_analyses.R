@@ -30,16 +30,14 @@
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' data.RLE <- mbecRLE(input.obj=datadummy,
+#' data.RLE <- mbecRLE(input.obj=dummy.mbec, type="clr",
 #' model.vars=c('group','batch'), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
-#' plot.RLE <- mbecRLE(input.obj=datadummy, model.vars=c('group','batch'),
-#' return.data=FALSE)
+#' plot.RLE <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
+#' type="clr", return.data=FALSE)
 mbecRLE <- function(input.obj, model.vars = c("batch",
                                               "group"), type="clr", label=character(), return.data = FALSE) {
-
-  mbecCols <- pals::tableau20(20)
 
   tmp <- mbecGetData(input.obj = input.obj, orientation = "fxs",
                      required.col = eval(model.vars), type=eval(type), label=label)
@@ -74,7 +72,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
   if (return.data) {
     return(tmp.long)
   }
-  return(mbecRLEPlot(tmp.long, model.vars, mbecCols))
+  return(mbecRLEPlot(tmp.long, model.vars))
 }
 
 
@@ -109,12 +107,12 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=datadummy,
+#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=datadummy,
+#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
                                                         model.vars = c("batch", "group"), pca.axes = c(1, 2), type="clr", label=character(),
@@ -194,12 +192,12 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=datadummy,
+#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=datadummy,
+#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "group"),
                                           pca.axes = c(1, 2), type="clr", label=character(), return.data = FALSE) {
@@ -235,12 +233,12 @@ setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "gr
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=datadummy,
+#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=datadummy,
+#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
   .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
@@ -278,12 +276,12 @@ setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "gr
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=datadummy,
+#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
 #' # This will return the ggplot2 object for display, saving and modification.
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=datadummy,
+#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
 setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
   .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
@@ -322,16 +320,14 @@ setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"
 #'
 #' @examples
 #' # This will return the plot-frame of all features i the data-set.
-#' data.Box <- mbecBox(input.obj=datadummy, method='ALL', model.var='batch',
+#' data.Box <- mbecBox(input.obj=dummy.mbec, method='ALL', model.var='batch',
 #' return.data=TRUE)
 #'
 #' # This will return the ggplot2 object of the top 15 most variable features.
-#' plot.Box <- mbecBox(input.obj=datadummy, method='TOP', n=15,
+#' plot.Box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=15,
 #' model.var='batch', type="otu", return.data=FALSE)
 mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch", type="clr", label=character(),
                     return.data = FALSE) {
-
-  cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
   input.obj <- mbecProcessInput(input.obj = input.obj, required.col = model.var)
   # needs sxf orientation
@@ -366,7 +362,7 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
     return(list(tmp, otu.idx))
   }
 
-  return(mbecBoxPlot(tmp, otu.idx, model.var, cols))
+  return(mbecBoxPlot(tmp, otu.idx, model.var))
 }
 
 
@@ -402,12 +398,12 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #'
 #' @examples
 #' # This will return the plot-frame of all features i the data-set.
-#' data.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
+#' data.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='ALL', return.data=TRUE)
 #'
-#' # This will return the ggplot2 object of the top 15 most variable features.
-#' plot.Heat <- mbecHeat(input.obj=datadummy, model.vars=c('group','batch'),
-#' center=TRUE, scale=TRUE, method='TOP', n=15, return.data=FALSE)
+#' # This will return the ggplot2 object of the top 5 most variable features.
+#' plot.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
+#' center=TRUE, scale=TRUE, method='TOP', n=5, return.data=FALSE)
 mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
                      scale = TRUE, method = "TOP", n = 10, type="clr", label=character(), return.data = FALSE) {
 
@@ -472,11 +468,11 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 #'
 #' @examples
 #' # This will return the plot-df of the samples grouped by treatment and sex
-#' data.Mosaic <- mbecMosaic(input.obj=datadummy, model.vars=c('group','batch'),
+#' data.Mosaic <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' return.data=TRUE)
 #'
 #' # Return the ggplot2 object of the samples grouped by group and batch
-#' plot.Mosaic <- mbecMosaic(input.obj=datadummy,
+#' plot.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), return.data=FALSE)
 mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data = FALSE) {
 
@@ -615,11 +611,11 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
 #' @examples
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
-#' df.var.lm <- mbecModelVariance(input.obj=datadummy,
-#' model.vars=c("batch", "group"), method='lm', type='RAW')
+#' df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
+#' model.vars=c("batch", "group"), method='lm', type='clr')
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
-#' df.var.pvca <- mbecModelVariance(input.obj=datadummy,
+#' df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='pvca')
 mbecModelVariance <- function(input.obj, model.vars = character(),
                               method = c("lm","lmm", "rda", "pvca", "s.coef"),
@@ -635,6 +631,9 @@ mbecModelVariance <- function(input.obj, model.vars = character(),
   if (is.null(na.action)) {
     na.action = getOption("na.action")
   }
+
+  method <- match.arg(method, choices = c("lm","lmm", "rda", "pvca", "s.coef"))
+  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
 
   ## PVCA stuff
   pct_threshold = 0.5876  # threshold for explained variances
@@ -1068,6 +1067,10 @@ mbecModelVarianceSCOEF <- function(model.form,
 
   return(res)
 }
+
+
+
+# VARIANCE STATISTICS -----------------------------------------------------
 
 
 

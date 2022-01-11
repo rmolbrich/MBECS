@@ -41,13 +41,13 @@ they are present in the data, but it will return the whole meta-frame.
 \examples{
 # This will return the abundance matrix with samples as rows and check for the presence of
 # variables 'group' and 'batch' in the meta-data.
-list.obj <- mbecGetData(input.obj=datadummy, orientation="sxf",
-    required.col=c("group","batch"))
+list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    required.col=c("group","batch"), type="otu")
 
 # This will return the abundance matrix with samples as columns and check for the presence
 # of variables 'group' and 'batch' in the meta-data.
-list.obj <- mbecGetData(input.obj=datadummy, orientation="fxs",
-    required.col=c("group","batch"))
+list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
+    required.col=c("group","batch"), type="clr")
 }
 \keyword{Getter}
 \keyword{MBECS}

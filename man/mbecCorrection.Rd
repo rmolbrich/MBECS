@@ -9,7 +9,6 @@ mbecCorrection(
   model.vars = c("group", "batch"),
   method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "pn",
     "svd"),
-  update = TRUE,
   nc.features = NULL
 )
 }
@@ -19,8 +18,6 @@ mbecCorrection(
 \item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
 
 \item{method}{algorithm to use}
-
-\item{update}{either update the input counts or create a new matrix of corrected counts within the input}
 
 \item{nc.features}{(OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls}
 }
@@ -116,13 +113,13 @@ the counts table. Correct orientation of counts will be handled internally.
 \examples{
 # This call will use 'ComBat' for batch effect correction and store the new
 # counts in a list-obj in the output.
-study.obj <- mbecCorrection(input.obj=datadummy,
-model.vars=c("group","batch"), method="bat", update=FALSE)
+study.obj <- mbecCorrection(input.obj=dummy.mbec,
+model.vars=c("batch","group"), method="bat")
 
 # This call will use 'Percentile Normalization' for batch effect correction
 # and replace the old count matrix.
-study.obj <- mbecCorrection(datadummy, model.vars=c("group","batch"),
-method="pn", update=TRUE)
+study.obj <- mbecCorrection(dummy.mbec, model.vars=c("batch","group"),
+method="pn")
 }
 \keyword{Assessment}
 \keyword{Batch-Effect}

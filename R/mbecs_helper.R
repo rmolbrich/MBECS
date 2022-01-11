@@ -24,7 +24,7 @@
 #'
 #' @examples
 #' # This will return NULL because it is estimable.
-#' eval.obj <- mbecTestModel(input.obj=datadummy, model.vars=c("group","batch"))
+#' eval.obj <- mbecTestModel(input.obj=dummy.mbec, model.vars=c("group","batch"))
 mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
   if( is.null(model.vars) && is.null(model.form) )
     stop("Please supply covariates and/or model-formula.")
@@ -152,7 +152,7 @@ mbecUpperCase <- function(input=character()) {
 #'
 #' @examples
 #' # This will return p-value for the linear model fit of every feature.
-#' val.score <- mbecLM(input.obj=datadummy, model.vars=c("batch","group"),
+#' val.score <- mbecLM(input.obj=dummy.mbec, model.vars=c("batch","group"),
 #' method="lm")
 mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"), type="clr", label=character()) {
   # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice

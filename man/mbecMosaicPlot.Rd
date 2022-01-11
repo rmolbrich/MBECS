@@ -18,6 +18,14 @@ ggplot2 object
 \description{
 Takes data.frame from mbecMosaic and produces a ggplot2 object.
 }
+\examples{
+# This will return a paneled plot that shows results for the variance
+# assessment.
+df.mosaic <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
+return.data=TRUE)
+plot.mosaic <- mbecMosaicPlot(study.summary=df.mosaic,
+model.vars=c('group','batch'))
+}
 \keyword{RLE}
 \keyword{expression}
 \keyword{log}
