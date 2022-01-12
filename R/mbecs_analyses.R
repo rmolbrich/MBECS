@@ -11,21 +11,30 @@
 #' produce the best result.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input
-#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
+#' is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+#' (tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+#' used, they can be selected as input by using the 'type' argument with either
+#' "otu", "clr" or "tss". If batch effect corrected matrices are available, they
+#' can be used by specifying the 'type' argument as "cor" and using the 'label'
+#' argument to select the appropriate matrix by its denominator, e.g., for batch
+#' correction method ComBat this would be "bat", for RemoveBatchEffects from the
+#' limma package this is "rbe". Default correction method-labels are "ruv3",
+#' "bmc","bat","rbe","pn","svd".
+#'
+#' The combination of 'type' and 'label' argument basically accesses the
+#' attribute 'cor', a list that stores all matrices of corrected counts.
+#' This list can also be accessed via getter and setter methods. Hence, the user
+#' can supply their own matrices with own names.
 #'
 #' @keywords RLE relative log expression
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
-#' orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable
-#' selects panels and second one determines coloring.
+#' @param input.obj MbecData-object
+#' @param model.vars two covariates of interest to select by. First relates to
+#' 'batch' and the second to relevant grouping.
 #' @param type Which abundance matrix to use for the calculation.
 #' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting here bucko)
-#' @return either a ggplot2 object or a formatted data-frame to plot from
+#' plotting. Default (FALSE) will return plot object.
+#' @return Either a ggplot2 object or a formatted data-frame to plot from.
 #' @export
 #'
 #' @examples
@@ -36,13 +45,14 @@
 #' # This will return the ggplot2 object for display, saving and modification.
 #' plot.RLE <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' type="clr", return.data=FALSE)
-mbecRLE <- function(input.obj, model.vars = c("batch",
-                                              "group"), type="clr", label=character(), return.data = FALSE) {
+mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
+                    label=character(), return.data = FALSE) {
 
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "fxs",
-                     required.col = eval(model.vars), type=eval(type), label=label)
+  tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
+                     required.col=eval(model.vars), type=eval(type),
+                     label=label)
   tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var = "specimen")
+  tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var="specimen")
 
   tmp.long <- NULL
   for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
@@ -86,10 +96,20 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #' components.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input
-#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
+#' is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+#' (tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+#' used, they can be selected as input by using the 'type' argument with either
+#' "otu", "clr" or "tss". If batch effect corrected matrices are available, they
+#' can be used by specifying the 'type' argument as "cor" and using the 'label'
+#' argument to select the appropriate matrix by its denominator, e.g., for batch
+#' correction method ComBat this would be "bat", for RemoveBatchEffects from the
+#' limma package this is "rbe". Default correction method-labels are "ruv3",
+#' "bmc","bat","rbe","pn","svd".
+#'
+#' The combination of 'type' and 'label' argument basically accesses the
+#' attribute 'cor', a list that stores all matrices of corrected counts.
+#' This list can also be accessed via getter and setter methods. Hence, the user
+#' can supply their own matrices with own names.
 #'
 #' @keywords PCA principal component analysis
 #' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
@@ -100,7 +120,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #' @param type Which abundance matrix to use for the calculation.
 #' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
+#' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -114,19 +134,21 @@ mbecRLE <- function(input.obj, model.vars = c("batch",
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
-                                                        model.vars = c("batch", "group"), pca.axes = c(1, 2), type="clr", label=character(),
-                                                        return.data = FALSE) standardGeneric("mbecPCA"))
+setGeneric("mbecPCA", signature = "input.obj",
+           function(input.obj, model.vars = c("batch", "group"),
+                    pca.axes = c(1, 2), type="clr", label=character(),
+                    return.data = FALSE) standardGeneric("mbecPCA"))
 
 ## In this form it works for 'phyloseq' and 'mbecData' objects
-.mbecPCA <- function(input.obj, model.vars = c("batch", "group"),
-                     pca.axes = c(1,2), type="clr", label=character(), return.data = FALSE) {
+.mbecPCA <- function(input.obj, model.vars=c("batch", "group"),
+                     pca.axes=c(1,2), type="clr", label=character(),
+                     return.data=FALSE) {
 
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.vars), type=eval(type), label=label)
+  tmp <- mbecGetData(input.obj=input.obj, orientation = "sxf",
+                     required.col=eval(model.vars), type=eval(type),
+                     label=label)
 
-  tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]]
+  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
   # calculate IQR and sort counts in decreasing order
   iqr <- apply(tmp.cnts, 2, stats::IQR)
@@ -143,8 +165,9 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
     tibble::rownames_to_column(var = "sID") %>%
     dplyr::left_join(tmp.meta, by = "sID")
 
-  metric.df <- data.frame(var.explained = round((100 * PCA$sdev^2)/(sum(PCA$x^2/max(1,
-                                                                                    nrow(PCA$x) - 1))), 2), row.names = axes.names) %>%
+  metric.df <- data.frame(var.explained=round((100 * PCA$sdev^2)/
+                                      (sum(PCA$x^2/max(1,nrow(PCA$x) - 1))), 2),
+                                      row.names = axes.names) %>%
     dplyr::mutate(axis.min = floor(apply(PCA$x, 2, function(col) min(col)))) %>%
     dplyr::mutate(axis.max = ceiling(apply(PCA$x, 2, function(col) max(col))))
 
@@ -152,7 +175,7 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
     if (!is.factor(plot.df[, eval(model.vars[idx])])) {
       warning("Grouping variables need to be factors.
               Coercing to factor now, adjust beforehand to get best results.")
-      plot.df[, eval(model.vars[idx])] <- factor(plot.df[, eval(model.vars[idx])])
+      plot.df[,eval(model.vars[idx])] <- factor(plot.df[,eval(model.vars[idx])])
     }
   }
 
@@ -175,17 +198,30 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 #' components.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input
-#' for the data-set is an MbecData-object. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
+#' is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+#' (tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+#' used, they can be selected as input by using the 'type' argument with either
+#' "otu", "clr" or "tss". If batch effect corrected matrices are available, they
+#' can be used by specifying the 'type' argument as "cor" and using the 'label'
+#' argument to select the appropriate matrix by its denominator, e.g., for batch
+#' correction method ComBat this would be "bat", for RemoveBatchEffects from the
+#' limma package this is "rbe". Default correction method-labels are "ruv3",
+#' "bmc","bat","rbe","pn","svd".
+#'
+#' The combination of 'type' and 'label' argument basically accesses the
+#' attribute 'cor', a list that stores all matrices of corrected counts.
+#' This list can also be accessed via getter and setter methods. Hence, the user
+#' can supply their own matrices with own names.
 #'
 #' @keywords PCA principal component analysis
-#' @param input.obj MbecData object (correct orientation is handled internally)
+#' @param input.obj MbecData object
 #' @param model.vars two covariates of interest to select by first variable
-#' selects shape and second one determines coloring
+#' selects color (batch) and second one determines shape (group).
 #' @param pca.axes numeric vector which axes to plot, first is X and second is Y
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
+#' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
@@ -199,93 +235,13 @@ setGeneric("mbecPCA", signature = "input.obj", function(input.obj,
 #' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
 #' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "MbecData", function(input.obj, model.vars = c("batch", "group"),
-                                          pca.axes = c(1, 2), type="clr", label=character(), return.data = FALSE) {
-  .mbecPCA(input.obj, model.vars = model.vars, pca.axes = pca.axes, type=type, label=label,
-           return.data = return.data)
-})
-
-
-#' Principal Component Analysis Plot for Phyloseq Objects
-#'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
-#' for user-selected principal components. Covariates determine sample-shape and
-#' color and can be switched to shift the emphasis on either group. In addition
-#' to the ordination-plot, the function will show the distribution of
-#' eigenvalues (colored by the second covariate) on their respective principal
-#' components.
-#'
-#' The function returns either a plot-frame or the finished ggplot object. Input
-#' for the data-set is a phyloseq-object. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords PCA principal component analysis
-#' @param input.obj phyloseq object
-#' @param model.vars two covariates of interest to select by first variable
-#' selects shape and second one determines coloring
-#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
-#' @return either a ggplot2 object or a formatted data-frame to plot from
-#' @export
-#' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
-#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
-#'
-#' # This will return the ggplot2 object for display, saving and modification.
-#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
-#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "phyloseq", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
-  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
-           return.data = return.data)
-})
-
-
-
-#' Principal Component Analysis Plot for List-Input
-#'
-#' Takes two covariates, i.e., group and batch, and computes the ordination-plot
-#' for user-selected principal components. Covariates determine sample-shape and
-#' color and can be switched to shift the emphasis on either group. In addition
-#' to the ordination-plot, the function will show the distribution of
-#' eigenvalues (colored by the second covariate) on their respective principal
-#' components.
-#'
-#' The function returns either a plot-frame or the finished ggplot object. Input
-#' for the data-set is a list that contains counts and covariate data. The
-#' covariate table requires an 'sID' column that contains sample IDs equal to
-#' the sample naming in the counts table. Correct orientation of counts will be
-#' handled internally.
-#'
-#' @keywords PCA principal component analysis
-#' @param input.obj List that contains counts and covariate data (correct
-#' orientation is handled internally)
-#' @param model.vars two covariates of interest to select by first variable
-#' selects shape and second one determines coloring
-#' @param pca.axes numeric vector which axes to plot, first is X and second is Y
-#' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
-#' @return either a ggplot2 object or a formatted data-frame to plot from
-#' @export
-#' @include mbecs_classes.R
-#'
-#' @examples
-#' # This will return the data.frame for plotting.
-#' data.PCA <- mbecPCA(input.obj=dummy.mbec,
-#' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
-#'
-#' # This will return the ggplot2 object for display, saving and modification.
-#' # Selected PCs are PC3 on x-axis and PC2 on y-axis.
-#' plot.PCA <- mbecPCA(input.obj=dummy.mbec,
-#' model.vars=c('group','batch'), pca.axes=c(3,2), return.data=FALSE)
-setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"), pca.axes = c(1, 2), type="otu", return.data = FALSE) {
-  .mbecPCA(mbecProcessInput(input.obj), model.vars = model.vars, pca.axes = pca.axes, type="otu",
-           return.data = return.data)
+setMethod("mbecPCA", "MbecData", function(input.obj,
+                                          model.vars = c("batch", "group"),
+                                          pca.axes = c(1, 2), type="clr",
+                                          label=character(),
+                                          return.data=FALSE) {
+  .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, type=type,
+           label=label, return.data=return.data)
 })
 
 
@@ -293,46 +249,60 @@ setMethod("mbecPCA", "list", function(input.obj, model.vars = c("batch", "group"
 #'
 #' Displays the abundance of a selected feature, grouped/colored by a covariate,
 #' i.e., batch, in a box-plot. Includes the density-plot, i.e., the distribution
-#' of counts for each sub-group. Selection methods for features are 'TOP' and
-#' 'ALL' which select the top-n or all features respectively. The default value
-#' for n is 10 and can be changed with the accompanying parameter.
+#' of counts for each sub-group. Selection methods for features are "TOP" and
+#' "ALL" which select the top-n or all features respectively. The default value
+#' for the argument 'n' is 10. If 'n' is supplied with a vector of feature
+#' names, e.g., c("OTU1","OTU5", "OTU10"), of arbitrary length, the argument
+#' 'method' will be ignored and only the given features selected for plotting.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input
-#' for th data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
+#' is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+#' (tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+#' used, they can be selected as input by using the 'type' argument with either
+#' "otu", "clr" or "tss". If batch effect corrected matrices are available, they
+#' can be used by specifying the 'type' argument as "cor" and using the 'label'
+#' argument to select the appropriate matrix by its denominator, e.g., for batch
+#' correction method ComBat this would be "bat", for RemoveBatchEffects from the
+#' limma package this is "rbe". Default correction method-labels are "ruv3",
+#' "bmc","bat","rbe","pn","svd".
+#'
+#' The combination of 'type' and 'label' argument basically accesses the
+#' attribute 'cor', a list that stores all matrices of corrected counts.
+#' This list can also be accessed via getter and setter methods. Hence, the user
+#' can supply their own matrices with own names.
 #'
 #' @keywords Box abundance density
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
-#' orientation is handeled internally)
-#' @param method one of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT
-#' is 'ALL'
-#' @param n number of OTUs to display for 'TOP' method
-#' @param model.var covariate to group by, default is batch
+#' @param input.obj MbecData object
+#' @param method One of 'ALL' or 'TOP' for 'n' most variable features, DEFAULT
+#' is 'ALL'.
+#' @param n Number of OTUs to display for 'TOP' method, or vector of specific
+#' feature names to select.
+#' @param model.var Covariate to group by, default is "batch".
 #' @param type Which abundance matrix to use for the calculation.
 #' @param label Which corrected abundance matrix to use for analysis.
 #' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
+#' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features in the data-set.
 #' data.Box <- mbecBox(input.obj=dummy.mbec, method='ALL', model.var='batch',
-#' return.data=TRUE)
+#' type='clr', return.data=TRUE)
 #'
-#' # This will return the ggplot2 object of the top 15 most variable features.
-#' plot.Box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=15,
-#' model.var='batch', type="otu", return.data=FALSE)
-mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "batch", type="clr", label=character(),
+#' # This will return the ggplot2 object of the top 5 most variable features.
+#' plot.Box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
+#' model.var='batch', type='otu', return.data=FALSE)
+mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10,
+                    model.var = "batch", type="clr", label=character(),
                     return.data = FALSE) {
 
   input.obj <- mbecProcessInput(input.obj = input.obj, required.col = model.var)
   # needs sxf orientation
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.var), type=eval(type), label=label)
+                     required.col = eval(model.var), type=eval(type),
+                     label=label)
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
   otu.idx <- colnames(tmp[[1]])
@@ -371,33 +341,45 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #' Shows the abundance value of selected features in a heatmap. By default, the
 #' function expects two covariates group and batch to depict clustering in these
 #' groups. More covariates can be included. Selection methods for features are
-#' 'TOP' and 'ALL' which select the top-n or all features respectively. The
-#' default value for n is 10 and can be changed with the accompanying parameter.
+#' "TOP" and "ALL" which select the top-n or all features respectively. The
+#' default value for the argument 'n' is 10. If 'n' is supplied with a vector
+#' of feature names, e.g., c("OTU1","OTU5", "OTU10"), of arbitrary length, the
+#' argument method' will be ignored and only the given features selected for
+#' plotting.
 #'
-#' The function returns either a plot-frame or the finished ggplot object.
-#' Input for the data-set can be an MbecData-object, a phyloseq-object or a list
-#' that contains counts and covariate data. The covariate table requires an
-#' 'sID' column that contains sample IDs equal to the sample naming in the
-#' counts table. Correct orientation of counts will be handled internally.
+#' The function returns either a plot-frame or the finished ggplot object. Input
+#' is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+#' (tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+#' used, they can be selected as input by using the 'type' argument with either
+#' "otu", "clr" or "tss". If batch effect corrected matrices are available, they
+#' can be used by specifying the 'type' argument as "cor" and using the 'label'
+#' argument to select the appropriate matrix by its denominator, e.g., for batch
+#' correction method ComBat this would be "bat", for RemoveBatchEffects from the
+#' limma package this is "rbe". Default correction method-labels are "ruv3",
+#' "bmc","bat","rbe","pn","svd".
+#'
+#' The combination of 'type' and 'label' argument basically accesses the
+#' attribute 'cor', a list that stores all matrices of corrected counts.
+#' This list can also be accessed via getter and setter methods. Hence, the user
+#' can supply their own matrices with own names.
 #'
 #' @keywords Heat abundance clustering
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
-#' orientation is handeled internally)
-#' @param model.vars covariates of interest to show in heatmap
-#' @param center flag to activate centering
-#' @param scale flag to activate scaling
-#' @param method one of 'ALL' or 'TOP' or a vector of feature names
-#' @param n number of features to select in method TOP
+#' @param input.obj MbecData object
+#' @param model.vars Covariates of interest to show in heatmap.
+#' @param center Flag to activate centering, DEFAULT is TRUE.
+#' @param scale Flag to activate scaling, DEFAULT is TRUE.
+#' @param method One of 'ALL' or 'TOP' or a vector of feature names.
+#' @param n Number of features to select in method TOP.
 #' @param type Which abundance matrix to use for the calculation.
 #' @param label Which corrected abundance matrix to use for analysis.
-#' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
+#' @param return.data Logical if TRUE returns the data.frame required for
+#' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return the plot-frame of all features i the data-set.
+#' # This will return the plot-frame of all features in the data-set.
 #' data.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='ALL', return.data=TRUE)
 #'
@@ -405,12 +387,14 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10, model.var = "ba
 #' plot.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='TOP', n=5, return.data=FALSE)
 mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
-                     scale = TRUE, method = "TOP", n = 10, type="clr", label=character(), return.data = FALSE) {
+                     scale = TRUE, method = "TOP", n = 10, type="clr",
+                     label=character(), return.data = FALSE) {
 
   cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
 
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.vars), type=eval(type), label=label)
+  tmp <- mbecGetData(input.obj=input.obj, orientation="sxf",
+                     required.col=eval(model.vars), type=eval(type),
+                     label=label)
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]]
   otu.idx <- colnames(tmp[[1]])
@@ -418,12 +402,14 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
   for (g.idx in c(seq_along(model.vars))) {
     if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
       warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(model.vars[g.idx]), " to factor now, adjust beforehand to get best results.")
-      tmp.meta[, eval(model.vars[g.idx])] <- factor(tmp.meta[, eval(model.vars[g.idx])])
+              eval(model.vars[g.idx]),
+              " to factor now, adjust beforehand to get best results.")
+      tmp.meta[, eval(model.vars[g.idx])] <-
+        factor(tmp.meta[, eval(model.vars[g.idx])])
     }
   }
-  tmp.cnts <- base::scale(tmp.cnts, center = eval(center), scale = eval(scale))
-  tmp.cnts <- base::scale(t(tmp.cnts), center = eval(center), scale = eval(scale))
+  tmp.cnts <- base::scale(tmp.cnts, center=eval(center), scale=eval(scale))
+  tmp.cnts <- base::scale(t(tmp.cnts), center=eval(center), scale=eval(scale))
   if (method[1] == "TOP") {
     iqr <- apply(tmp.cnts[otu.idx, ], 1, stats::IQR)
     iqr <- iqr[order(iqr, decreasing = TRUE)]
@@ -451,34 +437,32 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 #' in an analysis.
 #'
 #' The function returns either a plot-frame or the finished ggplot object. Input
-#' for the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
+#' for the data-set can be an MbecData-object.
 #'
 #' @keywords Mosaic sample allocation
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
-#' orientation is handeled internally)
-#' @param model.vars covariates of interest to the sample allocation
-#' @param return.data logical if TRUE returns the data.frame required for
-#' plotting (NO plotting or saving here bucko)
+#' @param input.obj MbecData object
+#' @param model.vars Two covariates of interest to the sample allocation.
+#' @param return.data Logical if TRUE returns the data.frame required for
+#' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return the plot-df of the samples grouped by treatment and sex
-#' data.Mosaic <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
-#' return.data=TRUE)
+#' # This will return the plot-df of the samples grouped by group and batch.
+#' data.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
+#' model.vars=c('group','batch'), return.data=TRUE)
 #'
 #' # Return the ggplot2 object of the samples grouped by group and batch
 #' plot.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), return.data=FALSE)
-mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data = FALSE) {
+mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
+                       return.data = FALSE) {
 
   cols <- pals::tableau20(20)
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
+  tmp <- mbecGetData(input.obj, orientation = "sxf",
+                     required.col = eval(model.vars))
   tmp.meta <- tmp[[2]]
 
   if (length(model.vars) < 2) {
@@ -490,12 +474,14 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
   for (g.idx in eval(model.vars)) {
     if (!is.factor(tmp.meta[, eval(g.idx)])) {
       warning("Grouping variables need to be factors. Coercing variable: '",
-              eval(g.idx), "' to factor now, adjust beforehand to get best results.")
+              eval(g.idx),
+              "' to factor now, adjust beforehand to get best results.")
       tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
     }
   }
   n.observations <- base::dim(tmp.meta)[1]
-  study.summary <- base::table(tmp.meta[, eval(model.vars[1])], tmp.meta[, eval(model.vars[2])]) %>%
+  study.summary <- base::table(tmp.meta[, eval(model.vars[1])],
+                               tmp.meta[, eval(model.vars[2])]) %>%
     as.data.frame() %>%
     dplyr::mutate(Freq.scaled = Freq/n.observations)
 
@@ -589,22 +575,22 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
 #' table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Model Evaluation Variance
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct
-#' orientation is handled internally)
-#' @param model.vars vector of covariates to include in model-construction, in
-#' case parameter 'model.form' is not supplied
-#' @param method select method of modeling: Linear Model (lm), Linear Mixed
+#' @param input.obj MbecData object
+#' @param model.vars Vector of covariates to include in model-construction, in
+#' case parameter 'model.form' is not supplied.
+#' @param method Select method of modeling: Linear Model (lm), Linear Mixed
 #' Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis
-#' (pvca) or Silhouette Coefficient (s.coef)
+#' (pvca) or Silhouette Coefficient (s.coef).
 #' @param model.form string that describes a model formula, i.e.,
-#' 'y ~ covariate1 + (1|covariate2)'
-#' @param type keep track of cnt-source
+#' 'y ~ covariate1 + (1|covariate2)'.
+#' @param type Which abundance matrix to use for the calculation.
+#' @param label Which corrected abundance matrix to use for analysis.
 #' @param no.warning (OPTIONAL) True/False-flag that should turn of singularity
 #' warnings, but it doesn't quite work
 #' @param na.action (OPTIONAL) set NA handling, will take global option if not
 #' supplied
-#' @return df that contains proportions of variance for given covariates in
-#' every feature
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in every feature.
 #' @include mbecs_classes.R
 #' @export
 #'
@@ -614,13 +600,13 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"), return.data 
 #' df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='lm', type='clr')
 #' # This will return a data-frame that contains the variance attributable to
-#' # group and batch according to linear additive model.
+#' # group and batch according to principal variance component analysis.
 #' df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='pvca')
-mbecModelVariance <- function(input.obj, model.vars = character(),
-                              method = c("lm","lmm", "rda", "pvca", "s.coef"),
-                              model.form = NULL, type = "clr", label=character(), no.warning = TRUE,
-                              na.action = NULL) {
+mbecModelVariance <- function(input.obj, model.vars=character(),
+                              method=c("lm","lmm", "rda", "pvca", "s.coef"),
+                              model.form=NULL, type="clr", label=character(),
+                              no.warning = TRUE, na.action = NULL) {
   oldw <- getOption("warn")
   if (no.warning) {
     options(warn = -1)
@@ -639,50 +625,48 @@ mbecModelVariance <- function(input.obj, model.vars = character(),
   pct_threshold = 0.5876  # threshold for explained variances
 
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.vars), type=eval(type), label=label)
+                     required.col=eval(model.vars), type=eval(type),
+                     label=label)
+  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  # ToDo: include working on correction lists right here
-
-  tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]]
+  ## Adjust 'type' variable if selected matrix comes from 'cor' list
+  if( type == "cor" && length(label) != 0 ) type <- label
 
   ## CHECK if grouping variables are factors
   for (g.idx in eval(model.vars)) {
     if (!is.factor(tmp.meta[, eval(g.idx)])) {
       warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(g.idx), " to factor now, adjust beforehand to get best results.")
+              eval(g.idx),
+              " to factor now, adjust beforehand to get best results.")
       tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
     }
   }
 
   if (method == "lm") {
-    res <- mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)
+    res <- mbecModelVarianceLM(model.form,model.vars,tmp.cnts,tmp.meta,type)
     return(res)
 
   } else if (method == "lmm") {
-    res <- mbecModelVarianceLMM(model.form, model.vars, tmp.cnts, tmp.meta, type)
+    res <- mbecModelVarianceLMM(model.form,model.vars,tmp.cnts,tmp.meta,type)
     return(res)
 
   } else if (method == "rda") {
-    res <- mbecModelVarianceRDA(model.form, model.vars, tmp.cnts, tmp.meta, type)
+    res <- mbecModelVarianceRDA(model.vars,tmp.cnts,tmp.meta,type)
     return(res)
 
   } else if (method == "pvca") {
-    res <- mbecModelVariancePVCA(model.form, model.vars, tmp.cnts, tmp.meta,
+    res <- mbecModelVariancePVCA(model.vars, tmp.cnts, tmp.meta,
                                  type, pct_threshold, na.action)
     return(res)
 
   } else if (method == "s.coef") {
-    res <- mbecModelVarianceSCOEF(model.form, model.vars, tmp.cnts, tmp.meta,
-                                  type)
+    res <- mbecModelVarianceSCOEF(model.vars, tmp.cnts, tmp.meta, type)
     return(res)
 
   }
   message("Input doesn't apply to any available method. Nothing was done here.")
   return(NULL)
 }
-
-
 
 
 #' Estimate Explained Variance with Linear Models
@@ -699,20 +683,17 @@ mbecModelVariance <- function(input.obj, model.vars = character(),
 #' feature respectively and the proportion of variance is extracted for each
 #' covariate (OTU_x ~ covariate_1 + covariate_2 + ...).
 #'
-#' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-#' the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords LM Variance
-#' @param model.form type formula for linear model
-#' @param model.vars covariates to use for model building
-#' @param tmp.cnts extracted count matrix
-#' @param tmp.meta extracted covariate table
-#' @param type String the denotes data source to keep track of process steps
-#' @return df that contains proportions of variance for given covariates
+#' @keywords LM Proportion of Variance
+#' @param model.form Formula for linear model, function will create simple
+#' additive linear model if this argument is not supplied.
+#' @param model.vars Covariates to use for model building if argument
+#' 'model.form' is not given.
+#' @param tmp.cnts Abundance matrix in 'sample x feature' orientation.
+#' @param tmp.meta Covariate table that contains at least the used variables.
+#' @param type String the denotes data source, i.e., one of "otu","clr" or "tss"
+#' for the transformed counts or the label of the batch corrected count-matrix.
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in a linear modelling approach.
 #' @include mbecs_classes.R
 mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type) {
   message("Fitting linear model to every feature and extract proportion of
@@ -722,19 +703,22 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
     tmp.formula <- stats::as.formula(model.form)
   } else {
     message("Construct formula from covariates.")
-    tmp.formula = stats::as.formula(paste("y", " ~ ", paste(model.vars, collapse = " + ")))
+    tmp.formula = stats::as.formula(paste("y", " ~ ", paste(model.vars,
+                                                            collapse = " + ")))
   }
 
   # Add a progress bar.
   features <- colnames(tmp.cnts)
-  lm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3, width = 80, char="=")
+  lm.pb <- utils::txtProgressBar(min=0, max=length(features), style=3,
+                                 width=80, char="=")
 
   model.variances <- NULL
   for (x in seq_along(features)) {
     y <- tmp.cnts[[eval(x)]]
 
     model.fit <- stats::lm(tmp.formula, data = tmp.meta)
-    model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    model.variances <- rbind.data.frame(model.variances,
+                                        mbecVarianceStats(model.fit))
     setTxtProgressBar(lm.pb, x)
   }
   # close progress bar
@@ -746,6 +730,7 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
   return(res)
 }
 
+
 #' Estimate Explained Variance with Linear Mixed Models
 #'
 #' The function offers a selection of methods/algorithms to estimate the
@@ -756,33 +741,30 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
 #' (CoI) are selected by the user and the function will incorporate them into
 #' the model.
 #'
-#' Linear Mixed Model (lmm): All but the first covariate are considered mixed
-#' effects. A model is fitted to each OTU respectively and the proportion of
+#' Linear Mixed Model (lmm): Only the first covariate is considered a mixed
+#' effect. A model is fitted to each OTU respectively and the proportion of
 #' variance extracted for each covariate.
-#' (OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
+#' (OTU_x ~ covariate_2.. + covariate_n + (1|covariate_1)
 #'
-#' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-#' the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords LM Variance
-#' @param model.form type formula for linear model
-#' @param model.vars covariates to use for model building
-#' @param tmp.cnts extracted count matrix
-#' @param tmp.meta extracted covariate table
-#' @param type String the denotes data source to keep track of process steps
-#' @return df that contains proportions of variance for given covariates
+#' @keywords LMM Proportion of Variance
+#' @param model.form Formula for linear mixed model, function will create simple
+#' additive linear mixed model if this argument is not supplied.
+#' @param model.vars Covariates to use for model building if argument
+#' 'model.form' is not given.
+#' @param tmp.cnts Abundance matrix in 'sample x feature' orientation.
+#' @param tmp.meta Covariate table that contains at least the used variables.
+#' @param type String the denotes data source, i.e., one of "otu","clr" or "tss"
+#' for the transformed counts or the label of the batch corrected count-matrix.
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in a linear mixed modelling approach.
 #' @include mbecs_classes.R
-mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type) {
-
+mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                 type) {
 
   message("Fitting linear-mixed model to every feature and extract proportion
           of variance explained by covariates.")
-
-  control = lme4::lmerControl(calc.derivs = TRUE, check.rankX = "stop.deficient")
+  # FixMe: maybe include the option to adjust this
+  control=lme4::lmerControl(calc.derivs=TRUE, check.rankX="stop.deficient")
 
   if (!is.null(model.form)) {
     message("Use provided model formula.")
@@ -790,22 +772,24 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
   } else {
     message("Construct formula from covariates.")
     f.terms <- paste("(1|", model.vars, ")", sep = "")
-
-        tmp.formula <- stats::as.formula(paste(paste("y", paste(model.vars[-1], collapse = " + "), sep = " ~ "),
-                                           paste(f.terms[1], collapse = " + "), sep = " + "))
-
+    tmp.formula <- stats::as.formula(paste(paste("y", paste(model.vars[-1],
+                                                            collapse = " + "),
+                                                 sep = " ~ "),
+                                           paste(f.terms[1], collapse = " + "),
+                                           sep = " + "))
   }
-
   # Add a progress bar.
   features <- colnames(tmp.cnts)
-  lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3, width = 80, char="=")
+  lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3,
+                                  width = 80, char="=")
 
   model.variances <- NULL
   for (x in seq_along(features)) {
     y <- tmp.cnts[[eval(x)]]  # meh
 
     model.fit <- lme4::lmer(tmp.formula, data = tmp.meta, control = control)
-    model.variances <- rbind.data.frame(model.variances, mbecVarianceStats(model.fit))
+    model.variances <- rbind.data.frame(model.variances,
+                                        mbecVarianceStats(model.fit))
 
     setTxtProgressBar(lmm.pb, x)
   }
@@ -832,29 +816,23 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta, typ
 #' variance between the full- and the constrained-model is then attributed to
 #' the constraint. (cnts ~ group + Condition(batch) vs. cnts ~ group + batch)
 #'
-#' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-#' the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords LM Variance
-#' @param model.form type formula for linear model
-#' @param model.vars covariates to use for model building
-#' @param tmp.cnts extracted count matrix
-#' @param tmp.meta extracted covariate table
-#' @param type String the denotes data source to keep track of process steps
-#' @return df that contains proportions of variance for given covariates
+#' @keywords Partial Redundancy Analysis of Variance
+#' @param model.vars Covariates to use for model building.
+#' @param tmp.cnts Abundance matrix in 'sample x feature' orientation.
+#' @param tmp.meta Covariate table that contains at least the used variables.
+#' @param type String the denotes data source, i.e., one of "otu","clr" or "tss"
+#' for the transformed counts or the label of the batch corrected count-matrix.
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in a partial redundancy analysis approach.
 #' @include mbecs_classes.R
-mbecModelVarianceRDA <- function(model.form,
-                                 model.vars, tmp.cnts, tmp.meta, type) {
+mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
 
   model.variances = data.frame(matrix(nrow = length(model.vars),
                                       ncol = 1, dimnames = list(model.vars,
                                                                 eval(type))))
   # Add a progress bar.
-  rda.pb <- utils::txtProgressBar(min = 0, max = length(model.vars), style = 3, width = 80, char="=")
+  rda.pb <- utils::txtProgressBar(min = 0, max = length(model.vars), style = 3,
+                                  width = 80, char="=")
 
   for (condition.idx in seq_along(model.vars)) {
     tmp.formula = stats::as.formula(
@@ -865,10 +843,6 @@ mbecModelVarianceRDA <- function(model.form,
 
     tmp.rda.covariate <- vegan::rda(tmp.formula,
                                     data = tmp.meta)
-
-    # tmp.sig <- stats::anova(
-    #   tmp.rda.covariate,
-    #   permutations = permute::how(nperm = 999))$`Pr(>FALSE)`[1]
 
     model.variances[condition.idx,eval(type)] <-
       summary(tmp.rda.covariate)$partial.chi *
@@ -883,6 +857,7 @@ mbecModelVarianceRDA <- function(model.form,
 
   return(res)
 }
+
 
 #' Estimate Explained Variance with Principal Variance Component Analysis
 #'
@@ -912,24 +887,19 @@ mbecModelVarianceRDA <- function(model.form,
 #' Finally take the average over each random variable and interaction term and
 #' display in a nice plot.
 #'
-#' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-#' the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords LM Variance
-#' @param model.form type formula for linear model
-#' @param model.vars covariates to use for model building
-#' @param tmp.cnts extracted count matrix
-#' @param tmp.meta extracted covariate table
-#' @param type String the denotes data source to keep track of process steps
-#' @param pct_threshold Cutoff value
-#' @param na.action Set NA handling, will take global option if not supplied
-#' @return df that contains proportions of variance for given covariates
+#' @keywords Principal Variance Component Analysis
+#' @param model.vars Covariates to use for model building.
+#' @param tmp.cnts Abundance matrix in 'sample x feature' orientation.
+#' @param tmp.meta Covariate table that contains at least the used variables.
+#' @param type String the denotes data source, i.e., one of "otu","clr" or "tss"
+#' for the transformed counts or the label of the batch corrected count-matrix.
+#' @param pct_threshold Cutoff value for accumulated variance in principal
+#' components.
+#' @param na.action Set NA handling, will take global option if not supplied.
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in a principal variance component analysis approach.
 #' @include mbecs_classes.R
-mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, type,
+mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
                                   pct_threshold, na.action) {
   n.vars <- length(model.vars)
   s.names <- rownames(tmp.cnts)
@@ -947,7 +917,8 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
   sum.eVal <- sum(eVal)
   prop.PCs <- eVal/sum.eVal
 
-  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs), function(x) x >= pct_threshold,
+  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs),
+                                   function(x) x >= pct_threshold,
                                    FUN.VALUE = logical(1)))))
   # suppress tibble verbose output
   suppressMessages(lmm.df <- eVec %>%
@@ -958,20 +929,25 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
   f.terms <- paste("(1|", model.vars, ")", sep = "")
 
   for( var.idx in seq_len((n.vars - 1)) ) {
-    for( interaction.idx in seq.int(from = (var.idx + 1), to = (n.vars), by = 1) ) {
-      f.terms <- c(f.terms, paste("(1|", model.vars[var.idx], ":", model.vars[interaction.idx],
-                                  ")", sep = ""))
+    for( interaction.idx in seq.int(from=(var.idx + 1), to=(n.vars), by=1) ) {
+      f.terms <- c(f.terms, paste("(1|", model.vars[var.idx], ":",
+                                  model.vars[interaction.idx], ")", sep = ""))
     }
   }
   n.effects <- length(f.terms) + 1
   randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
 
-  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ", paste(f.terms,
-                                                                            collapse = " + "), sep = ""))
+  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",
+                                           paste(f.terms,
+                                                 collapse = " + "), sep = ""))
 
   for (vec.idx in seq_len(n.PCs)) {
-    randomEffects <- data.frame(lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula,
-                                                                  lmm.df, REML = TRUE, verbose = 0, na.action = na.action)))
+    randomEffects <- data.frame(lme4::VarCorr(Rm1ML <-
+                                              lme4::lmer(model.formula,lmm.df,
+                                                         REML = TRUE,
+                                                         verbose = 0,
+                                                         na.action=na.action)))
+
     randomEffectsMatrix[vec.idx, ] <- as.numeric(randomEffects[, 4])
   }
 
@@ -979,9 +955,10 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
   randomEffectsMatrix.std <- randomEffectsMatrix/rowSums(randomEffectsMatrix)
 
   scaled.eVal <- eVal/sum(eVal)
-  randomEffectsMatrix.wgt <- randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
+  randomEffectsMatrix.wgt <- randomEffectsMatrix.std*scaled.eVal[seq_len(n.PCs)]
 
-  model.variances <- colSums(randomEffectsMatrix.wgt)/sum(colSums(randomEffectsMatrix.wgt))
+  model.variances <- colSums(randomEffectsMatrix.wgt)/
+    sum(colSums(randomEffectsMatrix.wgt))
   names(model.variances) <- names.effects
 
   res <- data.frame(t(model.variances)) %>%
@@ -990,6 +967,7 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
 
   return(res)
 }
+
 
 #' Estimate Explained Variance with Silhouette Coefficient
 #'
@@ -1022,24 +1000,16 @@ mbecModelVariancePVCA <- function(model.form, model.vars, tmp.cnts, tmp.meta, ty
 #' certain amount of uncertainty was removed from the data) and a decrease for
 #' the batch effect.
 #'
-#' The function returns a data-frame for further analysis - the report functions
-#' (mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-#' the data-set can be an MbecData-object, a phyloseq-object or a list that
-#' contains counts and covariate data. The covariate table requires an 'sID'
-#' column that contains sample IDs equal to the sample naming in the counts
-#' table. Correct orientation of counts will be handled internally.
-#'
-#' @keywords LM Variance
-#' @param model.form type formula for linear model
-#' @param model.vars covariates to use for model building
-#' @param tmp.cnts extracted count matrix
-#' @param tmp.meta extracted covariate table
-#' @param type String the denotes data source to keep track of process steps
-#' @return df that contains proportions of variance for given covariates
+#' @keywords Silhouette Coefficient Assessment
+#' @param model.vars Covariates to use for model building.
+#' @param tmp.cnts Abundance matrix in 'sample x feature' orientation.
+#' @param tmp.meta Covariate table that contains at least the used variables.
+#' @param type String the denotes data source, i.e., one of "otu","clr" or "tss"
+#' for the transformed counts or the label of the batch corrected count-matrix.
+#' @return Data.frame that contains proportions of variance for given covariates
+#' in a silhouette coefficient analysis approach.
 #' @include mbecs_classes.R
-mbecModelVarianceSCOEF <- function(model.form,
-                                   model.vars, tmp.cnts, tmp.meta,
-                                   type) {
+mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
 
   tmp.prcomp <- stats::prcomp(tmp.cnts,
                               center = TRUE, scale = FALSE)
@@ -1051,14 +1021,14 @@ mbecModelVarianceSCOEF <- function(model.form,
   for (var.elem in model.vars) {
     print(var.elem)
 
-    tmp.sil = cluster::silhouette(x = as.numeric(tmp.meta[,
-                                                          eval(var.elem)]), dist = tmp.dist)
+    tmp.sil = cluster::silhouette(x=as.numeric(tmp.meta[,eval(var.elem)]),
+                                  dist = tmp.dist)
 
     avg.sil.df <- rbind.data.frame(avg.sil.df,
-                                   data.frame(variable = var.elem,
-                                              cluster = levels(tmp.meta[,
-                                                                        eval(var.elem)]),
-                                              sil.coefficient = c(summary(tmp.sil))$clus.avg.widths))
+                        data.frame(variable=var.elem,
+                                   cluster=levels(tmp.meta[,eval(var.elem)]),
+                                   sil.coefficient =
+                                          c(summary(tmp.sil))$clus.avg.widths))
   }
 
   res <- avg.sil.df %>%
@@ -1091,8 +1061,8 @@ mbecModelVarianceSCOEF <- function(model.form,
 #' coefficients at this point.
 #'
 #' @keywords lm lmm proportion variance
-#' @param model.fit linear (mixed) model object of class 'lm' or 'lmerMod'
-#' @return a named row-vector, containing proportional variance for model terms
+#' @param model.fit A linear (mixed) model object of class 'lm' or 'lmerMod'.
+#' @return A named row-vector, containing proportional variance for model terms.
 #' @export
 #'
 #' @examples
@@ -1132,14 +1102,15 @@ mbecVarianceStats <- function(model.fit) {
 #' return the Sum of squares for each term, scaled by the total sum of squares.
 #'
 #' @keywords lm proportion variance
-#' @param model.fit linear model object of class 'lm'
-#' @return a named row-vector, containing proportional variance for model terms
+#' @param model.fit A linear model object of class 'lm'.
+#' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLM <- function(model.fit) {
 
   vp = stats::anova(model.fit) %>%
     data.frame() %>%
-    dplyr::mutate(variance = dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,
-                                                                          "Sum.Sq")), .keep = "none") %>%
+    dplyr::mutate(variance =
+                    dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,"Sum.Sq")),
+                  .keep = "none") %>%
     t()
 
   return(vp)
@@ -1160,22 +1131,27 @@ mbecVarianceStatsLM <- function(model.fit) {
 #' coefficients at this point.
 #'
 #' @keywords lmm proportion variance
-#' @param model.fit linear mixed model object of class 'lmerMod'
-#' @return a named row-vector, containing proportional variance for model terms
+#' @param model.fit A linear mixed model object of class 'lmerMod'.
+#' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLMM <- function(model.fit) {
 
   vc <- mbecMixedVariance(model.fit)
 
-  lib.df <- data.frame(covariates = colnames(model.fit@frame),
-                       row.names = vapply(colnames(model.fit@frame),
-                                          function(covariate) paste(paste(covariate,
-                                                                          levels(model.fit@frame[, eval(covariate)]),
-                                                                          sep = ""), collapse = ","), FUN.VALUE = character(1)))
+  lib.df <- data.frame(
+    covariates = colnames(model.fit@frame),
+    row.names = vapply(colnames(model.fit@frame),
+                       function(covariate)
+                         paste(paste(covariate,
+                                     levels(model.fit@frame[, eval(covariate)]),
+                                     sep = ""), collapse = ","),
+                       FUN.VALUE = character(1)))
 
   total.var.LUT <- unlist(lapply(vc, function(var.comp) {
     if (length(var.comp) > 1) {
-      weights = (table(model.fit@frame[[lib.df[eval(paste(names(var.comp),
-                                                          collapse = ",")), ]]])/nrow(model.fit@frame))
+      weights = (table(
+        model.fit@frame[[lib.df[eval(paste(names(var.comp),
+                                           collapse = ",")),
+                                ]]])/nrow(model.fit@frame))
       var.comp %*% weights
     } else {
       names(var.comp) <- NULL
@@ -1203,9 +1179,6 @@ mbecVarianceStatsLMM <- function(model.fit) {
 }
 
 
-
-
-
 #' Mixed Model Variance-Component Extraction
 #'
 #' A helper function that extracts the variance components of linear mixed
@@ -1222,12 +1195,13 @@ mbecVarianceStatsLMM <- function(model.fit) {
 #' variance of the matrix-multiplication β∗X (parameter vector by model matrix)
 #'
 #' @keywords lmm proportion variance
-#' @param model.fit linear mixed model object of class 'lmerMod'
-#' @return a named list, containing proportional variance for model terms
+#' @param model.fit A linear mixed model object of class 'lmerMod'.
+#' @return A named list, containing proportional variance for model terms that
+#' describe mixed effects.
 #' @export
 #'
 #' @examples
-#' # This will return the variance components.
+#' # This will return the variance of random/mixed components.
 #' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
 #' data=datadummy$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
@@ -1245,8 +1219,9 @@ mbecMixedVariance <- function(model.fit) {
     dplyr::mutate(total.var = apply(., 1, sum)) %>%
     apply(2, function(effect) stats::var(effect) * n.scaling)
 
-  fixedVar <- lapply(split(utils::head(fixedVar, -1)/sum(utils::head(fixedVar,
-                                                                     -1)) * utils::tail(fixedVar, 1), names(utils::head(fixedVar, -1))),
+  fixedVar <- lapply(
+    split(utils::head(fixedVar, -1)/sum(utils::head(fixedVar,-1)) *
+            utils::tail(fixedVar, 1), names(utils::head(fixedVar, -1))),
                      unname)
 
   return(c(randomVar, fixedVar))
@@ -1262,8 +1237,8 @@ mbecMixedVariance <- function(model.fit) {
 #' ToDo: maybe some additional validation steps and more informative output.
 #'
 #' @keywords collinearity model validation
-#' @param model.fit lm() or lmm() output
-#' @param colinearityThreshold cut-off for model rejection
+#' @param model.fit lm() or lmm() output.
+#' @param colinearityThreshold Cut-off for model rejection, I=[0,1].
 #' @return No return values. Stops execution if validation fails.
 #' @export
 #'
@@ -1275,9 +1250,9 @@ mbecMixedVariance <- function(model.fit) {
 mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
   ## ToDo: health & Safety
   if( colinScore(model.fit) > colinearityThreshold) {
-    warning("Some covariates are strongly correlated. Please re-evaluate the variable selection and try again.")
+    warning("Some covariates are strongly correlated.
+            Please re-evaluate the variable selection and try again.")
   }
-
 }
 
 

@@ -11,7 +11,7 @@ mbecPCTest(plot.df, pca.axes, model.vars, return.table = TRUE)
 
 \item{pca.axes}{The vector the denotes the selected axes}
 
-\item{model.vars}{The selected covariates. ToDo: fix PCA to work well with single variable}
+\item{model.vars}{The selected covariates.}
 
 \item{return.table}{DEFAULT is TRUE, if set to FALSE the function will return
 a list of length 2 that contains lists with result objects of 'ks.test()'
@@ -26,4 +26,7 @@ For the selected Principal Components in PCA-plot perform Kolmogorov-Smirnov
 test to evaluate if distributions of the batches (or any variable really) are
 statistically significantly different.
 }
-\keyword{uppercase}
+\keyword{Distribution}
+\keyword{Similarity}
+\keyword{Statistical}
+\keyword{Test}

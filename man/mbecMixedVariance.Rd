@@ -7,10 +7,11 @@
 mbecMixedVariance(model.fit)
 }
 \arguments{
-\item{model.fit}{linear mixed model object of class 'lmerMod'}
+\item{model.fit}{A linear mixed model object of class 'lmerMod'.}
 }
 \value{
-a named list, containing proportional variance for model terms
+A named list, containing proportional variance for model terms that
+describe mixed effects.
 }
 \description{
 A helper function that extracts the variance components of linear mixed
@@ -28,7 +29,7 @@ for fixed-effects parameters (X). The fixed effects variance, σ2f, is the
 variance of the matrix-multiplication β∗X (parameter vector by model matrix)
 }
 \examples{
-# This will return the variance components.
+# This will return the variance of random/mixed components.
 limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
 data=datadummy$meta)
 list.variance <- mbecMixedVariance(model.fit=limimo)

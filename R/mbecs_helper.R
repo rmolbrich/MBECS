@@ -11,12 +11,10 @@
 #' model.matrix for testing. You can also provide more complex linear models
 #' and the function will do the rest.
 #'
-#' @keywords uppercase
-#' @param input.obj, mbecData object or numeric matrix (correct orientation is handeled internally)
-#' @param model.vars covariates to construct formula from
+#' @keywords limma nonEstimable Wrapper
+#' @param input.obj MbecData, phyloseq or list (counts, meta-data).
+#' @param model.vars Names of covariates to construct formula from.
 #' @param model.form Formula for a linear model to test.
-#' a list of length 2 that contains lists with result objects of 'ks.test()'
-#' named like the performed comparisons i.e. Batch1 to Batch2, etc..
 #' @return Either NULL if everything is fine or a vector of strings that denote
 #' covariates and their respective problematic levels.
 #' @export
@@ -24,7 +22,8 @@
 #'
 #' @examples
 #' # This will return NULL because it is estimable.
-#' eval.obj <- mbecTestModel(input.obj=dummy.mbec, model.vars=c("group","batch"))
+#' eval.obj <- mbecTestModel(input.obj=dummy.mbec,
+#' model.vars=c("group","batch"))
 mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
   if( is.null(model.vars) && is.null(model.form) )
     stop("Please supply covariates and/or model-formula.")
@@ -38,8 +37,8 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
     # construct linear model from covariates
     message("Construct lm-formula from covariates.")
 
-    model.form = stats::as.formula(paste("y", " ~ ", paste(model.vars, collapse = " + ")))
-
+    model.form = stats::as.formula(paste("y", " ~ ", paste(model.vars,
+                                                           collapse = " + ")))
   }
   # if model.form is complete --> remove LHS
   if( length(model.form) == 3 ) model.form <- model.form[-2]
@@ -50,7 +49,8 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
   res.est <- limma::nonEstimable(model.mtx)
 
   if( !is.null(res.est) ) {
-    message("There is a problem with the estimatibility of your model. Check out covariate: ", paste("'",res.est, "'", sep="", collapse=", "))
+    message("There is a problem with the estimatibility of your model.
+            Check out covariate: ", paste("'",res.est, "'", sep="", collapse=", "))
   }
   return(res.est)
 }
@@ -62,19 +62,24 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
 #' test to evaluate if distributions of the batches (or any variable really) are
 #' statistically significantly different.
 #'
-#' @keywords uppercase
+#' @keywords Distribution Statistical Similarity Test
 #' @param plot.df The plotting data.frame from mbecPCA function
 #' @param pca.axes The vector the denotes the selected axes
-#' @param model.vars The selected covariates. ToDo: fix PCA to work well with single variable
+#' @param model.vars The selected covariates.
 #' @param return.table DEFAULT is TRUE, if set to FALSE the function will return
 #' a list of length 2 that contains lists with result objects of 'ks.test()'
 #' named like the performed comparisons i.e. Batch1 to Batch2, etc..
 #' @return A data.frame with #principal components rows and n!/(2!(n-2)!)
 #' .columns
 mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
-  ## FixME: this might not be a good idea because the batches probably contain the class effect to a certai degree --> test if it makes a difference when class effect is significant within batches and also the influence of distribution of groups within batches
+  ## FixME: this might not be a good idea because the batches probably contain
+  ## the class effect to a certai degree --> test if it makes a difference when
+  ## class effect is significant within batches and also the influence of
+  ## distribution of groups within batches
   # very ugly, but it'll do for now
-  dist.check <- plot.df[, c(eval(colnames(plot.df[pca.axes[1] + 1])),eval(colnames(plot.df[pca.axes[2] + 1])), eval(model.vars))]
+  dist.check <- plot.df[, c(eval(colnames(plot.df[pca.axes[1] + 1])),
+                            eval(colnames(plot.df[pca.axes[2] + 1])),
+                            eval(model.vars))]
 
   # get unique pairs of batches, i.e., the test that need to be performed
   batches <- unique(dist.check[,eval(model.vars[1])])
@@ -89,7 +94,10 @@ mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
   ks.res.list <- list()
   for( pc.idx in seq_along(pca.axes) ) {
     for( comp.idx in seq_along(comps) ) {
-      ks.res.list[[colnames(plot.df[pca.axes[pc.idx] + 1])]][[paste0(comps[[comp.idx]], collapse = ".")]] <- ks.test(dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][1]), pc.idx], dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][2]), pc.idx])
+      ks.res.list[[colnames(plot.df[pca.axes[pc.idx] + 1])]][[paste0(comps[[comp.idx]], collapse = ".")]] <-
+        ks.test(dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][1]),
+                           pc.idx],
+                dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][2]), pc.idx])
     }
   }
 
@@ -104,7 +112,8 @@ mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
 
   for( pc.idx in rownames(table.df) ) {
     for( comp.idx in colnames(table.df) ) {
-      table.df[eval(pc.idx),eval(comp.idx)] <- ks.res.list[[eval(pc.idx)]][[eval(comp.idx)]]$p.value
+      table.df[eval(pc.idx),eval(comp.idx)] <-
+        ks.res.list[[eval(pc.idx)]][[eval(comp.idx)]]$p.value
     }
   }
 
@@ -117,10 +126,10 @@ mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
 #' Capitalize Word Beginning
 #'
 #' Change the first letter of the input to uppercase. Used in plotting functions
-#' to make covariates, i.e., axis-lables look nicer.
+#' to make covariates, i.e., axis-labels look nicer.
 #'
 #' @keywords uppercase
-#' @param input A string that needs to be Capitalized
+#' @param input Any string whose first letter should be capitalized.
 #' @return Input with first letter capitalized
 mbecUpperCase <- function(input=character()) {
   return(gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",input,perl = TRUE))
@@ -143,10 +152,17 @@ mbecUpperCase <- function(input=character()) {
 #' counts table. Correct orientation of counts will be handled internally.
 #'
 #' @keywords Significance Linear Mixed Model Batch
-#' @param input.obj, mbecData object
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param method, either 'lm' or 'lmm' for linear (mixed) models or 'auto' to detect correct method (not implemented yet)
-#' @return vector of fdr corrected p-values that show significance of treatment for every feature
+#' @param input.obj MbecData object
+#' @param model.vars Covariates of interest, first relates to batch and second
+#' to treatment.
+#' @param method Either 'lm' or 'lmm' for linear models and linear mixed models.
+#' @param type Which abundance matrix to use, one of 'otu, tss, clr, cor'.
+#' DEFAULT is clr' and the use of 'cor' requires the parameter label to be
+#' set as well.
+#' @param label Which corrected abundance matrix to use for analysis in case
+#' 'cor' was selected as type.
+#' @return A vector of fdr corrected p-values that show significance of
+#' treatment for every feature
 #' @export
 #' @include mbecs_classes.R
 #'
@@ -159,7 +175,7 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
   #       alternative correction methods
   #       auto mode selection procedure --> detect unbalanced design?!
 
-  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+  type <- match.arg(type, choices = c("otu","clr","tss","cor"))
   ## check and prepare inputs
   input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
@@ -204,33 +220,39 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 # TRANSFORMATION FUNCTIONS ------------------------------------------------
 
 
-#' Log-Ratio Transformation
+#' Normalizing Transformations
 #'
-#' Wrapper to help perform log-ratio transformations ,adapted from packages 'mixOmics' and
-#' 'robCompositions' to work on matrices and Phyloseq objects alike.
+#' Wrapper to help perform cumulative log-ratio  and total sum-scaling
+#' transformations ,adapted from packages 'mixOmics' and robCompositions' to
+#' work on matrices and Phyloseq objects alike.
 #'
-#' The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
-#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns an MbecData object with transformed counts and covariate
+#' information. Input for the data-set can be of type MbecData, phyloseq or a
+#' list that contains counts and covariate data. Correct orientation of counts
+#' will be handled internally, as long as both abundance table contain sample
+#' names.
 #'
-#' @keywords Log Ratio Transformation
-#' @param input.obj either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)
-#' @param method one of 'CLR' or 'ILR'
-#' @param offset optional offset in case of sparse matrix
-#' @param required.col (OPTIONAL) A vector of column names in the meta-data that need to be present. Sanity check for subsequent steps.
-#' @return MbecDataObject with transformed counts
+#' @keywords CLR TSS Transformation
+#' @param input.obj MbecData, phyloseq, list(counts, meta-data)
+#' @param method one of 'CLR' or 'TSS'
+#' @param offset (OPTIONAL) Offset in case of sparse matrix, for DEFAULT (0) an
+#' offset will be calculated if required.
+#' @param required.col (OPTIONAL) A vector of column names in the meta-data that
+#' need to be present. Sanity check for subsequent steps.
+#' @return MbecData with transformed counts in 'clr' and 'tss' attributes
+#' respectively.
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return the cumulative log-ratio transformed counts in an MbecData object
-#' \dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
-#' method="CLR", offset=0)}
+#' # This will return the cumulative log-ratio transformed counts in an
+#' # MbecData object.
+#' mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="clr", offset=0,
+#' required.col=c("batch","group"))
 #'
-#' # This will return the inverse log-ratio transformed counts in an MbecData object
-#' \dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
-#' method="ILR", offset=0)}
+#' # This will return total sum-scaled counts in an MbecData object.
+#' mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="tss", offset=0,
+#' required.col=c("batch","group"))
 mbecTransform <- function(input.obj, method = "clr",
                           offset = 0, required.col=NULL) {
   ## 00. Check if 'method' was chosen correctly and get optional arguments
@@ -264,25 +286,24 @@ mbecTransform <- function(input.obj, method = "clr",
 
 #' Percentile Normalization
 #'
-#' Wrapper to help perform percentile normalization on a matrix of counts. Takes counts and a
-#' data-frame of grouping variables and returns a matrix of transformed counts. This is designed
-#' (by the Developers of the procedure) to work with case/control experiments by taking the
-#' untreated group as reference and adjusting the other groupings of TRT x Batch to it.
+#' Wrapper to help perform percentile normalization on a matrix of counts.
+#' Takes counts and a data-frame of grouping variables and returns a matrix of
+#' transformed counts. This is designed (by the Developers of the procedure) to
+#' work with case/control experiments by taking the untreated group as reference
+#' and adjusting the other groupings of TRT x Batch to it.
 #'
-#' The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
-#' can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-#' The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-#' in the counts table. Correct orientation of counts will be handled internally.
+#' The function returns a matrix of normalized abundances.
 #'
-#' @keywords Log Ratio Transformation
-#' @param cnts numeric matrix (samples x features)
-#' @param meta data-frame of covariate columns, first column contains study groups, second column contains batches
-#' @return numeric matrix of corrected counts
+#' @keywords Percentile Normalization
+#' @param cnts A numeric matrix  of abundances (samples x features).
+#' @param meta Data-frame of covariate columns, first column contains batches,
+#' second column contains grouping.
+#' @return Numeric matrix of corrected/normalized counts.
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
-#' # This will return a matrix of normalised counts, according to the covariate
+#' # This will return a matrix of normalized counts, according to the covariate
 #' # information in meta
 #' mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
 #' meta=datadummy$meta[,c("batch","group")])
@@ -316,13 +337,14 @@ percentileNorm <- function(cnts, meta) {
 
 #' Percentile of Score
 #'
-#' Helper function that calculates percentiles of scores for batch-correction method 'pn'
-#' (percentile normalization). R-implementation of Claire Duvallet's 'percentileofscore()' for
-#' python.
+#' Helper function that calculates percentiles of scores for batch-correction
+#' method 'pn' (percentile normalization). R-implementation of Claire Duvallet's
+#' 'percentileofscore()' for python.
 #'
-#' Calculates the number of values that bigger than reference (left) and the number of values that
-#' are smaller than the reference (right). Percentiles of scores are given in the interval \eqn{I:[0,100]}.
-#' Depending on type of calculation, the score will be computed as follows:
+#' Calculates the number of values that bigger than reference (left) and the
+#' number of values that are smaller than the reference (right). Percentiles of
+#' scores are given in the interval \eqn{I:[0,100]}. Depending on type of
+#' calculation, the score will be computed as follows:
 #'
 #' \code{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}
 #'
@@ -332,11 +354,13 @@ percentileNorm <- function(cnts, meta) {
 #'
 #' \code{mean = (right + left) * 50/n)}
 #'
-#' @keywords Log Ratio Transformation
-#' @param cnt.vec, vector of cnts that acts as reference for score calculation
-#' @param cnt, value to calculate score for
-#' @param type, one of 'rank', 'weak', 'strict' or 'mean' to determine how score is calculated
-#' @return a score for given counts in relation to reference counts
+#' @keywords Percentile Score
+#' @param cnt.vec A vector of counts that acts as reference for score
+#' calculation.
+#' @param cnt A numeric value to calculate percentile-score for.
+#' @param type One of 'rank', 'weak', 'strict' or 'mean' to determine how the
+#' score is calculated.
+#' @return A score for given count in relation to reference counts.
 #' @export
 #' @include mbecs_classes.R
 #'
@@ -376,7 +400,7 @@ poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
 #' Formula is: clr(mtx) = ln( mtx / geometric_mean(mtx_samples))
 #'
 #' @keywords Log Ratio Transformation
-#' @param input.mtx A matrix of counts (samples x features)
+#' @param input.mtx A matrix of counts (samples x features).
 #' @param offset An (OPTIONAL) offset in case of sparse matrix. Function will
 #' add an offset of 1/#features if matrix is sparse and offset not provided.
 #' @return A matrix of transformed counts of same size and orientation as the

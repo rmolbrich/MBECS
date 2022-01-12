@@ -25,9 +25,9 @@ Takes data.frame from mbecPCA and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
-df.pca <- mbecPCA(input.obj=dummy.mbec,
+pca.df <- mbecPCA(input.obj=dummy.mbec,
 model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
-plot.pca <- mbecPCAPlot(plot.df=df.pca[[1]], metric.df=df.pca[[2]],
+plot.pca <- mbecPCAPlot(plot.df=pca.df[[1]], metric.df=pca.df[[2]],
 model.vars=c('group','batch'), pca.axes=c(1,2))
 }
 \keyword{RLE}

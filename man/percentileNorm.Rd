@@ -7,31 +7,29 @@
 percentileNorm(cnts, meta)
 }
 \arguments{
-\item{cnts}{numeric matrix (samples x features)}
+\item{cnts}{A numeric matrix  of abundances (samples x features).}
 
-\item{meta}{data-frame of covariate columns, first column contains study groups, second column contains batches}
+\item{meta}{Data-frame of covariate columns, first column contains batches,
+second column contains grouping.}
 }
 \value{
-numeric matrix of corrected counts
+Numeric matrix of corrected/normalized counts.
 }
 \description{
-Wrapper to help perform percentile normalization on a matrix of counts. Takes counts and a
-data-frame of grouping variables and returns a matrix of transformed counts. This is designed
-(by the Developers of the procedure) to work with case/control experiments by taking the
-untreated group as reference and adjusting the other groupings of TRT x Batch to it.
+Wrapper to help perform percentile normalization on a matrix of counts.
+Takes counts and a data-frame of grouping variables and returns a matrix of
+transformed counts. This is designed (by the Developers of the procedure) to
+work with case/control experiments by taking the untreated group as reference
+and adjusting the other groupings of TRT x Batch to it.
 }
 \details{
-The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
-can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-in the counts table. Correct orientation of counts will be handled internally.
+The function returns a matrix of normalized abundances.
 }
 \examples{
-# This will return a matrix of normalised counts, according to the covariate
+# This will return a matrix of normalized counts, according to the covariate
 # information in meta
 mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
 meta=datadummy$meta[,c("batch","group")])
 }
-\keyword{Log}
-\keyword{Ratio}
-\keyword{Transformation}
+\keyword{Normalization}
+\keyword{Percentile}

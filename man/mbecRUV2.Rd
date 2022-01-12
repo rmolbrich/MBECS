@@ -10,15 +10,18 @@ mbecRUV2(input.obj, model.vars, type = "clr", nc.features = NULL)
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is
 handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+\item{model.vars}{Vector of covariate names. First element relates to batch.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+'clr'.}
 
 \item{nc.features}{(OPTIONAL) A vector of features names to be used as
 negative controls in RUV-3. If not supplied, the algorithm will use an 'lm'
 to find pseudo-negative controls}
 }
 \value{
-SOMETHING
+A vector of p-values that indicate significance of the batch-effect
+for the features.
 }
 \description{
 Estimates unknown BEs by using negative control variables that, in principle,
@@ -34,7 +37,9 @@ is applied to the data and returns the p-values for treatment, considering
 unwanted BEs (whatever that means).
 }
 \details{
-The output will be SOMETHING
+The input for this function is supposed to be an MbecData object that
+contains total sum-scaled and cumulative log-ratio transformed abundance
+matrices. Output will be a vector of p-values.
 }
 \keyword{Assessment}
 \keyword{Batch-Effect}

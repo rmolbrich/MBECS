@@ -25,8 +25,7 @@ use 'facet_grid()' to display side-by-side panels to enable easy comparison.
 # This will return a paneled plot that shows results for the variance
 # assessments.
 df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
-model.vars=c('group','batch'),
-method='lm', type='clr')
+model.vars=c('group','batch'), method='lm', type='clr')
 plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 }
 \keyword{linear}

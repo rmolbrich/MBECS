@@ -43,11 +43,29 @@ MbecData(
 produces an R-object of type MbecData
 }
 \description{
-An extension of phyloseq-class that contains the additional fields 'type', 'log' and
-'transformations' to accommodate MBECS functionality.
+An extension of phyloseq-class that contains the additional attributes 'tss',
+'clr', 'corrections' and 'assessments' to enable the MBECS functionality.
 
-Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
-and a data-frame of covariate variables for model-building.
+Constructor for the package class MbecData. Minimum input is an abundance
+matrix for the argument 'cnt_table' and any type of frame that contains
+columns of covariate information. The argument 'cnt_table' requires col/row-
+names that correspond to features and samples. The correct orientation will
+be handled internally. The argument 'meta_data' requires row-names that
+correspond to samples. Although it is an exported function, the user should
+utilize the function 'mbecProcessInput()' for safe initialization of an
+MbecData-object from phyloseq or list(counts, metadata) inputs.
+}
+\details{
+Additional (OPTIONAL) arguments are 'tax_table', 'phy_tree' and 'ref_seq'
+from phyloseq-objects.
+
+The (OPTIONAL) arguments 'tss' and 'clr' are feature
+abundance matrices that should contain total-sum-scaled or cumulative
+log-ratio transformed counts respectively. They should however be calculated
+by the package-function 'mbecTransform()'.
+
+The lists for Assessments and Corrections will be initialized empty and
+should only be accessed via the available Get/Set-functions.
 }
 \section{Slots}{
 
@@ -57,19 +75,21 @@ abundance values.}
 
 \item{\code{sample_data}}{Dataframe of covariate variables.}
 
-\item{\code{tax_table}}{taxonomic table from phyloseq as optional input}
+\item{\code{tax_table}}{Taxonomic table from phyloseq as optional input}
 
-\item{\code{phy_tree}}{phylogenetic tree as optional input}
+\item{\code{phy_tree}}{Phylogenetic tree as optional input}
 
-\item{\code{refseq}}{reference sequences as optional input}
+\item{\code{refseq}}{Reference sequences as optional input}
 
-\item{\code{assessments}}{A list for the results of BEAAs.}
+\item{\code{assessments}}{A list for the results of batch effect assessment
+algorithms (BEAA) that produce p-values for all features.}
 
-\item{\code{corrections}}{A list for the results of BECAs.}
+\item{\code{corrections}}{A list for the results of batch effect correction
+algorithms (BECA) that produce adjusted abundance matrices.}
 
-\item{\code{tss}}{Total-sum-squared features matrix.}
+\item{\code{tss}}{Total-sum-squared feature abundance matrix.}
 
-\item{\code{clr}}{Cumulative log-ratio transformed feature matrix.}
+\item{\code{clr}}{Cumulative log-ratio transformed feature abundance matrix.}
 
 \item{\code{assessments}}{A list for the results of BEAAs.}
 

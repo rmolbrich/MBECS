@@ -7,7 +7,7 @@
 mbecCLR(input.mtx, offset = 0)
 }
 \arguments{
-\item{input.mtx}{A matrix of counts (samples x features)}
+\item{input.mtx}{A matrix of counts (samples x features).}
 
 \item{offset}{An (OPTIONAL) offset in case of sparse matrix. Function will
 add an offset of 1/#features if matrix is sparse and offset not provided.}

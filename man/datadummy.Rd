@@ -12,9 +12,6 @@ A list with two elements:
   ...
 }
 }
-\source{
-\url{http://www.maulraus.de/}
-}
 \usage{
 datadummy
 }

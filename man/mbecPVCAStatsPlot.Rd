@@ -25,7 +25,7 @@ display side-by-side panels to enable easy comparison.
 # This will return a paneled plot that shows results for the variance
 # assessment.
 df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
-model.vars=c('group','batch'), method='pvca', type='clr')
+model.vars=c('batch','group'), method='pvca', type='clr')
 plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 }
 \keyword{plot}

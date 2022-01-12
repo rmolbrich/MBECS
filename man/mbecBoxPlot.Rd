@@ -12,8 +12,6 @@ mbecBoxPlot(tmp, otu.idx, model.var)
 \item{otu.idx}{Index of selected Otus in the data.}
 
 \item{model.var}{Which covariate to group Otus by.}
-
-\item{mbecCols}{Color scheme to use for plot.}
 }
 \value{
 ggplot2 object
@@ -22,13 +20,12 @@ ggplot2 object
 Takes data.frame from mbecBox and produces a ggplot2 object.
 }
 \examples{
-# This will return a paneled plot that shows results for the variance
-# assessment.
-df.box <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
+# This will return a list of the five most variable features grouped by the
+# covariate 'batch'.
+box.df <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
 model.var='batch', type="otu", return.data=TRUE)
-plot.box <- mbecBoxPlot(df.box[[1]], df.box[[2]], 'batch')
+plot.box <- mbecBoxPlot(box.df[[1]], box.df[[2]], 'batch')
 }
-\keyword{RLE}
-\keyword{expression}
-\keyword{log}
-\keyword{relative}
+\keyword{Abundance}
+\keyword{Plot}
+\keyword{Variability}

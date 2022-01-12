@@ -16,20 +16,21 @@ mbecModelVariance(
 )
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
-orientation is handled internally)}
+\item{input.obj}{MbecData object}
 
-\item{model.vars}{vector of covariates to include in model-construction, in
-case parameter 'model.form' is not supplied}
+\item{model.vars}{Vector of covariates to include in model-construction, in
+case parameter 'model.form' is not supplied.}
 
-\item{method}{select method of modeling: Linear Model (lm), Linear Mixed
+\item{method}{Select method of modeling: Linear Model (lm), Linear Mixed
 Model (lmm), Redundancy Analysis (rda), Principal Variance Component Analysis
-(pvca) or Silhouette Coefficient (s.coef)}
+(pvca) or Silhouette Coefficient (s.coef).}
 
 \item{model.form}{string that describes a model formula, i.e.,
-'y ~ covariate1 + (1|covariate2)'}
+'y ~ covariate1 + (1|covariate2)'.}
 
-\item{type}{keep track of cnt-source}
+\item{type}{Which abundance matrix to use for the calculation.}
+
+\item{label}{Which corrected abundance matrix to use for analysis.}
 
 \item{no.warning}{(OPTIONAL) True/False-flag that should turn of singularity
 warnings, but it doesn't quite work}
@@ -38,8 +39,8 @@ warnings, but it doesn't quite work}
 supplied}
 }
 \value{
-df that contains proportions of variance for given covariates in
-every feature
+Data.frame that contains proportions of variance for given covariates
+in every feature.
 }
 \description{
 The function offers a selection of methods/algorithms to estimate the
@@ -123,7 +124,7 @@ table. Correct orientation of counts will be handled internally.
 df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
 model.vars=c("batch", "group"), method='lm', type='clr')
 # This will return a data-frame that contains the variance attributable to
-# group and batch according to linear additive model.
+# group and batch according to principal variance component analysis.
 df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 model.vars=c("batch", "group"), method='pvca')
 }

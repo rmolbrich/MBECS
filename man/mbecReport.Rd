@@ -45,15 +45,6 @@ data-set, partial Redundancy Analysis (CCA or pRDA) and Principal Variance Compo
 Silhouette Coefficient is a representation for the goodness of fit. Which is how good grouping
 covariates such as treatment or batch are represented in the clustering of samples.
 }
-\examples{
-# This will return the data.frame for plotting.
-\dontrun{p.RLE <- mbecRLE(input.obj=list(counts, covariates),
-model.vars=c("treatment","batches"), return.data=TRUE)}
-
-# This will return the ggplot2 object for display, saving and modification.
-\dontrun{p.RLE <- mbecRLE(input.obj=phyloseq, model.vars=c("treatment","sex"),
-return.data=FALSE)}
-}
 \keyword{Comparative}
 \keyword{Preliminary}
 \keyword{Report}

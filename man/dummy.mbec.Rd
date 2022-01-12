@@ -14,9 +14,6 @@ An mbecData object including tss and clr transformed counts:
   ...
 }
 }
-\source{
-\url{http://www.maulraus.de/}
-}
 \usage{
 dummy.mbec
 }

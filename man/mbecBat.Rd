@@ -10,8 +10,10 @@ mbecBat(input.obj, model.vars, type = "clr")
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is
 handeled internally)}
 
-\item{model.vars}{First variable determines Batch, second (optional) variable
-describes study-group. ToDo: more vars and own models}
+\item{model.vars}{Vector of covariate names. First element relates to batch.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+'clr'.}
 }
 \value{
 A matrix of batch-effect corrected counts
@@ -22,8 +24,9 @@ for BEs. Described by Johnson et al. 2007 this method was initially conceived
 to work with gene expression data and is part of the sva-package in R.
 }
 \details{
-The function returns a matrix of corrected counts Correct orientation of
-counts will be handled internally.
+The input for this function is supposed to be an MbecData object that
+contains total sum-scaled and cumulative log-ratio transformed abundance
+matrices. Output will be a matrix of corrected abundances.
 }
 \keyword{BECA}
 \keyword{Batch}

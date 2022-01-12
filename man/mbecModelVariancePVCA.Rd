@@ -5,7 +5,6 @@
 \title{Estimate Explained Variance with Principal Variance Component Analysis}
 \usage{
 mbecModelVariancePVCA(
-  model.form,
   model.vars,
   tmp.cnts,
   tmp.meta,
@@ -15,22 +14,23 @@ mbecModelVariancePVCA(
 )
 }
 \arguments{
-\item{model.form}{type formula for linear model}
+\item{model.vars}{Covariates to use for model building.}
 
-\item{model.vars}{covariates to use for model building}
+\item{tmp.cnts}{Abundance matrix in 'sample x feature' orientation.}
 
-\item{tmp.cnts}{extracted count matrix}
+\item{tmp.meta}{Covariate table that contains at least the used variables.}
 
-\item{tmp.meta}{extracted covariate table}
+\item{type}{String the denotes data source, i.e., one of "otu","clr" or "tss"
+for the transformed counts or the label of the batch corrected count-matrix.}
 
-\item{type}{String the denotes data source to keep track of process steps}
+\item{pct_threshold}{Cutoff value for accumulated variance in principal
+components.}
 
-\item{pct_threshold}{Cutoff value}
-
-\item{na.action}{Set NA handling, will take global option if not supplied}
+\item{na.action}{Set NA handling, will take global option if not supplied.}
 }
 \value{
-df that contains proportions of variance for given covariates
+Data.frame that contains proportions of variance for given covariates
+in a principal variance component analysis approach.
 }
 \description{
 The function offers a selection of methods/algorithms to estimate the
@@ -59,13 +59,8 @@ of explained variance, i.e. the cutoff to select the number of PCs to take
 (obviously not the cutoff but rather the actual values for the selected PCs).
 Finally take the average over each random variable and interaction term and
 display in a nice plot.
-
-The function returns a data-frame for further analysis - the report functions
-(mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-the data-set can be an MbecData-object, a phyloseq-object or a list that
-contains counts and covariate data. The covariate table requires an 'sID'
-column that contains sample IDs equal to the sample naming in the counts
-table. Correct orientation of counts will be handled internally.
 }
-\keyword{LM}
+\keyword{Analysis}
+\keyword{Component}
+\keyword{Principal}
 \keyword{Variance}

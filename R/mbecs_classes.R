@@ -1,23 +1,24 @@
-# Sys.setenv('_R_CHECK_SYSTEM_CLOCK_' = 0)
-
 # DEFINE CLASS ------------------------------------------------------------
 
 
 #' Define MbecData-class
 #'
-#' An extension of phyloseq-class that contains the additional fields 'type', 'log' and
-#' 'transformations' to accommodate MBECS functionality.
+#' An extension of phyloseq-class that contains the additional attributes 'tss',
+#' 'clr', 'corrections' and 'assessments' to enable the MBECS functionality.
+#'
 #' @keywords MBECS Class
 #' @slot otu_table Class phyloseq::otu_table, (usually sparse) matrix of
 #' abundance values.
 #' @slot sample_data Dataframe of covariate variables.
-#' @slot tax_table taxonomic table from phyloseq as optional input
-#' @slot phy_tree phylogenetic tree as optional input
-#' @slot refseq reference sequences as optional input
-#' @slot assessments A list for the results of BEAAs.
-#' @slot corrections A list for the results of BECAs.
-#' @slot tss Total-sum-squared features matrix.
-#' @slot clr Cumulative log-ratio transformed feature matrix.
+#' @slot tax_table Taxonomic table from phyloseq as optional input
+#' @slot phy_tree Phylogenetic tree as optional input
+#' @slot refseq Reference sequences as optional input
+#' @slot assessments A list for the results of batch effect assessment
+#' algorithms (BEAA) that produce p-values for all features.
+#' @slot corrections A list for the results of batch effect correction
+#' algorithms (BECA) that produce adjusted abundance matrices.
+#' @slot tss Total-sum-squared feature abundance matrix.
+#' @slot clr Cumulative log-ratio transformed feature abundance matrix.
 #' @import phyloseq
 #' @export
 #'
@@ -32,8 +33,26 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 
 #' Mbec-Data Constructor
 #'
-#' Constructor for the package class MbecData that takes a single input object of class phyloseq or a matrix of counts
-#' and a data-frame of covariate variables for model-building.
+#' Constructor for the package class MbecData. Minimum input is an abundance
+#' matrix for the argument 'cnt_table' and any type of frame that contains
+#' columns of covariate information. The argument 'cnt_table' requires col/row-
+#' names that correspond to features and samples. The correct orientation will
+#' be handled internally. The argument 'meta_data' requires row-names that
+#' correspond to samples. Although it is an exported function, the user should
+#' utilize the function 'mbecProcessInput()' for safe initialization of an
+#' MbecData-object from phyloseq or list(counts, metadata) inputs.
+#'
+#' Additional (OPTIONAL) arguments are 'tax_table', 'phy_tree' and 'ref_seq'
+#' from phyloseq-objects.
+#'
+#' The (OPTIONAL) arguments 'tss' and 'clr' are feature
+#' abundance matrices that should contain total-sum-scaled or cumulative
+#' log-ratio transformed counts respectively. They should however be calculated
+#' by the package-function 'mbecTransform()'.
+#'
+#' The lists for Assessments and Corrections will be initialized empty and
+#' should only be accessed via the available Get/Set-functions.
+#'
 #' @keywords MBECS Constructor
 #' @param cnt_table either class phyloseq or a matrix of counts
 #' @param meta_data A table with covariate information, whose row-names correspond to sample-IDs
@@ -154,28 +173,32 @@ MbecData <- function( cnt_table=NULL,
 
 #' Mbec-Data Setter
 #'
-#' This function either updates counts, type and log attributes (DEFAULT) or adds a matrix of
-#' transformed counts to the input (update=FALSE).
+#' Sets and/or replaces selected feature abundance matrix and handles correct
+#' orientation. The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
+#'
 #' @keywords MBECS Setter
-#' @param input.obj MbecData object to change
-#' @param new.cnts matrix-like object with same dimension as 'otu_table' in input.obj
-#' @param type Specify which type of data to add, by using one of 'ass' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio Transformation) or 'tss' (Total Scaled-Sum).
-#' @param label For types 'ass' and 'cor' this sets the name within the list.
-#' @param log character to add to the log string
-#' @param type character to replace type-attribute or as name tag for added count-matrix
-#' @param update logical (TRUE) replace input fields (FALSE) add to the input.obj
+#' @param input.obj MbecData object to work on.
+#' @param new.cnts A matrix-like object with same dimension as 'otu_table' in
+#' input.obj.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this sets the name within the lists.
 #' @return Input object with updated attributes.
 #' @export
 #'
 #' @examples
-#' # This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
-#' # log and change the type to 'rbe' to indicate current status.
+#' # This will fill the 'tss' slot with the supplied matrix.
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
 #'     type='tss')
 #'
-#' # This will add the corrected data to the list of transformations named like the type argument.
-#' # The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
-#' # matrix wasn't replaced.
+#' # This will put the given matrix into the list of corrected counts under the
+#' # name "nameOfMethod".
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
 #'     type='cor', label="nameOfMethod")
 setGeneric("mbecSetData", signature="input.obj",
@@ -245,42 +268,60 @@ setMethod("mbecSetData", "MbecData",
 
 #' Mbec-Data Getter
 #'
-#' This mow function extracts abundance matrix and meta-data in the chosen orientation from the input.
+#' This function extracts abundance matrix and meta-data in the chosen
+#' orientation from the input.
 #'
-#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
-#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
-#' the different analysis and correction functions.
+#' The parameter 'orientation' determines if the output has features as columns
+#' (sxf) or if the columns contain samples (fxs). This is mainly used to
+#' retrieve correctly oriented matrices for the different analysis and
+#' correction functions.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' metadata, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The parameter 'required.col' is a vector of column names (technically
+#' positions would work) in the  metadata, that are required for the analysis
+#' at hand. The function actually only checks if they are present in the data,
+#' but it will return the whole meta-frame.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
 #'
 #' @keywords MBECS Getter
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
-#' @param required.col Vector of column names that are required from the covariate-table.
-#' @param transformation Default is 'NULL', otherwise give name or index of
-#' matrix in transformation-list attribute for extraction.
-#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
+#' @param input.obj MbecData object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in
+#' rows or columns respectively.
+#' @param required.col Vector of column names that are required from the
+#' covariate-table.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this specifies the name within the
+#' lists.
+#' @return A list that contains count-matrix (in chosen orientation) and
+#' meta-data table.
 #' @export
 #'
 #' @examples
-#' # This will return the abundance matrix with samples as rows and check for the presence of
-#' # variables 'group' and 'batch' in the meta-data.
+#' # This will return the un-transformed (OTU) abundance matrix with features as
+#' # columns and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
 #'     required.col=c("group","batch"), type="otu")
 #'
-#' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'group' and 'batch' in the meta-data.
+#' # This will return the clr-transformed abundance matrix with features as
+#' # rows and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
-#'     required.col=c("group","batch"), type="otu")
+#'     required.col=c("group","batch"), type="clr")
 setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL,
                     type=c("otu","ass","cor","clr","tss"), label=character())
              standardGeneric("mbecGetData")
 )
 
-#IMPLEMENT function to use a vector as input
+
 .mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL,
                          type=c("otu","ass","cor","clr","tss"), label=character()) {
 
@@ -344,36 +385,53 @@ setGeneric("mbecGetData", signature="input.obj",
 }
 
 
-#' Mbec-Data Getter MbecDdata
+#' Mbec-Data Getter
 #'
-#' This function extracts abundance matrix and meta-data in the chosen orientation from input of
-#' class MbecData
+#' This function extracts abundance matrix and meta-data in the chosen
+#' orientation from the input.
 #'
-#' The parameter 'orientation' determines if the output has features as columns (sxf) or if the
-#' columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
-#' the different analysis and correction functions.
+#' The parameter 'orientation' determines if the output has features as columns
+#' (sxf) or if the columns contain samples (fxs). This is mainly used to
+#' retrieve correctly oriented matrices for the different analysis and
+#' correction functions.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' metadata, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The parameter 'required.col' is a vector of column names (technically
+#' positions would work) in the  metadata, that are required for the analysis
+#' at hand. The function actually only checks if they are present in the data,
+#' but it will return the whole meta-frame.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
 #'
 #' @keywords MBECS Getter
-#' @param input.obj MbecData-object
-#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively
-#' @param required.col Vector of column names that are required from the covariate-table.
-#' @param transformation Default is 'NULL', otherwise give name or index of
-#' matrix in transformation-list attribute for extraction.
-#' @return A list that contains count-matrix (in chosen orientation) and meta-data table.
+#' @param input.obj MbecData object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in
+#' rows or columns respectively.
+#' @param required.col Vector of column names that are required from the
+#' covariate-table.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this specifies the name within the
+#' lists.
+#' @return A list that contains count-matrix (in chosen orientation) and
+#' meta-data table.
 #' @export
 #'
 #' @examples
-#' # This will return the abundance matrix with samples as rows and check for the presence of
-#' # variables 'group' and 'batch' in the meta-data.
+#' # This will return the un-transformed (OTU) abundance matrix with features as
+#' # columns and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
 #'     required.col=c("group","batch"), type="otu")
 #'
-#' # This will return the abundance matrix with samples as columns and check for the presence
-#' # of variables 'group' and 'batch' in the meta-data.
+#' # This will return the clr-transformed abundance matrix with features as
+#' # rows and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
 #'     required.col=c("group","batch"), type="clr")
 setMethod("mbecGetData", "MbecData",
@@ -389,31 +447,31 @@ setMethod("mbecGetData", "MbecData",
 
 #' Mbec-Data Constructor Wrapper
 #'
-#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
-#' 'required.col', the function will check if the required columns are present in the data and then
-#' return it as an MbecData-object.
+#' This function is a wrapper for the constructor of MbecData-objects from
+#' phyloseq objects and lists of counts and sample data.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' meta-data, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The (OPTIONAL) argument 'required.col' is a vector of column-names that will
+#' enable a sanity test for the presence in the meta-data table. Which is also
+#' the second use-case for objects that are already of class MbecData.
 #'
 #' @keywords MBECS Constructor Wrapper
-#' @param input.obj phyloseq-object
-#' @param required.col Vector of column names that are required from the covariate-table.
+#' @param input.obj One of MbecData, phyloseq or list(counts, meta-data).
+#' @param required.col Vector of column names that need to be present in the
+#' meta-data table.
 #' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
-#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
-#' # an object of class 'MbecData'.
-#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#' # This will check for the presence of variables 'group' and 'batch' in the
+#' # meta-data and return an object of class 'MbecData'.
+#' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
            function(input.obj, required.col=NULL)
              standardGeneric("mbecProcessInput")
 )
 
-# the generic version is for MbecData type inputs
+
 .mbecProcessInput <- function(input.obj, required.col=NULL) {
 
   # check sample_data if 'required.col' is not NULL
@@ -429,30 +487,26 @@ setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
 }
 
 
-#' Mbec-Data Constructor Wrapper for MbecData
+#' Mbec-Data Constructor Wrapper
 #'
-#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
-#' 'required.col', the function will check if the required columns are present in the data and then
-#' return it as an MbecData-object.
+#' This function is a wrapper for the constructor of MbecData-objects from
+#' phyloseq objects and lists of counts and sample data.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' meta-data, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The (OPTIONAL) argument 'required.col' is a vector of column-names that will
+#' enable a sanity test for the presence in the meta-data table. Which is also
+#' the second use-case for objects that are already of class MbecData.
 #'
-#' For existing MbecData objects this function serves as sanity check within correction and analysis
-#' functions. Also kind of required to enable the input of different data classes at any point in
-#' the MBECS pipeline.
-#'
-#' @keywords MBECS Constructor Wrapper MbecData
-#' @param input.obj phyloseq-object
-#' @param required.col Vector of column names that are required from the covariate-table.
+#' @keywords MBECS Constructor Wrapper
+#' @param input.obj One of MbecData, phyloseq or list(counts, meta-data).
+#' @param required.col Vector of column names that need to be present in the
+#' meta-data table.
 #' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
-#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
-#' # an object of class 'MbecData'.
-#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#' # This will check for the presence of variables 'group' and 'batch' in the
+#' # meta-data and return an object of class 'MbecData'.
+#' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "MbecData",
           function(input.obj, required.col=NULL) {
@@ -461,26 +515,26 @@ setMethod("mbecProcessInput", "MbecData",
 )
 
 
-#' Mbec-Data Constructor Wrapper for Phyloseq
+#' Mbec-Data Constructor Wrapper
 #'
-#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
-#' 'required.col', the function will check if the required columns are present in the data and then
-#' return it as an MbecData-object.
+#' This function is a wrapper for the constructor of MbecData-objects from
+#' phyloseq objects and lists of counts and sample data.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' meta-data, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The (OPTIONAL) argument 'required.col' is a vector of column-names that will
+#' enable a sanity test for the presence in the meta-data table. Which is also
+#' the second use-case for objects that are already of class MbecData.
 #'
-#' @keywords MBECS Constructor Wrapper Phyloseq
-#' @param input.obj phyloseq-object
-#' @param required.col Vector of column names that are required from the covariate-table.
+#' @keywords MBECS Constructor Wrapper
+#' @param input.obj One of MbecData, phyloseq or list(counts, meta-data).
+#' @param required.col Vector of column names that need to be present in the
+#' meta-data table.
 #' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
-#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
-#' # an object of class 'MbecData'.
-#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#' # This will check for the presence of variables 'group' and 'batch' in the
+#' # meta-data and return an object of class 'MbecData'.
+#' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "phyloseq",
           function(input.obj, required.col=NULL) {
@@ -506,26 +560,26 @@ setMethod("mbecProcessInput", "phyloseq",
 )
 
 
-#' Mbec-Data Constructor Wrapper for List Input
+#' Mbec-Data Constructor Wrapper
 #'
-#' This function is a wrapper for the constructor of MbecData-objects. Given the parameter
-#' 'required.col', the function will check if the required columns are present in the data and then
-#' return it as an MbecData-object.
+#' This function is a wrapper for the constructor of MbecData-objects from
+#' phyloseq objects and lists of counts and sample data.
 #'
-#' The parameter 'required.col' is a vector of column names (technically positions would work) from
-#' meta-data, that are required for the analysis at hand. The function actually only checks if
-#' they are present in the data, but it will return the whole meta-frame.
+#' The (OPTIONAL) argument 'required.col' is a vector of column-names that will
+#' enable a sanity test for the presence in the meta-data table. Which is also
+#' the second use-case for objects that are already of class MbecData.
 #'
-#' @keywords MBECS Constructor Wrapper Phyloseq
-#' @param input.obj a list that contains an abundance matrix and a data.frame of covaraite information
-#' @param required.col Vector of column names that are required from the covariate-table.
+#' @keywords MBECS Constructor Wrapper
+#' @param input.obj One of MbecData, phyloseq or list(counts, meta-data).
+#' @param required.col Vector of column names that need to be present in the
+#' meta-data table.
 #' @return An object of type MbecData that has been validated.
 #' @export
 #'
 #' @examples
-#' # This will check for the presence of variables 'group' and 'batch' in the meta-data and return
-#' # an object of class 'MbecData'.
-#' MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+#' # This will check for the presence of variables 'group' and 'batch' in the
+#' # meta-data and return an object of class 'MbecData'.
+#' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "list",
           function(input.obj, required.col=NULL) {

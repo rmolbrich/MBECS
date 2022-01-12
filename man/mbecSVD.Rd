@@ -10,8 +10,10 @@ mbecSVD(input.obj, model.vars, type = "clr")
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is
 handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+\item{model.vars}{Vector of covariate names. First element relates to batch.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+'clr'.}
 }
 \value{
 A matrix of batch-effect corrected counts
@@ -28,8 +30,9 @@ solve this issue.
 ToDo: IF I find the time to works on "my-own-approach" then this is the
 point to start from!!!
 
-The function returns a matrix of corrected counts Correct orientation of
-counts will be handled internally.
+The input for this function is supposed to be an MbecData object that
+contains total sum-scaled and cumulative log-ratio transformed abundance
+matrices. Output will be a matrix of corrected abundances.
 }
 \keyword{BECA}
 \keyword{Duvallet}

@@ -7,13 +7,11 @@
 mbecTestModel(input.obj, model.vars = NULL, model.form = NULL)
 }
 \arguments{
-\item{input.obj, }{mbecData object or numeric matrix (correct orientation is handeled internally)}
+\item{input.obj}{MbecData, phyloseq or list (counts, meta-data).}
 
-\item{model.vars}{covariates to construct formula from}
+\item{model.vars}{Names of covariates to construct formula from.}
 
-\item{model.form}{Formula for a linear model to test.
-a list of length 2 that contains lists with result objects of 'ks.test()'
-named like the performed comparisons i.e. Batch1 to Batch2, etc..}
+\item{model.form}{Formula for a linear model to test.}
 }
 \value{
 Either NULL if everything is fine or a vector of strings that denote
@@ -32,6 +30,9 @@ and the function will do the rest.
 }
 \examples{
 # This will return NULL because it is estimable.
-eval.obj <- mbecTestModel(input.obj=dummy.mbec, model.vars=c("group","batch"))
+eval.obj <- mbecTestModel(input.obj=dummy.mbec,
+model.vars=c("group","batch"))
 }
-\keyword{uppercase}
+\keyword{Wrapper}
+\keyword{limma}
+\keyword{nonEstimable}

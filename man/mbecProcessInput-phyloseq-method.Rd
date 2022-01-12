@@ -2,35 +2,34 @@
 % Please edit documentation in R/mbecs_classes.R
 \name{mbecProcessInput,phyloseq-method}
 \alias{mbecProcessInput,phyloseq-method}
-\title{Mbec-Data Constructor Wrapper for Phyloseq}
+\title{Mbec-Data Constructor Wrapper}
 \usage{
 \S4method{mbecProcessInput}{phyloseq}(input.obj, required.col = NULL)
 }
 \arguments{
-\item{input.obj}{phyloseq-object}
+\item{input.obj}{One of MbecData, phyloseq or list(counts, meta-data).}
 
-\item{required.col}{Vector of column names that are required from the covariate-table.}
+\item{required.col}{Vector of column names that need to be present in the
+meta-data table.}
 }
 \value{
 An object of type MbecData that has been validated.
 }
 \description{
-This function is a wrapper for the constructor of MbecData-objects. Given the parameter
-'required.col', the function will check if the required columns are present in the data and then
-return it as an MbecData-object.
+This function is a wrapper for the constructor of MbecData-objects from
+phyloseq objects and lists of counts and sample data.
 }
 \details{
-The parameter 'required.col' is a vector of column names (technically positions would work) from
-meta-data, that are required for the analysis at hand. The function actually only checks if
-they are present in the data, but it will return the whole meta-frame.
+The (OPTIONAL) argument 'required.col' is a vector of column-names that will
+enable a sanity test for the presence in the meta-data table. Which is also
+the second use-case for objects that are already of class MbecData.
 }
 \examples{
-# This will check for the presence of variables 'group' and 'batch' in the meta-data and return
-# an object of class 'MbecData'.
-MbecData.obj <- mbecProcessInput(input.obj=datadummy,
+# This will check for the presence of variables 'group' and 'batch' in the
+# meta-data and return an object of class 'MbecData'.
+MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
     required.col=c("group","batch"))
 }
 \keyword{Constructor}
 \keyword{MBECS}
-\keyword{Phyloseq}
 \keyword{Wrapper}

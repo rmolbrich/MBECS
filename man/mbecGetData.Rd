@@ -13,40 +13,59 @@ mbecGetData(
 )
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}
+\item{input.obj}{MbecData object}
 
-\item{orientation, }{Select either 'fxs' or 'sxf' to retrieve features in rows or columns respectively}
+\item{orientation, }{Select either 'fxs' or 'sxf' to retrieve features in
+rows or columns respectively.}
 
-\item{required.col}{Vector of column names that are required from the covariate-table.}
+\item{required.col}{Vector of column names that are required from the
+covariate-table.}
 
-\item{transformation}{Default is 'NULL', otherwise give name or index of
-matrix in transformation-list attribute for extraction.}
+\item{type}{Specify which type of data to add, by using one of 'ass'
+(Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+(Total Scaled-Sum).}
+
+\item{label}{For types 'ass' and 'cor' this specifies the name within the
+lists.}
 }
 \value{
-A list that contains count-matrix (in chosen orientation) and meta-data table.
+A list that contains count-matrix (in chosen orientation) and
+meta-data table.
 }
 \description{
-This mow function extracts abundance matrix and meta-data in the chosen orientation from the input.
+This function extracts abundance matrix and meta-data in the chosen
+orientation from the input.
 }
 \details{
-The parameter 'orientation' determines if the output has features as columns (sxf) or if the
-columns contain samples (fxs). This is mainly used to retrieve correctly oriented matrices for
-the different analysis and correction functions.
+The parameter 'orientation' determines if the output has features as columns
+(sxf) or if the columns contain samples (fxs). This is mainly used to
+retrieve correctly oriented matrices for the different analysis and
+correction functions.
 
-The parameter 'required.col' is a vector of column names (technically positions would work) from
-metadata, that are required for the analysis at hand. The function actually only checks if
-they are present in the data, but it will return the whole meta-frame.
+The parameter 'required.col' is a vector of column names (technically
+positions would work) in the  metadata, that are required for the analysis
+at hand. The function actually only checks if they are present in the data,
+but it will return the whole meta-frame.
+
+The argument type determines which slot to access, i.e. the base
+matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+cumulative log-ratio transformed counts "clr" and batch effect corrected
+counts "cor" and assessment vectors "ass". The later two additionally require
+the use of the argument 'label' that specifies the name within the respective
+lists of corrections and assessments.
 }
 \examples{
-# This will return the abundance matrix with samples as rows and check for the presence of
-# variables 'group' and 'batch' in the meta-data.
+# This will return the un-transformed (OTU) abundance matrix with features as
+# columns and it will test if the columns "group" and "batch" are present in
+# the meta-data table.
 list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
     required.col=c("group","batch"), type="otu")
 
-# This will return the abundance matrix with samples as columns and check for the presence
-# of variables 'group' and 'batch' in the meta-data.
+# This will return the clr-transformed abundance matrix with features as
+# rows and it will test if the columns "group" and "batch" are present in
+# the meta-data table.
 list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
-    required.col=c("group","batch"), type="otu")
+    required.col=c("group","batch"), type="clr")
 }
 \keyword{Getter}
 \keyword{MBECS}

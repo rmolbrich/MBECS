@@ -7,18 +7,22 @@
 mbecModelVarianceLMM(model.form, model.vars, tmp.cnts, tmp.meta, type)
 }
 \arguments{
-\item{model.form}{type formula for linear model}
+\item{model.form}{Formula for linear mixed model, function will create simple
+additive linear mixed model if this argument is not supplied.}
 
-\item{model.vars}{covariates to use for model building}
+\item{model.vars}{Covariates to use for model building if argument
+'model.form' is not given.}
 
-\item{tmp.cnts}{extracted count matrix}
+\item{tmp.cnts}{Abundance matrix in 'sample x feature' orientation.}
 
-\item{tmp.meta}{extracted covariate table}
+\item{tmp.meta}{Covariate table that contains at least the used variables.}
 
-\item{type}{String the denotes data source to keep track of process steps}
+\item{type}{String the denotes data source, i.e., one of "otu","clr" or "tss"
+for the transformed counts or the label of the batch corrected count-matrix.}
 }
 \value{
-df that contains proportions of variance for given covariates
+Data.frame that contains proportions of variance for given covariates
+in a linear mixed modelling approach.
 }
 \description{
 The function offers a selection of methods/algorithms to estimate the
@@ -30,17 +34,12 @@ i.e., residuals that are not currently explained. Covariates of interest
 the model.
 }
 \details{
-Linear Mixed Model (lmm): All but the first covariate are considered mixed
-effects. A model is fitted to each OTU respectively and the proportion of
+Linear Mixed Model (lmm): Only the first covariate is considered a mixed
+effect. A model is fitted to each OTU respectively and the proportion of
 variance extracted for each covariate.
-(OTU_x ~ covariate_1 + (1|covariate_2) + (1|...)).
-
-The function returns a data-frame for further analysis - the report functions
-(mbecReport and mbecReportPrelim) will automatically produce plots. Input for
-the data-set can be an MbecData-object, a phyloseq-object or a list that
-contains counts and covariate data. The covariate table requires an 'sID'
-column that contains sample IDs equal to the sample naming in the counts
-table. Correct orientation of counts will be handled internally.
+(OTU_x ~ covariate_2.. + covariate_n + (1|covariate_1)
 }
-\keyword{LM}
+\keyword{LMM}
+\keyword{Proportion}
 \keyword{Variance}
+\keyword{of}

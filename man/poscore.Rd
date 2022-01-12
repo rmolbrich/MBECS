@@ -7,24 +7,27 @@
 poscore(cnt.vec, cnt, type = c("rank", "weak", "strict", "mean"))
 }
 \arguments{
-\item{cnt.vec, }{vector of cnts that acts as reference for score calculation}
+\item{cnt.vec}{A vector of counts that acts as reference for score
+calculation.}
 
-\item{cnt, }{value to calculate score for}
+\item{cnt}{A numeric value to calculate percentile-score for.}
 
-\item{type, }{one of 'rank', 'weak', 'strict' or 'mean' to determine how score is calculated}
+\item{type}{One of 'rank', 'weak', 'strict' or 'mean' to determine how the
+score is calculated.}
 }
 \value{
-a score for given counts in relation to reference counts
+A score for given count in relation to reference counts.
 }
 \description{
-Helper function that calculates percentiles of scores for batch-correction method 'pn'
-(percentile normalization). R-implementation of Claire Duvallet's 'percentileofscore()' for
-python.
+Helper function that calculates percentiles of scores for batch-correction
+method 'pn' (percentile normalization). R-implementation of Claire Duvallet's
+'percentileofscore()' for python.
 }
 \details{
-Calculates the number of values that bigger than reference (left) and the number of values that
-are smaller than the reference (right). Percentiles of scores are given in the interval \eqn{I:[0,100]}.
-Depending on type of calculation, the score will be computed as follows:
+Calculates the number of values that bigger than reference (left) and the
+number of values that are smaller than the reference (right). Percentiles of
+scores are given in the interval \eqn{I:[0,100]}. Depending on type of
+calculation, the score will be computed as follows:
 
 \code{rank = (right + left + ifelse(right > left, 1, 0)) * 50/n}
 
@@ -40,6 +43,5 @@ Depending on type of calculation, the score will be computed as follows:
 val.score <- poscore(cnt.vec=runif(100, min=0, max=100), cnt=42,
 type="strict")
 }
-\keyword{Log}
-\keyword{Ratio}
-\keyword{Transformation}
+\keyword{Percentile}
+\keyword{Score}

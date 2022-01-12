@@ -7,10 +7,10 @@
 mbecVarianceStatsLMM(model.fit)
 }
 \arguments{
-\item{model.fit}{linear mixed model object of class 'lmerMod'}
+\item{model.fit}{A linear mixed model object of class 'lmerMod'.}
 }
 \value{
-a named row-vector, containing proportional variance for model terms
+A named row-vector, containing proportional variance for model terms.
 }
 \description{
 For a Linear Mixed Model, this function extracts the proportion of variance

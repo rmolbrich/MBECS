@@ -7,13 +7,13 @@
 mbecUpperCase(input = character())
 }
 \arguments{
-\item{input}{A string that needs to be Capitalized}
+\item{input}{Any string whose first letter should be capitalized.}
 }
 \value{
 Input with first letter capitalized
 }
 \description{
 Change the first letter of the input to uppercase. Used in plotting functions
-to make covariates, i.e., axis-lables look nicer.
+to make covariates, i.e., axis-labels look nicer.
 }
 \keyword{uppercase}

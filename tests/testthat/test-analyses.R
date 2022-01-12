@@ -14,7 +14,7 @@ test_that("mbecRLE works", {
   # expect no warnings
   expect_warning(rle.test, NA)
   # now put in plotting function and test that this produces a 'gtable'
-  expect_s3_class(mbecRLEPlot(tmp.long=rle.test$result,
+  expect_s3_class(mbecRLEPlot(rle.df=rle.test$result,
                               model.vars=eval(model.vars)),
                   "ggplot")
 })
@@ -265,7 +265,7 @@ test_that("mbecModelVariance RDA works", {
   expect_warning(mvar.test, NA)
 
   # build directly from 'mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)'
-  rda.test <- evaluate_promise(mbecModelVarianceRDA(model.form=NULL, model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
+  rda.test <- evaluate_promise(mbecModelVarianceRDA(model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
 
   expect_identical(mvar.test$result, rda.test$result)
   # expect no warnings
@@ -289,7 +289,7 @@ test_that("mbecModelVariance PVCA works", {
   expect_warning(mvar.test, NA)
 
   # build directly from 'mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)'
-  pvca.test <- evaluate_promise(mbecModelVariancePVCA(model.form=NULL, model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr",pct_threshold = 0.5876))
+  pvca.test <- evaluate_promise(mbecModelVariancePVCA(model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr",pct_threshold = 0.5876))
 
   expect_identical(mvar.test$result, pvca.test$result)
   # expect no warnings
@@ -313,7 +313,7 @@ test_that("mbecModelVariance S.COEF works", {
   expect_warning(mvar.test, NA)
 
   # build directly from 'mbecModelVarianceSCOEF(model.form, model.vars, tmp.cnts, tmp.meta, type)'
-  scoef.test <- evaluate_promise(mbecModelVarianceSCOEF(model.form=NULL, model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
+  scoef.test <- evaluate_promise(mbecModelVarianceSCOEF(model.vars = c("batch", "group"), tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
 
   expect_identical(mvar.test$result, scoef.test$result)
   # expect no warnings
@@ -392,7 +392,7 @@ test_that("mbecValidateModel works", {
 
   # expect warning
   mval.test <- evaluate_promise(mbecValidateModel(lme4::lmer(tmp[[1]][,1] ~ group + (1|batch),data=tmp[[2]]), colinearityThreshold = 0.5))
-  expect_identical(mval.test$result, "Some covariates are strongly correlated. Please re-evaluate the variable selection and try again.")
+  expect_true(grepl("Some covariates are strongly *", mval.test$result))
 
   # expect no problems
   mval.test <- evaluate_promise(mbecValidateModel(lme4::lmer(tmp[[1]][,1] ~ group + (1|batch),data=tmp[[2]]), colinearityThreshold = 0.999))

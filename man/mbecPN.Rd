@@ -10,8 +10,10 @@ mbecPN(input.obj, model.vars, type = "tss")
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is
 handeled internally)}
 
-\item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+\item{model.vars}{Vector of covariate names. First element relates to batch.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+'tss'.}
 }
 \value{
 A matrix of batch-effect corrected counts
@@ -35,8 +37,9 @@ because it requires a reference group. In addition, the transformation into
 percentiles removes information from the data.
 }
 \details{
-The function returns a matrix of corrected counts Correct orientation of
-counts will be handled internally.
+The input for this function is supposed to be an MbecData object that
+contains total sum-scaled and cumulative log-ratio transformed abundance
+matrices. Output will be a matrix of corrected abundances.
 }
 \keyword{BECA}
 \keyword{Duvallet}

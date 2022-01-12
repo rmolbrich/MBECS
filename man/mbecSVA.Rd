@@ -4,30 +4,34 @@
 \alias{mbecSVA}
 \title{Surrogate variable Analysis (SVA)}
 \usage{
-mbecSVA(input.obj, model.vars)
+mbecSVA(input.obj, model.vars, type = "clr")
 }
 \arguments{
-\item{input.obj}{phyloseq object or numeric matrix (correct orientation is
-handeled internally)}
+\item{input.obj}{MbecData object}
 
-\item{model.vars}{two covariates of interest to select by first variable
-selects panels and second one determines coloring}
+\item{model.vars}{Vector of covariate names. First element relates to batch.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+'clr'.}
 }
 \value{
-SOMETHING
+A vector of p-values that indicate significance of the batch-effect
+for the features.
 }
 \description{
 Two step approach that (1.) identify the number of latent factors to be
 estimated by fitting a full-model with effect of interest and a null-model
-with no effects. The function num.sv then calculates the number of latent
+with no effects. The function 'num.sv()' then calculates the number of latent
 factors. In the next (2.) step, the sva function will estimate the surrogate
 variables. And adjust for them in full/null-model . Subsequent F-test gives
 significance values for each feature - these P-values and Q-values are
 accounting for surrogate variables (estimated BEs).
 }
 \details{
-The output will be SOMETHING
+The input for this function is supposed to be an MbecData object that
+contains total sum-scaled and cumulative log-ratio transformed abundance
+matrices. Output will be a vector of p-values.
 }
 \keyword{Assessment}
 \keyword{Batch-Effect}
-\keyword{Correction}
+\keyword{SVA}

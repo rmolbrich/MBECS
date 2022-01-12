@@ -7,10 +7,10 @@
 mbecVarianceStatsLM(model.fit)
 }
 \arguments{
-\item{model.fit}{linear model object of class 'lm'}
+\item{model.fit}{A linear model object of class 'lm'.}
 }
 \value{
-a named row-vector, containing proportional variance for model terms
+A named row-vector, containing proportional variance for model terms.
 }
 \description{
 For a Linear Model, this function extracts the proportion of variance

@@ -2,41 +2,47 @@
 % Please edit documentation in R/mbecs_helper.R
 \name{mbecTransform}
 \alias{mbecTransform}
-\title{Log-Ratio Transformation}
+\title{Normalizing Transformations}
 \usage{
 mbecTransform(input.obj, method = "clr", offset = 0, required.col = NULL)
 }
 \arguments{
-\item{input.obj}{either pyhloseq-object (OTU orientation is handled) or numeric matrix (samples x features)}
+\item{input.obj}{MbecData, phyloseq, list(counts, meta-data)}
 
-\item{method}{one of 'CLR' or 'ILR'}
+\item{method}{one of 'CLR' or 'TSS'}
 
-\item{offset}{optional offset in case of sparse matrix}
+\item{offset}{(OPTIONAL) Offset in case of sparse matrix, for DEFAULT (0) an
+offset will be calculated if required.}
 
-\item{required.col}{(OPTIONAL) A vector of column names in the meta-data that need to be present. Sanity check for subsequent steps.}
+\item{required.col}{(OPTIONAL) A vector of column names in the meta-data that
+need to be present. Sanity check for subsequent steps.}
 }
 \value{
-MbecDataObject with transformed counts
+MbecData with transformed counts in 'clr' and 'tss' attributes
+respectively.
 }
 \description{
-Wrapper to help perform log-ratio transformations ,adapted from packages 'mixOmics' and
-'robCompositions' to work on matrices and Phyloseq objects alike.
+Wrapper to help perform cumulative log-ratio  and total sum-scaling
+transformations ,adapted from packages 'mixOmics' and robCompositions' to
+work on matrices and Phyloseq objects alike.
 }
 \details{
-The function returns an MbecData object with tranformed counts and covariate information. Input for the data-set
-can be an MbecData-object, a phyloseq-object or a list that contains counts and covariate data.
-The covariate table requires an 'sID' column that contains sample IDs equal to the sample naming
-in the counts table. Correct orientation of counts will be handled internally.
+The function returns an MbecData object with transformed counts and covariate
+information. Input for the data-set can be of type MbecData, phyloseq or a
+list that contains counts and covariate data. Correct orientation of counts
+will be handled internally, as long as both abundance table contain sample
+names.
 }
 \examples{
-# This will return the cumulative log-ratio transformed counts in an MbecData object
-\dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
-method="CLR", offset=0)}
+# This will return the cumulative log-ratio transformed counts in an
+# MbecData object.
+mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="clr", offset=0,
+required.col=c("batch","group"))
 
-# This will return the inverse log-ratio transformed counts in an MbecData object
-\dontrun{mbec.LRT <- mbecTransform(input.obj=list(counts, covariates),
-method="ILR", offset=0)}
+# This will return total sum-scaled counts in an MbecData object.
+mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="tss", offset=0,
+required.col=c("batch","group"))
 }
-\keyword{Log}
-\keyword{Ratio}
+\keyword{CLR}
+\keyword{TSS}
 \keyword{Transformation}

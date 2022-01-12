@@ -7,13 +7,12 @@
 mbecMosaic(input.obj, model.vars = c("batch", "group"), return.data = FALSE)
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
-orientation is handeled internally)}
+\item{input.obj}{MbecData object}
 
-\item{model.vars}{covariates of interest to the sample allocation}
+\item{model.vars}{Two covariates of interest to the sample allocation.}
 
-\item{return.data}{logical if TRUE returns the data.frame required for
-plotting (NO plotting or saving here bucko)}
+\item{return.data}{Logical if TRUE returns the data.frame required for
+plotting. Default (FALSE) will return plot object.}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
@@ -26,15 +25,12 @@ in an analysis.
 }
 \details{
 The function returns either a plot-frame or the finished ggplot object. Input
-for the data-set can be an MbecData-object, a phyloseq-object or a list that
-contains counts and covariate data. The covariate table requires an 'sID'
-column that contains sample IDs equal to the sample naming in the counts
-table. Correct orientation of counts will be handled internally.
+for the data-set can be an MbecData-object.
 }
 \examples{
-# This will return the plot-df of the samples grouped by treatment and sex
-data.Mosaic <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
-return.data=TRUE)
+# This will return the plot-df of the samples grouped by group and batch.
+data.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
+model.vars=c('group','batch'), return.data=TRUE)
 
 # Return the ggplot2 object of the samples grouped by group and batch
 plot.Mosaic <- mbecMosaic(input.obj=dummy.mbec,

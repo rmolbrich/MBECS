@@ -17,25 +17,24 @@ mbecHeat(
 )
 }
 \arguments{
-\item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct
-orientation is handeled internally)}
+\item{input.obj}{MbecData object}
 
-\item{model.vars}{covariates of interest to show in heatmap}
+\item{model.vars}{Covariates of interest to show in heatmap.}
 
-\item{center}{flag to activate centering}
+\item{center}{Flag to activate centering, DEFAULT is TRUE.}
 
-\item{scale}{flag to activate scaling}
+\item{scale}{Flag to activate scaling, DEFAULT is TRUE.}
 
-\item{method}{one of 'ALL' or 'TOP' or a vector of feature names}
+\item{method}{One of 'ALL' or 'TOP' or a vector of feature names.}
 
-\item{n}{number of features to select in method TOP}
+\item{n}{Number of features to select in method TOP.}
 
 \item{type}{Which abundance matrix to use for the calculation.}
 
 \item{label}{Which corrected abundance matrix to use for analysis.}
 
-\item{return.data}{logical if TRUE returns the data.frame required for
-plotting (NO plotting or saving here bucko)}
+\item{return.data}{Logical if TRUE returns the data.frame required for
+plotting. Default (FALSE) will return plot object.}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
@@ -44,18 +43,31 @@ either a ggplot2 object or a formatted data-frame to plot from
 Shows the abundance value of selected features in a heatmap. By default, the
 function expects two covariates group and batch to depict clustering in these
 groups. More covariates can be included. Selection methods for features are
-'TOP' and 'ALL' which select the top-n or all features respectively. The
-default value for n is 10 and can be changed with the accompanying parameter.
+"TOP" and "ALL" which select the top-n or all features respectively. The
+default value for the argument 'n' is 10. If 'n' is supplied with a vector
+of feature names, e.g., c("OTU1","OTU5", "OTU10"), of arbitrary length, the
+argument method' will be ignored and only the given features selected for
+plotting.
 }
 \details{
-The function returns either a plot-frame or the finished ggplot object.
-Input for the data-set can be an MbecData-object, a phyloseq-object or a list
-that contains counts and covariate data. The covariate table requires an
-'sID' column that contains sample IDs equal to the sample naming in the
-counts table. Correct orientation of counts will be handled internally.
+The function returns either a plot-frame or the finished ggplot object. Input
+is an MbecData-object. If cumulative log-ratio (clr) and total sum-scaled
+(tss) abundance matrices are part of the input, i.e., 'mbecTransform()' was
+used, they can be selected as input by using the 'type' argument with either
+"otu", "clr" or "tss". If batch effect corrected matrices are available, they
+can be used by specifying the 'type' argument as "cor" and using the 'label'
+argument to select the appropriate matrix by its denominator, e.g., for batch
+correction method ComBat this would be "bat", for RemoveBatchEffects from the
+limma package this is "rbe". Default correction method-labels are "ruv3",
+"bmc","bat","rbe","pn","svd".
+
+The combination of 'type' and 'label' argument basically accesses the
+attribute 'cor', a list that stores all matrices of corrected counts.
+This list can also be accessed via getter and setter methods. Hence, the user
+can supply their own matrices with own names.
 }
 \examples{
-# This will return the plot-frame of all features i the data-set.
+# This will return the plot-frame of all features in the data-set.
 data.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 center=TRUE, scale=TRUE, method='ALL', return.data=TRUE)
 

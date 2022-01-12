@@ -12,34 +12,36 @@ mbecSetData(
 )
 }
 \arguments{
-\item{input.obj}{MbecData object to change}
+\item{input.obj}{MbecData object to work on.}
 
-\item{new.cnts}{matrix-like object with same dimension as 'otu_table' in input.obj}
+\item{new.cnts}{A matrix-like object with same dimension as 'otu_table' in
+input.obj.}
 
-\item{type}{character to replace type-attribute or as name tag for added count-matrix}
+\item{type}{Specify which type of data to add, by using one of 'ass'
+(Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+(Total Scaled-Sum).}
 
-\item{label}{For types 'ass' and 'cor' this sets the name within the list.}
-
-\item{log}{character to add to the log string}
-
-\item{update}{logical (TRUE) replace input fields (FALSE) add to the input.obj}
+\item{label}{For types 'ass' and 'cor' this sets the name within the lists.}
 }
 \value{
 Input object with updated attributes.
 }
 \description{
-This function either updates counts, type and log attributes (DEFAULT) or adds a matrix of
-transformed counts to the input (update=FALSE).
+Sets and/or replaces selected feature abundance matrix and handles correct
+orientation. The argument type determines which slot to access, i.e. the base
+matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+cumulative log-ratio transformed counts "clr" and batch effect corrected
+counts "cor" and assessment vectors "ass". The later two additionally require
+the use of the argument 'label' that specifies the name within the respective
+lists of corrections and assessments.
 }
 \examples{
-# This will replace the current abundance-matrix, append 'rbe' (for remove-batch-effect) to the
-# log and change the type to 'rbe' to indicate current status.
+# This will fill the 'tss' slot with the supplied matrix.
 MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
     type='tss')
 
-# This will add the corrected data to the list of transformations named like the type argument.
-# The 'log' attribute will be updated, but 'type' stays the same (because the main abundnce
-# matrix wasn't replaced.
+# This will put the given matrix into the list of corrected counts under the
+# name "nameOfMethod".
 MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
     type='cor', label="nameOfMethod")
 }

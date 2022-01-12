@@ -4,10 +4,10 @@
 \alias{mbecRLEPlot}
 \title{RLE plotting function}
 \usage{
-mbecRLEPlot(tmp.long, model.vars)
+mbecRLEPlot(rle.df, model.vars)
 }
 \arguments{
-\item{tmp.long}{'mbecRLE' output}
+\item{rle.df}{'mbecRLE'  data output}
 
 \item{model.vars}{two covariates of interest to select by first variable
 selects panels and second one determines coloring}
@@ -21,11 +21,12 @@ Takes data.frame from mbecRLE and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
-df.rle <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
+rle.df <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
 type="clr", return.data=TRUE)
-plot.rle <- mbecRLEPlot(df.rle, c('group','batch'))
+plot.rle <- mbecRLEPlot(rle.df, c('group','batch'))
 }
+\keyword{Expression}
+\keyword{Log}
+\keyword{Plot}
 \keyword{RLE}
-\keyword{expression}
-\keyword{log}
-\keyword{relative}
+\keyword{Relative}

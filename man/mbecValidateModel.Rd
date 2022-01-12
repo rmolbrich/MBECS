@@ -7,9 +7,9 @@
 mbecValidateModel(model.fit, colinearityThreshold = 0.999)
 }
 \arguments{
-\item{model.fit}{lm() or lmm() output}
+\item{model.fit}{lm() or lmm() output.}
 
-\item{colinearityThreshold}{cut-off for model rejection}
+\item{colinearityThreshold}{Cut-off for model rejection, I=[0,1].}
 }
 \value{
 No return values. Stops execution if validation fails.

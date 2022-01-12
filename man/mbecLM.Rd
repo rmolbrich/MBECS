@@ -13,14 +13,23 @@ mbecLM(
 )
 }
 \arguments{
-\item{input.obj, }{mbecData object}
+\item{input.obj}{MbecData object}
 
-\item{method, }{either 'lm' or 'lmm' for linear (mixed) models or 'auto' to detect correct method (not implemented yet)}
+\item{method}{Either 'lm' or 'lmm' for linear models and linear mixed models.}
 
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
+\item{model.vars}{Covariates of interest, first relates to batch and second
+to treatment.}
+
+\item{type}{Which abundance matrix to use, one of 'otu, tss, clr, cor'.
+DEFAULT is clr' and the use of 'cor' requires the parameter label to be
+set as well.}
+
+\item{label}{Which corrected abundance matrix to use for analysis in case
+'cor' was selected as type.}
 }
 \value{
-vector of fdr corrected p-values that show significance of treatment for every feature
+A vector of fdr corrected p-values that show significance of
+treatment for every feature
 }
 \description{
 Helper function that fits lm/lmm with covariates 'treatment' and 'batch' to

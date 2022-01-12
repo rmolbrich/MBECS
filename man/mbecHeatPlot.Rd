@@ -27,10 +27,10 @@ Takes data.frame from 'mbecHeat()' and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
-df.heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
+heat.df <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
-plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=df.heat[[1]],
-tmp.meta=df.heat[[2]], model.vars=c('group','batch'))
+plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=heat.df[[1]],
+tmp.meta=heat.df[[2]], model.vars=c('group','batch'))
 }
 \keyword{RLE}
 \keyword{expression}
