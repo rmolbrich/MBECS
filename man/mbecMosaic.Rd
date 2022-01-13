@@ -18,7 +18,7 @@ plotting. Default (FALSE) will return plot object.}
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Depicts the dispersion of samples over two (preferentially categorical*)
+Depicts the dispersion of samples over two (preferentially categorical)
 covariates of interest. Effectively showing, the un-/evenness within and
 between covariates to inform the choice of methods for the subsequent steps
 in an analysis.

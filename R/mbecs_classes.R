@@ -59,10 +59,10 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #' @param tax_table taxonomic table from phyloseq as optional input
 #' @param phy_tree phylogenetic tree as optional input
 #' @param refseq reference sequences as optional input
-#' @slot assessments A list for the results of BEAAs.
-#' @slot corrections A list for the results of BECAs.
-#' @slot tss Total-sum-squared features matrix.
-#' @slot clr Cumulative log-ratio transformed feature matrix.
+#' @param assessments A list for the results of BEAAs.
+#' @param corrections A list for the results of BECAs.
+#' @param tss Total-sum-squared features matrix.
+#' @param clr Cumulative log-ratio transformed feature matrix.
 #' @return produces an R-object of type MbecData
 #' @import phyloseq
 #' @export
@@ -208,6 +208,36 @@ setGeneric("mbecSetData", signature="input.obj",
 )
 
 
+#' Mbec-Data Setter
+#'
+#' Sets and/or replaces selected feature abundance matrix and handles correct
+#' orientation. The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
+#'
+#' @keywords MBECS Setter
+#' @param input.obj MbecData object to work on.
+#' @param new.cnts A matrix-like object with same dimension as 'otu_table' in
+#' input.obj.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this sets the name within the lists.
+#' @return Input object with updated attributes.
+#' @export
+#'
+#' @examples
+#' # This will fill the 'tss' slot with the supplied matrix.
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='tss')
+#'
+#' # This will put the given matrix into the list of corrected counts under the
+#' # name "nameOfMethod".
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='cor', label="nameOfMethod")
 setMethod("mbecSetData", "MbecData",
           function(input.obj, new.cnts=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {
@@ -217,6 +247,36 @@ setMethod("mbecSetData", "MbecData",
 )
 
 
+#' Mbec-Data Setter
+#'
+#' Sets and/or replaces selected feature abundance matrix and handles correct
+#' orientation. The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
+#'
+#' @keywords MBECS Setter
+#' @param input.obj MbecData object to work on.
+#' @param new.cnts A matrix-like object with same dimension as 'otu_table' in
+#' input.obj.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this sets the name within the lists.
+#' @return Input object with updated attributes.
+#' @export
+#'
+#' @examples
+#' # This will fill the 'tss' slot with the supplied matrix.
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='tss')
+#'
+#' # This will put the given matrix into the list of corrected counts under the
+#' # name "nameOfMethod".
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#'     type='cor', label="nameOfMethod")
 .mbecSetData <- function(input.obj, new.cnts=NULL,
                         type=c("otu","ass","cor","clr","tss"), label=character()) {
 
@@ -322,6 +382,55 @@ setGeneric("mbecGetData", signature="input.obj",
 )
 
 
+#' Mbec-Data Getter
+#'
+#' This function extracts abundance matrix and meta-data in the chosen
+#' orientation from the input.
+#'
+#' The parameter 'orientation' determines if the output has features as columns
+#' (sxf) or if the columns contain samples (fxs). This is mainly used to
+#' retrieve correctly oriented matrices for the different analysis and
+#' correction functions.
+#'
+#' The parameter 'required.col' is a vector of column names (technically
+#' positions would work) in the  metadata, that are required for the analysis
+#' at hand. The function actually only checks if they are present in the data,
+#' but it will return the whole meta-frame.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor" and assessment vectors "ass". The later two additionally require
+#' the use of the argument 'label' that specifies the name within the respective
+#' lists of corrections and assessments.
+#'
+#' @keywords MBECS Getter
+#' @param input.obj MbecData object
+#' @param orientation, Select either 'fxs' or 'sxf' to retrieve features in
+#' rows or columns respectively.
+#' @param required.col Vector of column names that are required from the
+#' covariate-table.
+#' @param type Specify which type of data to add, by using one of 'ass'
+#' (Assessement), 'cor' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss'
+#' (Total Scaled-Sum).
+#' @param label For types 'ass' and 'cor' this specifies the name within the
+#' lists.
+#' @return A list that contains count-matrix (in chosen orientation) and
+#' meta-data table.
+#' @export
+#'
+#' @examples
+#' # This will return the un-transformed (OTU) abundance matrix with features as
+#' # columns and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+#'     required.col=c("group","batch"), type="otu")
+#'
+#' # This will return the clr-transformed abundance matrix with features as
+#' # rows and it will test if the columns "group" and "batch" are present in
+#' # the meta-data table.
+#' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
+#'     required.col=c("group","batch"), type="clr")
 .mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL,
                          type=c("otu","ass","cor","clr","tss"), label=character()) {
 

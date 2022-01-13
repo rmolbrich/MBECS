@@ -12,11 +12,13 @@ mbecReportPrelim(
 )
 }
 \arguments{
-\item{input.obj, }{list of phyloseq objects to compare, first element is considered uncorrected data}
+\item{input.obj}{list of phyloseq objects to compare, first element is considered uncorrected data}
 
-\item{model.vars, }{required covariates to build models}
+\item{model.vars}{required covariates to build models}
 
-\item{return.data, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
+\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.}
+
+\item{return.data}{TRUE will return a list of all produced plots, FALSE will start rendering the report}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from

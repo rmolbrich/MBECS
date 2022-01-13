@@ -38,6 +38,14 @@ MbecData(
 \item{phy_tree}{phylogenetic tree as optional input}
 
 \item{refseq}{reference sequences as optional input}
+
+\item{assessments}{A list for the results of BEAAs.}
+
+\item{corrections}{A list for the results of BECAs.}
+
+\item{tss}{Total-sum-squared features matrix.}
+
+\item{clr}{Cumulative log-ratio transformed feature matrix.}
 }
 \value{
 produces an R-object of type MbecData
@@ -90,14 +98,6 @@ algorithms (BECA) that produce adjusted abundance matrices.}
 \item{\code{tss}}{Total-sum-squared feature abundance matrix.}
 
 \item{\code{clr}}{Cumulative log-ratio transformed feature abundance matrix.}
-
-\item{\code{assessments}}{A list for the results of BEAAs.}
-
-\item{\code{corrections}}{A list for the results of BECAs.}
-
-\item{\code{tss}}{Total-sum-squared features matrix.}
-
-\item{\code{clr}}{Cumulative log-ratio transformed feature matrix.}
 }}
 
 \examples{

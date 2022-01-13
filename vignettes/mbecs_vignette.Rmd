@@ -6,8 +6,8 @@ output:
     toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{MBECS introduction}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]{inputenc}
 ---
 
 ```{r, include = FALSE}

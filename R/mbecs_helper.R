@@ -95,7 +95,7 @@ mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
   for( pc.idx in seq_along(pca.axes) ) {
     for( comp.idx in seq_along(comps) ) {
       ks.res.list[[colnames(plot.df[pca.axes[pc.idx] + 1])]][[paste0(comps[[comp.idx]], collapse = ".")]] <-
-        ks.test(dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][1]),
+        stats::ks.test(dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][1]),
                            pc.idx],
                 dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][2]), pc.idx])
     }

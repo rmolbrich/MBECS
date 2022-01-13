@@ -1,3 +1,13 @@
+MBECS.Rproj
+.git/.DS_Store
+.Rproj.user/.DS_Store
+.Rproj.user/shared/.DS_Store
+data/.DS_Store
+inst/.DS_Store
+R/.DS_Store
+README_files/.DS_Store
+tests/.DS_Store
+tests/testthat/.DS_Store
 .Rproj.user
 .Rhistory
 .Rdata
@@ -5,3 +15,5 @@
 .DS_Store
 Complete_rebuild_2.0.R
 TestingThings.R
+/doc/
+/Meta/

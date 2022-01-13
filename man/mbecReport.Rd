@@ -4,7 +4,7 @@
 \alias{mbecReport}
 \title{MBECS Report Pipeline}
 \usage{
-mbecReport(input.obj, model.vars = c("group", "batch"), return.data = FALSE)
+mbecReport(input.obj, model.vars = c("batch", "group"), return.data = FALSE)
 }
 \arguments{
 \item{input.obj}{list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)}

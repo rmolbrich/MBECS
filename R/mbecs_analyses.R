@@ -431,7 +431,7 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 
 #' Mosaic Sample Group Allocation
 #'
-#' Depicts the dispersion of samples over two (preferentially categorical*)
+#' Depicts the dispersion of samples over two (preferentially categorical)
 #' covariates of interest. Effectively showing, the un-/evenness within and
 #' between covariates to inform the choice of methods for the subsequent steps
 #' in an analysis.
@@ -719,7 +719,7 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
     model.fit <- stats::lm(tmp.formula, data = tmp.meta)
     model.variances <- rbind.data.frame(model.variances,
                                         mbecVarianceStats(model.fit))
-    setTxtProgressBar(lm.pb, x)
+    utils::setTxtProgressBar(lm.pb, x)
   }
   # close progress bar
   close(lm.pb)
@@ -791,7 +791,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
     model.variances <- rbind.data.frame(model.variances,
                                         mbecVarianceStats(model.fit))
 
-    setTxtProgressBar(lmm.pb, x)
+    utils::setTxtProgressBar(lmm.pb, x)
   }
   close(lmm.pb)
   res <- dplyr::mutate(model.variances, type = eval(type))
@@ -848,7 +848,7 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
       summary(tmp.rda.covariate)$partial.chi *
       100/summary(tmp.rda.covariate)$tot.chi
 
-    setTxtProgressBar(rda.pb, condition.idx)
+    utils::setTxtProgressBar(rda.pb, condition.idx)
   }
   close(rda.pb)
   res <- data.frame(t(model.variances)) %>%
@@ -1191,8 +1191,9 @@ mbecVarianceStatsLMM <- function(model.fit) {
 #'
 #' Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter
 #' estimates. The attribute 'pp' of the model contains the dense model matrix
-#' for fixed-effects parameters (X). The fixed effects variance, σ2f, is the
-#' variance of the matrix-multiplication β∗X (parameter vector by model matrix)
+#' for fixed-effects parameters (X). The fixed effects variance, sigma2f, is the
+#' variance of the matrix-multiplication beta times X (parameter vector by
+#' model matrix)
 #'
 #' @keywords lmm proportion variance
 #' @param model.fit A linear mixed model object of class 'lmerMod'.

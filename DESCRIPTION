@@ -1,6 +1,8 @@
 Package: MBECS
-Title: What the Package Does (One Line, Title Case)
+Title: Evaluation and correction of batch effects in microbiome data-sets
 Version: 0.0.1
+Author: Michael Olbrich
+Maintainer: Michael Olbrich <M.Olbrich@protonmail.com>
 Authors@R: 
     person(given = "Michael",
        family = "Olbrich",
@@ -31,12 +33,15 @@ Suggests:
     permute,
     pheatmap,
     rmarkdown,
+    markdown,
     ruv,
     sva,
     tibble,
     tidyr,
     vegan,
     methods,
+    stats,
+    utils,
     knitr
 Depends: 
     R (>= 4.1.0)

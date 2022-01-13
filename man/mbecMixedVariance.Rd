@@ -25,8 +25,9 @@ Standard Deviation of Residuals is stored as 'sc' attribute in the output of
 
 Uses 'lme4::fixef' to extract fixed-effects components, i.e., parameter
 estimates. The attribute 'pp' of the model contains the dense model matrix
-for fixed-effects parameters (X). The fixed effects variance, σ2f, is the
-variance of the matrix-multiplication β∗X (parameter vector by model matrix)
+for fixed-effects parameters (X). The fixed effects variance, sigma2f, is the
+variance of the matrix-multiplication beta times X (parameter vector by
+model matrix)
 }
 \examples{
 # This will return the variance of random/mixed components.

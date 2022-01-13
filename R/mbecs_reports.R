@@ -36,7 +36,7 @@
 #' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
-mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FALSE) {
+mbecReport <- function(input.obj, model.vars=c("batch","group"), return.data=FALSE) {
 
   ## first determine whether this is a post- or a preliminary-report and then call the appropriate function
 
@@ -79,9 +79,10 @@ mbecReport <- function(input.obj, model.vars=c("group","batch"), return.data=FAL
 
 
 #' Constructs an initial report of a single data-set without comparative analyses.
-#' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
-#' @param model.vars, required covariates to build models
-#' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
+#' @param input.obj list of phyloseq objects to compare, first element is considered uncorrected data
+#' @param model.vars required covariates to build models
+#' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.
+#' @param return.data TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), type="clr", return.data = FALSE) {
