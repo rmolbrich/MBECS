@@ -1,8 +1,6 @@
 Package: MBECS
 Title: Evaluation and correction of batch effects in microbiome data-sets
 Version: 0.0.1
-Author: Michael Olbrich
-Maintainer: Michael Olbrich <M.Olbrich@protonmail.com>
 Authors@R: 
     person(given = "Michael",
        family = "Olbrich",
