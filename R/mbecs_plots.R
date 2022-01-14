@@ -348,11 +348,11 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
   legend.title.cex =0.75
 
   # meh
-  ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
-  plot.annotation.top <- paste(colnames(ks.table),
-                               ks.table[1,], sep = ": ", collapse = " \n")
-  plot.annotation.right <- paste(colnames(ks.table),
-                                 ks.table[2,], sep = ": ", collapse = " \n")
+  # ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
+  # plot.annotation.top <- paste(colnames(ks.table),
+  #                              ks.table[1,], sep = ": ", collapse = " \n")
+  # plot.annotation.right <- paste(colnames(ks.table),
+  #                                ks.table[2,], sep = ": ", collapse = " \n")
   # meh
 
   var.color <- model.vars[1]; var.shape <- model.vars[2]
@@ -417,9 +417,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                      axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)),
                      plot.title = ggplot2::element_text(hjust = 0.5,
-                                                        size = ggplot2::rel(1.5))) +
-      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
+                                                        size = ggplot2::rel(1.5))) #+
+      # ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+      #                   colour = "#666666", size = ggplot2::rel(3))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
                                                                                       1])), fill = get(var.color), linetype = get(var.shape))) +
@@ -443,9 +443,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
         legend.text = ggplot2::element_text(size = ggplot2::rel(legend.cex))) +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank()) +
-      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
+                                   plot.title = ggplot2::element_blank()) #+
+      # ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+      #                   colour = "#666666", size = ggplot2::rel(3))
 
   } else {
     pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
@@ -464,9 +464,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
       #theme_pca() +
       ggplot2::labs(title = ggplot2::element_blank()) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
-                                                                                                                                                                     size = ggplot2::rel(1.5)))+
-      ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
+                                                                                                                                                                     size = ggplot2::rel(1.5))) #+
+      # ggplot2::annotate("text", -Inf, Inf, label = plot.annotation.top, hjust = -0.05, vjust = 1.15,
+      #                   colour = "#666666", size = ggplot2::rel(3))
 
     pRight <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[2] +
                                                                                       1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
@@ -475,9 +475,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
       #theme_pca() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
-                                   plot.title = ggplot2::element_blank())+
-      ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
-                        colour = "#666666", size = ggplot2::rel(3))
+                                   plot.title = ggplot2::element_blank()) #+
+      # ggplot2::annotate("text", Inf, -Inf, label = plot.annotation.right, hjust = -0.05, vjust = 1.15,
+      #                   colour = "#666666", size = ggplot2::rel(3))
   }
 
   g <- ggplot2::ggplotGrob(pMain)$grobs

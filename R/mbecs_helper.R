@@ -56,71 +56,7 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
 }
 
 
-#' Compare Distributions of Principal Component Values per Group
-#'
-#' For the selected Principal Components in PCA-plot perform Kolmogorov-Smirnov
-#' test to evaluate if distributions of the batches (or any variable really) are
-#' statistically significantly different.
-#'
-#' @keywords Distribution Statistical Similarity Test
-#' @param plot.df The plotting data.frame from mbecPCA function
-#' @param pca.axes The vector the denotes the selected axes
-#' @param model.vars The selected covariates.
-#' @param return.table DEFAULT is TRUE, if set to FALSE the function will return
-#' a list of length 2 that contains lists with result objects of 'ks.test()'
-#' named like the performed comparisons i.e. Batch1 to Batch2, etc..
-#' @return A data.frame with #principal components rows and n!/(2!(n-2)!)
-#' .columns
-mbecPCTest <- function(plot.df, pca.axes, model.vars, return.table=TRUE) {
-  ## FixME: this might not be a good idea because the batches probably contain
-  ## the class effect to a certai degree --> test if it makes a difference when
-  ## class effect is significant within batches and also the influence of
-  ## distribution of groups within batches
-  # very ugly, but it'll do for now
-  dist.check <- plot.df[, c(eval(colnames(plot.df[pca.axes[1] + 1])),
-                            eval(colnames(plot.df[pca.axes[2] + 1])),
-                            eval(model.vars))]
 
-  # get unique pairs of batches, i.e., the test that need to be performed
-  batches <- unique(dist.check[,eval(model.vars[1])])
-
-  comps <- list()
-  for( a.idx in seq_len(length(batches)-1) ) {
-    for( b.idx in seq.int(a.idx + 1,length(batches)) ) {
-      comps[[length(comps) + 1]] <- c(batches[a.idx], batches[b.idx])
-    }
-  }
-
-  ks.res.list <- list()
-  for( pc.idx in seq_along(pca.axes) ) {
-    for( comp.idx in seq_along(comps) ) {
-      ks.res.list[[colnames(plot.df[pca.axes[pc.idx] + 1])]][[paste0(comps[[comp.idx]], collapse = ".")]] <-
-        stats::ks.test(dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][1]),
-                           pc.idx],
-                dist.check[which(dist.check[,eval(model.vars[1])] %in% comps[[comp.idx]][2]), pc.idx])
-    }
-  }
-
-  if( !return.table ) {
-    # return list of ks-obj
-    return(ks.res.list)
-  }
-  # else return a table
-  table.df <- data.frame(matrix(ncol = length(comps), nrow = length(pca.axes)))
-  colnames(table.df) <- names(ks.res.list[[1]])
-  rownames(table.df) <- names(ks.res.list)
-
-  for( pc.idx in rownames(table.df) ) {
-    for( comp.idx in colnames(table.df) ) {
-      table.df[eval(pc.idx),eval(comp.idx)] <-
-        ks.res.list[[eval(pc.idx)]][[eval(comp.idx)]]$p.value
-    }
-  }
-
-  table.df <- format(round(table.df, 5), nsmall = 2)
-
-  return(table.df)
-}
 
 
 #' Capitalize Word Beginning

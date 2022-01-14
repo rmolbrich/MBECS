@@ -24,11 +24,6 @@ test_that("mbecTestModel works", {
 })
 
 
-test_that("mbecPCTest works", {
-  # ToDo: meh
-})
-
-
 test_that("capitalization works", {
   expect_identical(mbecUpperCase("muh"), "Muh")
   expect_identical(mbecUpperCase("MUH"), "MUH")

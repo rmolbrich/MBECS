@@ -85,17 +85,17 @@ mbecReport <- function(input.obj, model.vars=c("batch","group"), return.data=FAL
 #' @param return.data TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
-mbecReportPrelim <- function(input.obj, model.vars=c("group","batch"), type="clr", return.data = FALSE) {
+mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr", return.data = FALSE) {
   # just start with input processing and transform into MbecData if required
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
   # Prepare the SIX exploratory plots
   prelim.report.list <- list()
-  prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars) )
-  prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2))
-  prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars))
-  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars))
-  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1] )
+  prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars))
+  prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2), type=eval(type))
+  prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars), type=eval(type))
+  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars), type=eval(type))
+  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1], type=eval(type))
   # Dendrogramm needs better function if possible
   #prelim.report.list[["dendro"]] <- mbecDendro(input.obj, method="TOP", n=5, model.var=eval(model.vars)[2] )
 
