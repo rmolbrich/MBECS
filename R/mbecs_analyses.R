@@ -1067,7 +1067,7 @@ mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
-#' limo <- stats::lm(datadummy$cnts[,1] ~ group + batch, data=datadummy$meta)
+#' limo <- stats::lm(dummy.list$cnts[,1] ~ group + batch, data=dummy.list$meta)
 #' vec.variance <- mbecVarianceStats(model.fit=limo)
 mbecVarianceStats <- function(model.fit) {
 
@@ -1203,8 +1203,8 @@ mbecVarianceStatsLMM <- function(model.fit) {
 #'
 #' @examples
 #' # This will return the variance of random/mixed components.
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
-#' data=datadummy$meta)
+#' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
+#' data=dummy.list$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
 mbecMixedVariance <- function(model.fit) {
 
@@ -1245,8 +1245,8 @@ mbecMixedVariance <- function(model.fit) {
 #'
 #' @examples
 #' # This will just go through if colinearity threshold is met.
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
-#' data=datadummy$meta)
+#' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
+#' data=dummy.list$meta)
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
   ## ToDo: health & Safety
@@ -1272,8 +1272,8 @@ mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
 #'
 #' @examples
 #' # This will return the maximum colinearity score in the given model
-#' limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
-#' data=datadummy$meta)
+#' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
+#' data=dummy.list$meta)
 #' num.max_corr <- colinScore(model.fit=limimo)
 colinScore <- function(model.fit) {
   # get variance-covariance matrix

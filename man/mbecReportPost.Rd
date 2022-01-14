@@ -6,7 +6,8 @@
 \usage{
 mbecReportPost(
   input.obj,
-  model.vars = c("group", "batch"),
+  model.vars = c("batch", "group"),
+  type = "clr",
   return.data = FALSE
 )
 }

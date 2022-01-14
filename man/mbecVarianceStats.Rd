@@ -30,7 +30,7 @@ coefficients at this point.
 }
 \examples{
 # This will return the data.frame for plotting.
-limo <- stats::lm(datadummy$cnts[,1] ~ group + batch, data=datadummy$meta)
+limo <- stats::lm(dummy.list$cnts[,1] ~ group + batch, data=dummy.list$meta)
 vec.variance <- mbecVarianceStats(model.fit=limo)
 }
 \keyword{lm}

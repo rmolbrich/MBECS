@@ -24,8 +24,8 @@ ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
 # This will just go through if colinearity threshold is met.
-limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
-data=datadummy$meta)
+limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
+data=dummy.list$meta)
 mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 }
 \keyword{collinearity}

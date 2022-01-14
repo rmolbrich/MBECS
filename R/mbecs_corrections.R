@@ -24,14 +24,27 @@
 #' # and replace the old count matrix.
 #' study.obj <- mbecRunCorrections(dummy.mbec, model.vars=c("batch","group"),
 #' method=c("pn"))
-mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"),
+mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"), type="clr",
                            method=c("ruv3","bmc","bat","rbe","pn","svd"),
                            nc.features=NULL) {
 
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
+  if( all(dim(input.obj@clr) == 1) )
+    input.obj <- mbecTransform(input.obj, method="clr")
+
+  if( all(dim(input.obj@tss) == 1) )
+    input.obj <- mbecTransform(input.obj, method="tss")
+
   for( m.idx in method ) {
-    input.obj <- mbecCorrection(input.obj = input.obj, method = eval(m.idx))
+    if( m.idx == "pn" ) {
+      # because percentile norm is supposed to run on total sum scaled data
+      input.obj <- mbecCorrection(input.obj = input.obj, method = "pn",
+                                  type="tss")
+    } else {
+      input.obj <- mbecCorrection(input.obj = input.obj, method = eval(m.idx),
+                                  type=eval(type))
+    }
   }
 
   return(input.obj)
@@ -188,7 +201,7 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
                          type=eval(type))
   } else if( method == "lmm" ) {
     message("Applying Linear Mixed Model (LMM) to account for batch-effects.")
-    res.assess <- mbecLMM(input.obj = input.obj, method = "lmm",
+    res.assess <- mbecLM(input.obj = input.obj, method = "lmm",
                           model.vars=model.vars,
                           type=eval(type))
   } else if( method == "sva" ) {
@@ -328,7 +341,7 @@ mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
     names(tmp.nc) <- colnames(tmp.cnts)
   } else {
     message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars)
+    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
     tmp.nc <- tmp.group.p > 0.05
   }
 
@@ -381,7 +394,7 @@ mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
     names(tmp.nc) <- colnames(tmp.cnts)
   } else {
     message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars)
+    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
     tmp.nc <- tmp.group.p > 0.05
   }
 
@@ -432,14 +445,15 @@ mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
     names(tmp.nc) <- colnames(tmp.cnts)
   } else {
     message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars)
+    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
     tmp.nc <- tmp.group.p > 0.05
   }
 
   message("Applying Remove Unwanted Variantion v3 (RUV-III) for batch-correction.")
   tmp.replicate <- tmp.meta$replicate
   if( length(tmp.replicate) == length(unique(tmp.replicate)) ) {
-    stop("No technical replicates found. RUV-3 is not available for this data-set!")
+    warning("No technical replicates found. RUV-3 is not available for this data-set!")
+    return(NULL)
   } else {
     tmp.replicate.matrix <- ruv::replicate.matrix(tmp.replicate)
   }

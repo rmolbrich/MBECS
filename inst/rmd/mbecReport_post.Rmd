@@ -1,5 +1,5 @@
 ---
-title: "PreliminaryReport"
+title: "PostCorrectionReport"
 author: "Michael Olbrich"
 # output: pdf_document
 output:
@@ -16,7 +16,7 @@ params:
   report.data: !r list()
   report.vars: !r character()
   report.list: !r list()
-  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","linmod","linmixmod","rda","pvca","scoef"))))
+  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","stats","rda","pvca","scoef"))))
   something: !r c(1,2,3)
 
 ---
@@ -70,7 +70,11 @@ Technically, the function 'prcomp' performs a singular value decomposition to re
 ```{r PCA}
 
 # PCA plot and description.
-plot(params$report.list$pca)
+# version 1
+gridExtra::marrangeGrob(grobs=params$report.list$pca, ncol = 2, nrow=2)
+# or version 2
+# gridExtra::grid.arrange(grobs=params$report.list$pca, ncol = 2)
+
 
 ```
 
@@ -93,7 +97,11 @@ Separate samples by covariate of interest (CoI), e.g., treatment or study group,
 ```{r RLE}
 
 # RLE plot and description.
-plot(params$report.list$rle)
+# version 1
+gridExtra::marrangeGrob(grobs=params$report.list$rle, ncol = 2, nrow=2)
+# or version 2
+# gridExtra::grid.arrange(grobs=post.report.list$rle, ncol = 2)
+#plot(bla$report.list$rle)
 
 ```
 
@@ -104,24 +112,27 @@ Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or 
 
 
 ```{r HEAT}
-
+#print(bla$report.list$heat$Base)
 # Heatmap features of interest and description.
-print(params$report.list$heat)
+# version 1
+gridExtra::marrangeGrob(grobs=params$report.list$heat, ncol = 2, nrow=2)
+# or version 2
+#gridExtra::grid.arrange(grobs=bla$report.list$heat, ncol = 2)
 
 ```
 
 
 
-## Dendrogram
+<!-- ## Dendrogram -->
 
-```{r DENDROGRAM}
+<!-- ```{r DENDROGRAM} -->
 
-# ToDo: add le dendrogram
+<!-- # ToDo: add le dendrogram -->
 
-message("Comes with the next update.")
+<!-- message("Comes with the next update.") -->
 
 
-```
+<!-- ``` -->
 
 
 ## BOX-plot
@@ -129,16 +140,30 @@ message("Comes with the next update.")
 Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all samples. Produce box-plot showing expression with respect to a covariate of interest (CoI) 
 
 ```{r BOX}
+p.names <- names(params$report.list$box)
 
-# ToDo: implement some logic to organize and format these plots
-for( p.idx in params$report.list$box ) {
+# FixMe: implement some logic to organize and format these plots
+gridExtra::marrangeGrob(grobs=params$report.list$box$pre, ncol = 2, nrow=2)
 
-  plot(p.idx)
-
+#c("ruv3","bmc","bat","rbe","pn","svd")
+if( "ruv3" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$ruv3, ncol = 2, nrow=2)
 }
-
-# gridExtra::marrangeGrob(grobs=params$report.list$box, ncol = 2, nrow=5)
-
+if( "bmc" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$bmc, ncol = 2, nrow=2)
+}
+if( "bat" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$bat, ncol = 2, nrow=2)
+}
+if( "rbe" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$rbe, ncol = 2, nrow=2)
+}
+if( "pn" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$pn, ncol = 2, nrow=2)
+}
+if( "svd" %in% p.names ) {
+  gridExtra::marrangeGrob(grobs=params$report.list$box$svd, ncol = 2, nrow=2)
+}
 
 ```
 

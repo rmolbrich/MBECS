@@ -22,8 +22,8 @@ ToDo: maybe some additional validation steps and more informative output.
 }
 \examples{
 # This will return the maximum colinearity score in the given model
-limimo <- lme4::lmer(datadummy$cnts[,1] ~ group + (1|batch),
-data=datadummy$meta)
+limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
+data=dummy.list$meta)
 num.max_corr <- colinScore(model.fit=limimo)
 }
 \keyword{collinearity}

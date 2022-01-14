@@ -1,84 +1,13 @@
 # MBECS REPORT FUNCTIONS --------------------------------------------------
 
 
-#' MBECS Report Pipeline
-#'
-#' A wrapper for the generation of preliminary and comparative reports. The function will call the
-#' appropriate sub-routines based on the given input. The subsequent sections will assume that the
-#' covariates 'treatment' and 'batch' are the effects of interest (CoI). Other variables can be
-#' chosen via the functions 'model.vars' parameter. Accepted inputs are MbecData-objects,
-#' phyloseq-objects or a list that contains counts and covariate data. Multiple MbecData and
-#' phyloseq objects in a list will produce a comparative report and single objects generate a
-#' preliminary report.
-#'
-#' The reports are partitioned into three sections for both types of reports.
-#'
-#' Study Summary: This section provides a general overview of study design with a summary of
-#' covariate variables, distribution of samples with respect to grouping, e.g., case/control or
-#' un-treated/different treatment levels, and known batches as well as an ordination-plot for
-#' the first two principal components.
-#'
-#' Visualization: This section aims to provide a visual assessment of the batch-effect. It provides
-#' a plot of relative log-expression, a heatmap of the top 5 most variable features, a dendrogram
-#' (hopefully as soon as it works) and box-plots of the expression of the top 5 most variable
-#' features with respect to the batches.
-#'
-#' Variance Assessment: Diverse methods are applied to calculate the proportion of variance that
-#' is explainable by the CoI. Linear (Mixed) Models with user supplied covariates are fit to the
-#' data-set, partial Redundancy Analysis (CCA or pRDA) and Principal Variance Component Analysis
-#' (PVCA) use different approaches to compute proportions of variance as well. Finally, the
-#' Silhouette Coefficient is a representation for the goodness of fit. Which is how good grouping
-#' covariates such as treatment or batch are represented in the clustering of samples.
-#'
-#' @keywords Comparative Preliminary Report
-#' @param input.obj list(cnts, meta), phyloseq, MbecData object (correct orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param return.data logical if TRUE returns the data.frame required for plotting (NO plotting here bucko)
-#' @return either a ggplot2 object or a formatted data-frame to plot from
-#' @export
-mbecReport <- function(input.obj, model.vars=c("batch","group"), return.data=FALSE) {
-
-  ## first determine whether this is a post- or a preliminary-report and then call the appropriate function
-
-  # if list & !any are ps or mbecData objects --> prelim with cnts,meta input
-  if( is(input.obj, "list") ) {
-    if( length(input.obj) == 2 & !any(lapply(input.obj, is) %in% c("MbecData", "phyloseq")) ) {
-      # prelim-report from cnts + meta
-      message("We have a preliminary report from cnts+meta-input!")
-      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
-
-    } else {
-      message("We have a comparative post-report!")
-      # post-report from multiple phyloseq or MbecData objects
-      # tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
-    }
-  } else {
-    if( class(input.obj) %in% "phyloseq" ) {
-      # no list and class phyloseq means preliminary report
-      message("We have a preliminary report from phyloseq-input!")
-
-      tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
-
-    } else if( class(input.obj) %in% "MbecData" ) {
-      # if only 'raw' MbecData --> call Prelim else Post
-      if( length(attr(input.obj, "transformations")) >= 1 ) {
-        message("We have a comparative post-report!")
-
-        tmp.report <- mbecReportPost(input.obj, model.vars, return.data)
-
-      } else {
-        # if 'transformations' list is empty - only preliminary report
-        # (technically, this can also be Post-correction.. I guess ToDo)
-        tmp.report <- mbecReportPrelim(input.obj, model.vars, return.data)
-      }
-    }
-  }
-
-  return(tmp.report)
-}
-
-
 #' Constructs an initial report of a single data-set without comparative analyses.
+#'
+#' Input can be of class MbecData, phyloseq or list(counts, meta-data). The
+#' function will check if required covariates are present and apply
+#' normalization with default parameters according to chosen type, i.e., 'clr'
+#' (cumulative log-ratio) or 'tss' (total sum scaled).
+#'
 #' @param input.obj list of phyloseq objects to compare, first element is considered uncorrected data
 #' @param model.vars required covariates to build models
 #' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.
@@ -89,13 +18,19 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
   # just start with input processing and transform into MbecData if required
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
+  # for choice of abundance matrix other than 'otu' this checks if it is present
+  # and calculates it if not
+  type <- match.arg(type, choices = c("otu","clr","tss"))
+  if( !(type == "otu") )
+    input.obj <- mbecTransform(input.obj, method=eval(type))
+
   # Prepare the SIX exploratory plots
   prelim.report.list <- list()
-  prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars))
-  prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2), type=eval(type))
-  prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars), type=eval(type))
-  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars), type=eval(type))
-  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1], type=eval(type))
+  prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars), return.data = eval(return.data))
+  prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2), type=eval(type), return.data = eval(return.data))
+  prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars), type=eval(type), return.data = eval(return.data))
+  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars), type=eval(type), return.data = eval(return.data))
+  prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1], type=eval(type), return.data = eval(return.data))
   # Dendrogramm needs better function if possible
   #prelim.report.list[["dendro"]] <- mbecDendro(input.obj, method="TOP", n=5, model.var=eval(model.vars)[2] )
 
@@ -115,6 +50,11 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
   prelim.report.list[["scoef"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef",
                                                      type=eval(type))
 
+  # if only data is required - stop here and return the list of dfs
+  if( return.data ) {
+    return(prelim.report.list)
+  }
+
   # to plot or not to plot .. and how
   # for now just call all stat-plot functions and replace the respective values in the list
   prelim.report.list[["linmod"]] <- mbecVarianceStatsPlot(prelim.report.list[["linmod"]])
@@ -123,15 +63,13 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
   prelim.report.list[["pvca"]] <- mbecPVCAStatsPlot(prelim.report.list[["pvca"]])
   prelim.report.list[["scoef"]] <- mbecSCOEFStatsPlot(prelim.report.list[["scoef"]])
 
-  if( return.data ) {
-    return(prelim.report.list)
-  }
-
   # construct the report
-  input.obj <- mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars))
-
-  rmarkdown::render("mbecReport_prelim_TMPLT.Rmd",
-                    params = list(report.data=input.obj,
+  ## ToDo: for next version include some configuration that allows users to add
+  ## some file naming
+  rmarkdown::render(system.file("rmd","mbecReport_prelim.Rmd",package="MBECS"),
+                    output_dir = getwd(),
+                    output_file = NULL,
+                    params = list(report.data=mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars), type=eval(type)),
                                   report.vars=model.vars,
                                   report.list=prelim.report.list))
 }
@@ -143,58 +81,75 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
 #' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
-mbecReportPost <- function(input.obj, model.vars=c("group","batch"), return.data = FALSE) {
-  # only three situations here: list with cnts and meta, phyloseq or MbecData
-  rep.prelim <- mbecReportPrelim(input.obj=testdata,
-                                 model.vars=c("group","batch"),
-                                 return.data = TRUE)
+mbecReportPost <- function(input.obj, model.vars=c("batch","group"), type="clr", return.data = FALSE) {
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf", required.col = eval(model.vars))
-  tmp.meta <- tmp[[2]]
+  n.cor <- length(input.obj@corrections)
+  n.ass <- length(input.obj@assessments)
 
-  transformations <- attr(input.obj, "transformations")
-  report.list <- list()
-  comp.report.list <- list()
-
-  for( t.idx in 1:length(transformations) )
-
-  # calculate the variance statistics
-    comp.report.list[[t.idx]][["linmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lm",
-                                                      type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
-
-  comp.report.list[[t.idx]][["linmixmod"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm",
-                                                         type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
-
-  comp.report.list[[t.idx]][["rda"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="rda",
-                                                   type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
-
-  comp.report.list[[t.idx]][["pvca"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="pvca",
-                                                    type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
-
-  comp.report.list[[t.idx]][["scoef"]] <- mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef",
-                                                     type=ifelse(is.null(attr(input.obj, "type")), "none", attr(input.obj, "type")))
-
-  # to plot or not to plot .. and how
-  # for now just call all stat-plot functions and replace the respective values in the list
-  report.list[["linmod"]] <- mbecVarianceStatsPlot(comp.report.list[[t.idx]][["linmod"]])
-  report.list[["linmixmod"]] <- mbecVarianceStatsPlot(comp.report.list[[t.idx]][["linmixmod"]])
-  report.list[["rda"]] <- mbecRDAStatsPlot(comp.report.list[[t.idx]][["rda"]])
-  report.list[["pvca"]] <- mbecPVCAStatsPlot(comp.report.list[[t.idx]][["pvca"]])
-  report.list[["scoef"]] <- mbecSCOEFStatsPlot(comp.report.list[[t.idx]][["scoef"]])
-
-  if( return.data ) {
-    return(prelim.report.list)
+  if( n.cor == 0 && n.ass == 0) {
+    stop("No corrections available.")
   }
 
-  # construct the report
-  input.obj <- mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars))
+  otu.idx <- mbecBox(input.obj, method = "TOP", n = 4, model.var = model.vars[1], type=eval(type), return.data = TRUE)[[2]]
 
-  rmarkdown::render("mbecReport_prelim_TMPLT.Rmd",
-                    params = list(report.data=input.obj,
+  pre.list <- list()
+  pre.list$mosaic <- mbecMosaic(input.obj, model.vars)
+  pre.list$pca$pre <- mbecPCA(input.obj, model.vars, type=eval(type))
+  pre.list$rle$pre <- mbecRLE(input.obj, model.vars=eval(model.vars), type=eval(type))
+  pre.list$heat$pre <- mbecHeat(input.obj, model.vars, method = otu.idx, type = eval(type))[[4]] # to get the grob
+  pre.list$box$pre <- mbecBox(input.obj, method = otu.idx, model.var = model.vars[1], type=eval(type))
+
+  pre.list$linmod <- mbecModelVariance(input.obj, model.vars=model.vars, method="lm", type=eval(type))
+  pre.list$linmixmod <- mbecModelVariance(input.obj, model.vars=model.vars, method="lmm", type=eval(type))
+  pre.list$rda <- mbecModelVariance(input.obj, model.vars=model.vars, method="rda", type=eval(type))
+  pre.list$pvca <- mbecModelVariance(input.obj, model.vars=model.vars, method="pvca", type=eval(type))
+  pre.list$scoef <- mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef", type=eval(type))
+
+  # now iterate through all available assessment matrices and calculate metrics
+  if( n.ass != 0 ) {
+    for( ass.idx in names(input.obj@assessments) ) {
+      # FixMe: this needs to do sth. at some point
+    }
+  }
+
+  # "mosaic"    "pca"       "rle"       "heat"      "box"       "linmod"    "linmixmod" "rda"       "pvca"      "scoef"
+  p.list <- pre.list
+  # now iterate through all available corrected matrices and calculate metrics
+  if( n.cor != 0 ) {
+    for( cor.idx in names(input.obj@corrections) ) {
+
+      p.list$pca[[eval(cor.idx)]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2), type="cor", label = eval(cor.idx))
+      p.list$box[[eval(cor.idx)]] <- mbecBox(input.obj, method=otu.idx, model.var=eval(model.vars)[1], type="cor", label = eval(cor.idx))
+      p.list$heat[[eval(cor.idx)]] <- mbecHeat(input.obj, method=otu.idx, model.vars=eval(model.vars), type="cor", label = eval(cor.idx))[[4]]
+      p.list$rle[[eval(cor.idx)]] <- mbecRLE(input.obj, model.vars=eval(model.vars), type="cor", label = eval(cor.idx))
+
+      p.list$linmod <- rbind.data.frame(p.list$linmod, mbecModelVariance(input.obj, model.vars=model.vars, method="lm", type="cor", label = eval(cor.idx)))
+      p.list$linmixmod <- rbind.data.frame(p.list$linmixmod, mbecModelVariance(input.obj, model.vars=model.vars, method="lmm", type="cor", label = eval(cor.idx)))
+      p.list$rda <- rbind.data.frame(p.list$rda, mbecModelVariance(input.obj, model.vars=model.vars, method="rda", type="cor", label = eval(cor.idx)))
+      p.list$pvca <- rbind.data.frame(p.list$pvca, mbecModelVariance(input.obj, model.vars=model.vars, method="pvca", type="cor", label = eval(cor.idx)))
+      p.list$scoef <- rbind.data.frame(p.list$scoef, mbecModelVariance(input.obj, model.vars=model.vars, method="s.coef", type="cor", label = eval(cor.idx)))
+    }
+  }
+  # FixMe: either do separate branches or just drop it
+  if( return.data ) {
+    return(p.list)
+  }
+
+  ## produce plot-panels for variance assessment analyses
+  p.list[["linmod"]] <- mbecVarianceStatsPlot(p.list[["linmod"]])
+  p.list[["linmixmod"]] <- mbecVarianceStatsPlot(p.list[["linmixmod"]])
+  p.list[["rda"]] <- mbecRDAStatsPlot(p.list[["rda"]])
+  p.list[["pvca"]] <- mbecPVCAStatsPlot(p.list[["pvca"]])
+  p.list[["scoef"]] <- mbecSCOEFStatsPlot(p.list[["scoef"]])
+
+
+  rmarkdown::render(system.file("rmd","mbecReport_post.Rmd",package="MBECS"),
+                    output_dir = getwd(),
+                    output_file = NULL,
+                    params = list(report.data=mbecGetData(input.obj, orientation="fxs", required.col=eval(model.vars)),
                                   report.vars=model.vars,
-                                  report.list=prelim.report.list))
+                                  report.list=p.list))
 }
-
 
 
 

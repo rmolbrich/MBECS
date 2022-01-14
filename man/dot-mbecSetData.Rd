@@ -37,12 +37,12 @@ lists of corrections and assessments.
 }
 \examples{
 # This will fill the 'tss' slot with the supplied matrix.
-MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
     type='tss')
 
 # This will put the given matrix into the list of corrected counts under the
 # name "nameOfMethod".
-MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
     type='cor', label="nameOfMethod")
 }
 \keyword{MBECS}

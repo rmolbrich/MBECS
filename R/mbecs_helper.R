@@ -241,8 +241,8 @@ mbecTransform <- function(input.obj, method = "clr",
 #' @examples
 #' # This will return a matrix of normalized counts, according to the covariate
 #' # information in meta
-#' mtx.pn_counts <- percentileNorm(cnts=datadummy$cnts,
-#' meta=datadummy$meta[,c("batch","group")])
+#' mtx.pn_counts <- percentileNorm(cnts=dummy.list$cnts,
+#' meta=dummy.list$meta[,c("batch","group")])
 percentileNorm <- function(cnts, meta) {
 
   ref.group <- levels(meta[,2])[1]

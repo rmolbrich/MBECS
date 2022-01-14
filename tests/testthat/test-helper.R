@@ -3,21 +3,21 @@
 test_that("mbecTestModel works", {
   # Works with list, phyloseq and MbecDdata input due to 'mbecProcessInput'
   # model is estimable and return value is NULL
-  expect_identical(mbecTestModel(input.obj=datadummy,
+  expect_identical(mbecTestModel(input.obj=dummy.list,
                                  model.vars=c("group","batch")), NULL)
   # 'model.form' is class formula and is estimable
-  expect_identical(mbecTestModel(input.obj=datadummy,
+  expect_identical(mbecTestModel(input.obj=dummy.list,
                                  model.form=stats::as.formula("y ~ group + batch")), NULL)
   # problem with estimability and return value is a character vector
-  expect_vector(mbecTestModel(input.obj=datadummy,
-                              model.vars=c("sample","group","batch")),
+  expect_vector(mbecTestModel(input.obj=dummy.list,
+                              model.vars=c("group","sID")),
                 character())
   # covariates and model-formula are missing
-  expect_error(mbecTestModel(input.obj=datadummy),
+  expect_error(mbecTestModel(input.obj=dummy.list),
                "Please supply covariates and/or model-formula.")
 
   # will construct generic model-formula if input is not class 'formula'
-  form.res <- evaluate_promise(mbecTestModel(input.obj=datadummy,
+  form.res <- evaluate_promise(mbecTestModel(input.obj=dummy.list,
                                              model.vars=c("group","batch"),
                                              model.form="y ~ group + batch"))
   expect_true(any(grepl("lm-formula", form.res$messages)))
@@ -31,16 +31,16 @@ test_that("capitalization works", {
 
 
 test_that("linear modeling works", {
-  lm.res <- evaluate_promise(mbecLM(datadummy, "lmm", c("group","batch"), type="otu"))
-  expect_identical(length(lm.res$result), dim(datadummy$cnts)[2])
+  lm.res <- evaluate_promise(mbecLM(dummy.list, "lmm", c("group","batch"), type="otu"))
+  expect_identical(length(lm.res$result), dim(dummy.list$cnts)[2])
   expect_identical(class(lm.res$result), "numeric")
   expect_identical(typeof(lm.res$result), "double")
 })
 
 
 test_that("linear mixed modeling works", {
-  lmm.res <- evaluate_promise(mbecLM(datadummy, "lmm", c("group","batch"), type="otu"))
-  expect_identical(length(lmm.res$result), dim(datadummy$cnts)[2])
+  lmm.res <- evaluate_promise(mbecLM(dummy.list, "lmm", c("group","batch"), type="otu"))
+  expect_identical(length(lmm.res$result), dim(dummy.list$cnts)[2])
   expect_identical(class(lmm.res$result), "numeric")
   expect_identical(typeof(lmm.res$result), "double")
 })

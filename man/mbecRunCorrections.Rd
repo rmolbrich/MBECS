@@ -7,6 +7,7 @@
 mbecRunCorrections(
   input.obj,
   model.vars = c("batch", "group"),
+  type = "clr",
   method = c("ruv3", "bmc", "bat", "rbe", "pn", "svd"),
   nc.features = NULL
 )

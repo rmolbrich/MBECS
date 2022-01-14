@@ -103,10 +103,10 @@ algorithms (BECA) that produce adjusted abundance matrices.}
 \examples{
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
-mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
+mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
-mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
+mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 }
 \keyword{Class}
 \keyword{Constructor}

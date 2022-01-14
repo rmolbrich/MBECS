@@ -25,7 +25,7 @@
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
-#' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
+#' mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",
                      slots = list(assessments="list", corrections="list",
                                   tss="matrix",       clr="matrix"))
@@ -70,7 +70,7 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
-#' mbec.obj <- MbecData(cnt_table=datadummy$cnts, meta_data = datadummy$meta)
+#' mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 MbecData <- function( cnt_table=NULL,
                       meta_data=NULL,
                       tax_table=NULL,
@@ -194,12 +194,12 @@ MbecData <- function( cnt_table=NULL,
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
 #' # This will put the given matrix into the list of corrected counts under the
 #' # name "nameOfMethod".
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
 setGeneric("mbecSetData", signature="input.obj",
            function(input.obj, new.cnts=NULL, type=c("otu","ass","cor","clr","tss"),
@@ -231,12 +231,12 @@ setGeneric("mbecSetData", signature="input.obj",
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
 #' # This will put the given matrix into the list of corrected counts under the
 #' # name "nameOfMethod".
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
 setMethod("mbecSetData", "MbecData",
           function(input.obj, new.cnts=NULL,
@@ -270,25 +270,38 @@ setMethod("mbecSetData", "MbecData",
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
 #' # This will put the given matrix into the list of corrected counts under the
 #' # name "nameOfMethod".
-#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=datadummy$cnts,
+#' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
 .mbecSetData <- function(input.obj, new.cnts=NULL,
                         type=c("otu","ass","cor","clr","tss"), label=character()) {
 
   if( is.null(new.cnts) ) {
-    stop("Nothing to do here.")
-  } else if( !all(apply(new.cnts, 2, is.numeric)) ) {
-    stop("All the values in your count-table need to be numeric!", call. = FALSE)
-  } else if( is.null(colnames(new.cnts)) && is.null(rownames(bla)) ) {
-    stop("No col/row-names found! Not able to match to sample names.")
+    warning("Nothing to do here. Returning unchanged input.")
+    return(input.obj)
   }
 
   type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
+
+
+  if( type != "ass" ) {
+    if( !all(apply(new.cnts, 1, is.numeric)) ) {
+      stop("All the values in your count-table need to be numeric!", call. = FALSE)
+    } else if( is.null(colnames(new.cnts)) && is.null(rownames(new.cnts)) ) {
+      stop("No col/row-names found! Not able to match to sample names.")
+    }
+  } else {
+    if( !all(apply(new.cnts, 1, is.numeric)) ) {
+      stop("All the values in your assessment vector need to be numeric!", call. = FALSE)
+    } else if( is.null(names(new.cnts)) ) {
+      stop("No col/row-names found! Not able to match to features.")
+    }
+
+  }
 
   # 1. get sample names
   s.names <- phyloseq::sample_names(input.obj)

@@ -57,7 +57,7 @@ test_that("mbecRUV3 works", {
   # expect errors without replicate column - after I removed the column..
   dummy.noRep <- dummy.mbec
   dummy.noRep@sam_data <- dummy.mbec@sam_data[,-3]
-  expect_error(mbecRUV3(input.obj=dummy.noRep, model.vars, type="clr", nc.features=NULL), "No technical replicates found. RUV-3 is not available for this data-set!")
+  expect_warning(mbecRUV3(input.obj=dummy.noRep, model.vars, type="clr", nc.features=NULL), "No technical replicates found. RUV-3 is not available for this data-set!")
 })
 
 

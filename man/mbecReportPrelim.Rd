@@ -24,5 +24,8 @@ mbecReportPrelim(
 either a ggplot2 object or a formatted data-frame to plot from
 }
 \description{
-Constructs an initial report of a single data-set without comparative analyses.
+Input can be of class MbecData, phyloseq or list(counts, meta-data). The
+function will check if required covariates are present and apply
+normalization with default parameters according to chosen type, i.e., 'clr'
+(cumulative log-ratio) or 'tss' (total sum scaled).
 }

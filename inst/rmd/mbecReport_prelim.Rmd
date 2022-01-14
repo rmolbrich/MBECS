@@ -1,5 +1,5 @@
 ---
-title: "PostCorrectionReport"
+title: "PreliminaryReport"
 author: "Michael Olbrich"
 # output: pdf_document
 output:
@@ -16,7 +16,7 @@ params:
   report.data: !r list()
   report.vars: !r character()
   report.list: !r list()
-  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=9, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","stats","rda","pvca","scoef"))))
+  report.methods: !r data.frame(matrix(data=TRUE, nrow=1, ncol=10, dimnames=list(NULL,c("mosaic","pca","rle","heat","box","linmod","linmixmod","rda","pvca","scoef"))))
   something: !r c(1,2,3)
 
 ---
@@ -70,11 +70,7 @@ Technically, the function 'prcomp' performs a singular value decomposition to re
 ```{r PCA}
 
 # PCA plot and description.
-# version 1
-gridExtra::marrangeGrob(grobs=params$report.list$pca, ncol = 2, nrow=2)
-# or version 2
-# gridExtra::grid.arrange(grobs=params$report.list$pca, ncol = 2)
-
+plot(params$report.list$pca)
 
 ```
 
@@ -97,10 +93,7 @@ Separate samples by covariate of interest (CoI), e.g., treatment or study group,
 ```{r RLE}
 
 # RLE plot and description.
-# version 1
-gridExtra::marrangeGrob(grobs=params$report.list$rle, ncol = 2, nrow=2)
-# or version 2
-# gridExtra::grid.arrange(grobs=post.report.list$rle, ncol = 2)
+plot(params$report.list$rle)
 
 ```
 
@@ -111,27 +104,24 @@ Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or 
 
 
 ```{r HEAT}
-print(params$report.list$heat$Base)
+
 # Heatmap features of interest and description.
-# version 1
-# gridExtra::marrangeGrob(grobs=params$report.list$heat$Base, ncol = 2, nrow=2)
-# or version 2
-# gridExtra::grid.arrange(grobs=params$report.list$heat, ncol = 2)
+print(params$report.list$heat)
 
 ```
 
 
 
-<!-- ## Dendrogram -->
+## Dendrogram
 
-<!-- ```{r DENDROGRAM} -->
+```{r DENDROGRAM}
 
-<!-- # ToDo: add le dendrogram -->
+# ToDo: add le dendrogram
 
-<!-- message("Comes with the next update.") -->
+message("Comes with the next update.")
 
 
-<!-- ``` -->
+```
 
 
 ## BOX-plot
@@ -141,11 +131,14 @@ Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all sampl
 ```{r BOX}
 
 # ToDo: implement some logic to organize and format these plots
-# for( p.idx in params$report.list$box ) {
-#   
-#   plot(p.idx)
-#   
-# }
+for( p.idx in params$report.list$box ) {
+
+  plot(p.idx)
+
+}
+
+# gridExtra::marrangeGrob(grobs=params$report.list$box, ncol = 2, nrow=5)
+
 
 ```
 
@@ -162,7 +155,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```{r LINMOD}
 
 # avg. variance in linear model plot and description.
-# print(params$report.list$linmod)
+print(params$report.list$linmod)
 
 ```
 
@@ -172,7 +165,7 @@ This method fits a linear model to every feature respectively and estimates the 
 ```{r LINMIXMOD}
 
 # avg. variance in linear model plot and description.
-# print(params$report.list$linmixmod)
+print(params$report.list$linmixmod)
 
 ```
 
@@ -201,7 +194,7 @@ Information concerning a number of constrained axes (RDA axes) and unconstrained
 ```{r RDA}
 
 # RDA plot and description.
-# print(params$report.list$rda)
+print(params$report.list$rda)
 
 ```
 
@@ -215,7 +208,7 @@ Scale each PCs results by the proportion this PC accounted for in the first plac
 ```{r PVCA}
 
 # PVCA plot and description.
-# print(params$report.list$pvca)
+print(params$report.list$pvca)
 
 ```
 
@@ -228,7 +221,7 @@ Then iterate over all the covariates and calculate the cluster silhouette (which
 ```{r SCOEF}
 
 # Average silhouette-coef plot and description.
-# print(params$report.list$scoef)
+print(params$report.list$scoef)
 
 ```
 

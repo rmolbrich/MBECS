@@ -116,7 +116,6 @@ test_that("mbecBox works", {
   expect_equal(length(box.plot.test$result), 10)
   # expect no warnings
   expect_warning(box.plot.test, NA)
-
 })
 
 
@@ -443,3 +442,4 @@ test_that("SOMETHING works", {
                                              model.form="y ~ group + batch"))
   expect_true(any(grepl("lm-formula", form.res$messages)))
 })
+
