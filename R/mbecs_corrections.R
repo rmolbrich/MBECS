@@ -8,6 +8,7 @@
 #' @keywords Batch-Effect Correction Pipeline
 #' @param input.obj phyloseq object or numeric matrix (correct orientation is handeled internally)
 #' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
+#' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.
 #' @param method algorithms to use
 #' @param nc.features (OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls
 #' @return an object of class MbecDataSet

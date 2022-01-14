@@ -17,6 +17,8 @@ mbecRunCorrections(
 
 \item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
 
+\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.}
+
 \item{method}{algorithms to use}
 
 \item{nc.features}{(OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls}
