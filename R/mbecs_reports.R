@@ -78,6 +78,7 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
 #' Constructs an initial report of a single data-set without comparative analyses.
 #' @param input.obj, list of phyloseq objects to compare, first element is considered uncorrected data
 #' @param model.vars, required covariates to build models
+#' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.
 #' @param return.data, TRUE will return a list of all produced plots, FALSE will start rendering the report
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export

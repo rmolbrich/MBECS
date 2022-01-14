@@ -16,6 +16,8 @@ mbecReportPost(
 
 \item{model.vars, }{required covariates to build models}
 
+\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.}
+
 \item{return.data, }{TRUE will return a list of all produced plots, FALSE will start rendering the report}
 }
 \value{
