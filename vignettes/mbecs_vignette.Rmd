@@ -1,9 +1,14 @@
 ---
 title: "MBECS introduction"
+bibliography: vignette.bib
+nocite: '@*'
+link-citations: true
+zotero: true
 output:
   BiocStyle::html_document:
     toc: true
     toc_depth: 2
+    pandoc_args: --webtex
 vignette: >
   %\VignetteIndexEntry{MBECS introduction}
   %\VignetteEngine{knitr::knitr}
@@ -17,6 +22,208 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+
+# Introduction
+
+The Microbiome Batch-Effect Correction Suite aims to provide a toolkit for stringent assessment and correction of batch-effects in microbiome data sets.
+To that end, the package offers wrapper-functions to summarize study-design and data, e.g., PCA, Heatmap and Mosaic-plots, and to estimate the proportion of variance that can be attributed to the batch effect.
+The 'mbecsCorrection' function acts as a wrapper for various batch effects correction algorithms (BECA) and in conjunction with the aforementioned tools, it can be used to compare the effectiveness of correction methods on particular sets of data. All functions of this package are accessible on their own or within the preliminary and comparative report pipelines respectively.
+
+
+## Installation {-}
+
+As of now the package is only available through github. To install form that source type:
+
+```{r INSTALLATION, echo=TRUE, eval=FALSE, results='asis', tidy=TRUE}
+
+# The 'devtools' package provides the ability to install from a github repository. it can be installed from CRAN like this.
+install.packages("devtools")
+
+# This will install the MBECS package from github.
+devtools::install_github("rmolbrich/MBECS")
+
+# And then load via the library function.
 library(MBECS)
+
 ```
+
+## Dependencies {-}
+
+The MBECS package relies on the following packages to work:
+
+```{r DEPENDENCIES, echo=FALSE, eval=TRUE, results='asis', tidy=TRUE}
+# Dependency table
+pkg_dependencies <- data.frame("Package"=c("phyloseq","magrittr","bapred","cluster","dplyr","ggplot2","gridExtra","limma",
+                                           "lme4","lmerTest","pals","permute","pheatmap","rmarkdown",
+                                           "ruv","sva","tibble","tidyr","vegan","methods","stats","utils"),
+                               "Version"=NA,
+                               "Date"=NA,
+                               "Repository"=NA)
+
+for( pkg in 1:length(pkg_dependencies$Package) ) {
+  pkg_dependencies$Version[pkg] <- toString(utils::packageVersion(eval(pkg_dependencies$Package[pkg])))
+  tmp_description <- utils::packageDescription(eval(pkg_dependencies$Package[pkg]))
+  pkg_dependencies$Date[pkg] <- toString(tmp_description["Date"])
+  pkg_dependencies$Repository[pkg] <- toString(tmp_description["Repository"])
+}
+
+
+knitr::kable(pkg_dependencies, 
+             align = 'c', 
+             caption = "MBECS package dependencies",
+             label = NULL)
+
+
+```
+
+# Workflow
+
+The main application of this package is microbiome data. It is common practice to use the phyloseq [@R-phyloseq] package for analyses of this type of data. To that end, the MBECS package extends the phyloseq class in order to provide its functionality. The user can utilise objects of class phyloseq or a list object that contains an abundance table as well as meta data. The package contains a dummy data-set of artificially generated data to illustrate this process. To start an analysis, the user requires the 'mbecProcessInput' function.
+
+
+## Start from abundance table
+
+For an input that consists of an abundance table and meta-data, both table require sample names as either row or column names. The 'mbecProcessInput' function will handle the correct orientation and return an object of class MbecData.
+
+```{r Usage_list, echo=TRUE, eval=FALSE, tidy=TRUE}
+# load the package
+library(MBECS)
+
+# The dummy-list input object comprises two matrices:
+names(dummy.list)
+
+# Create an MbecData object from list input:
+mbec.obj <- mbecProcessInput(dummy.list)
+
+# The optional argument 'required.col' may be used to ensure that all covariate columns that should be there are available. For the dummy-data these are c("group", "batch", "replicate"). Create an MbecData object from list input and ensure availability of columns in meta-data:
+mbec.obj <- mbecProcessInput(dummy.list, required.col = c("group", "batch", "replicate"))
+
+```
+
+
+## Start from phyloseq object
+
+The start is the same if the data is already of class phyloseq.
+
+```{r Usage_phyloseq, echo=TRUE, eval=FALSE, tidy=TRUE}
+# The 'dummy.ps' object contains the same data as 'dummy.list', but it is of class phyloseq. Create an MbecData object from phyloseq input:
+mbec.obj <- mbecProcessInput(dummy.ps)
+
+# The optional argument 'required.col' may be used to ensure that all covariate columns that should be there are available. For the dummy-data these are c("group", "batch", "replicate"). Create an MbecData object from list input and ensure availability of columns in meta-data:
+mbec.obj <- mbecProcessInput(dummy.ps, required.col = c("group", "batch", "replicate"))
+
+```
+
+
+## Apply transformations
+
+The most common normalizing transformations in microbiome analysis are total sum scaling (TSS) and centered log-ratio transformation (CLR). Hence, the MBECS package offers these two methods. The resulting matrices will be stored in their respective slots (tss, clr) in the MbecData object, while the original abundance table will remain unchanged. 
+
+```{r Usage_transformation, echo=TRUE, eval=FALSE, tidy=TRUE}
+
+# Apply total sum scaling to the data. 
+mbec.obj <- mbecTransform(mbec.obj, method = "tss")
+
+# Apply centered log-ratio transformation to the data. Due to the sparse nature of compositional microbiome data, the parameter 'offset' may be used to add a small offset to the abundunca matrix in order to facilitate the CLR transformation.
+mbec.obj <- mbecTransform(mbec.obj, method = "clr", offset = 0.0001)
+
+```
+
+
+## Preliminary report
+
+The preliminary report will provide the user with an overview of experimental setup and the significance of the batch effect. To that end it is required to declare the covariates that are related to batch effect and group effect respectively. In addition it provides the option to select the abundance table to use here. The CLR transformed abundances are the default and the function will calculate them if they are not present in the input. Technically, the user can start the analysis at this point because the function incorporates the functionality of the aforementioned processing functions. 
+
+
+```{r Usage_prelimreport, echo=TRUE, eval=FALSE, results='asis', tidy=TRUE}
+
+# The parameter 'model.vars' is a character vector with two elements. The first denotes the covariate column that describes the batch effect and the second one should be used for the presumed biological effect of interest, e.g., the group effect in case/control studies. The type parameter selects which abundance table is to be used ("otu", "clr", "tss").
+mbecReportPrelim(input.obj=mbec.obj, model.vars=c("batch","group"), type="clr")
+
+```
+
+## Run corrections
+
+The package acts as a wrapper for six different batch effect correction algorithms (BECA).
+
+* Remove Unwanted Variation 3 (ruv3)
+  + This algorithm is implemented in ruv-package by @R-ruv. 
+  + The algorithm requires negative control-features, i.e., features that are known to be unaffected by the batch effect, as well as technical replicates. The algorithm will check for the existence of a replicate column in the covariate data. If the column is not present, the execution stops and a warning message will be displayed. The denominators for negative controls can be supplied via the parameter 'nc.features'. If they are not supplied, the function will employ a linear model to determine pseudo negative controls that are not significantly affected by the batch effect.
+  
+* Batch Mean Centering (bmc)
+  + This algorithm is part of this package.
+  + For known batch effects, this method takes the batches, i.e., subgroup of samples within a particular batch, and centers them to their mean value.
+
+* ComBat (bat)
+  + Described by Johnson et al. 2007 this method was initially conceived to work with gene expression data and is part of the sva-package by @R-sva.
+  + This method uses an non-/parametric empirical  Bayes framework to correct for known batch effects. 
+  
+* Remove Batch Effect (rbe)
+  + As part of the limma-package by @R-limma this method was designed to remove BEs from Micro array data. 
+  + The algorithm fits the full-model to the data, i.e., all relevant covariates whose effect should not be removed, and a model that only contains the known batch effects. The difference between these models produces a residual matrix that (presumably) contains only the full-model-effect, e.g., treatment. 
+  
+* Percentile Normalization (pn)
+  + This method was actually developed specifically to facilitate the integration of microbiome data from different studies/experimental set-ups by @gibbons2018. This problem is similar to the mitigation of BEs, i.e., when collectively analyzing two or more data-sets, every study is effectively a batch on its own (not withstanding the probable BEs within studies). 
+  + The algorithm iterates over the unique batches and converts the relative abundance of control samples into their percentiles. The relative abundance of case-samples within the respective batches is then transformed into percentiles of the associated control-distribution. Basically, the procedure assumes that the control-group is unaffected by any effect of interest, e.g., treatment or sickness, but both groups within a batch are affected by that BE. The switch to percentiles (kinda) flattens the effective difference in count values due to batch - as compared to the other batches. This also introduces the two limiting aspects in percentile normalization. It can only be applied to case/control designs because it requires a reference group. In addition, the transformation into percentiles removes information from the data.
+  
+* Support Vector Decomposition (svd)
+  + Successfully applied to micro-array data by @nielsen2002.
+  + Basically perform matrix factorization and compute singular eigen-vectors (SEV). Assume that the first SEV captures the batch-effect and remove this effect from the data.
+
+
+The user has the choice between two functions 'mbecCorrection' and 'mbecRunCorrections', the latter one acts as a wrapper that can apply multiple correction methods in a single run.
+
+
+```{r Usage_correction, echo=TRUE, eval=FALSE, results='asis', tidy=TRUE}
+
+# The function 'mbecCorrection' will apply a single correction algorithm of choice and return an object that contains the resulting corrected abundance matrix in its 'cor' slot under the name 'ruv3'.
+mbec.rbe <- mbecCorrection(mbec.obj, model.vars=c("batch","group"), 
+                           method = "ruv3", type = "clr", 
+                           nc.features = c("OTU1","OTU2","OTU3","OTU4"))
+
+# The function 'mbecRunCorrections will apply all selected correction algorithms and return an object that contains all respective corrected abundance matrices in the 'cor' slot. In this example there will be three in total, named like the methods that created them.
+mbec.corrected <- mbecRunCorrections(mbec.obj, model.vars=c("batch","group"), 
+                                     method=c("bmc","pn","svd"), type = "clr")
+
+```
+
+
+
+## Post report
+
+The post-report will provide the user with a comparative report that shows how the chosen batch effect correction algorithms changed the data-set compared to the initial values. 
+
+
+```{r Usage_postreport, echo=TRUE, eval=FALSE, results='asis', tidy=TRUE}
+
+# The parameter 'model.vars' is a character vector with two elements. The first denotes the covariate column that describes the batch effect and the second one should be used for the presumed biological effect of interest, e.g., the group effect in case/control studies. The type parameter selects which abundance table is to be used ("otu", "clr", "tss").
+mbecReportPost(input.obj=mbec.corrected, model.vars=c("batch","group"), type="clr")
+
+```
+
+
+## Retrieve corrrected data
+
+Because the MbecData-class extends the phyloseq-class, all function from phyloseq can be used as well. They do however only apply to the 'otu_table' slot and will return an object of class phyloseq, i.e., any transformations or corrections will be lost. To retrieve an object of class phyloseq that contains the 'otu_table' of corrected counts, for downstream analyses, the user can employ the 'mbecGetPhyloseq' function. As before, the arguments 'type' and 'label' are used to specifiy which abundance table should be used in the returned object.
+
+
+```{r Usage_returnPS, echo=TRUE, eval=FALSE, results='asis', tidy=TRUE}
+
+# To retrieve the clr-transformed counts, set 'type' accordingly.
+ps.clr <- mbecGetPhyloseq(mbec.corrected, type="clr")
+
+# If the batch-mean-centering corrected counts show the best results, select "cor" as 'type' and set the 'label' to "bmc".
+ps.bmc <- mbecGetPhyloseq(mbec.corrected, type="cor", label="bmc")
+
+```
+
+
+
+
+
+
+
+
+# Bibliography
+
+

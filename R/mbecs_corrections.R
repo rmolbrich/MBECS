@@ -634,12 +634,19 @@ mbecPN <- function(input.obj, model.vars, type="tss") {
   type <- match.arg(type, choices = c("tss","otu","clr"))
   tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+
+  if( !is(tmp.meta[,eval(model.vars[2])], "factor") ) {
+    warning("Grouping variable is not a factor! Converting to factor now.")
+    tmp.meta[,eval(model.vars[2])] <- as.factor(tmp.meta[,eval(model.vars[2])])
+  }
+
   # check for case/control design
   if( nlevels(tmp.meta[,eval(model.vars[2])]) != 2 ) {
     warning("Grouping/Treatment contains ",
             nlevels(tmp.meta[,eval(model.vars[2])]),
             " different categories. Percentile normalization is designed to work
             with 2 classes only, i.e., case/control studies.")
+    return(NULL)
   }
   # check/adjust for zero-values
   if( any(tmp.cnts == 0) ) {

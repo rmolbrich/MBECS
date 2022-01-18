@@ -448,7 +448,6 @@ setGeneric("mbecGetData", signature="input.obj",
                          type=c("otu","ass","cor","clr","tss"), label=character()) {
 
   type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
-  message("Selected type is: ", type)
   # in general the input should be of class phyloseq or MbecData - so just get the fields to evaluate here
   tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE), check.names = FALSE)
 
@@ -723,6 +722,124 @@ setMethod("mbecProcessInput", "list",
                                    meta_data = input.obj[[2]])
 
             return(return.obj)
+          }
+)
+
+
+
+# mbecGetPhyloseq ---------------------------------------------------------
+
+
+#' Return Phyloseq after correction
+#'
+#' This function extracts the abundance table of choice and returns a phyloseq
+#' object for downstream analyses.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor". The later additionally requires the use of the argument 'label'
+#' that specifies the name within the list of corrected matrices.
+#'
+#' @keywords MBECS Phyloseq Getter
+#' @param input.obj MbecData object
+#' @param type Specify which type of data to add, by using one of 'cor'
+#' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss' (Total Scaled-Sum).
+#' @param label For type 'cor' this specifies the name within the
+#' list.
+#' @return A phyloseq object that contains the chosen abundance table as
+#' otu_table.
+#' @export
+#'
+#' @examples
+#' # This will return a phyloseq object that contains the clr-transformed
+#' # abundances as otu_table
+#' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
+setGeneric("mbecGetPhyloseq", signature="input.obj",
+           function(input.obj, type=c("otu","cor","clr","tss"),
+                    label=character())
+             standardGeneric("mbecGetPhyloseq")
+)
+
+
+
+#' Return Phyloseq after correction
+#'
+#' This function extracts the abundance table of choice and returns a phyloseq
+#' object for downstream analyses.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor". The later additionally requires the use of the argument 'label'
+#' that specifies the name within the list of corrected matrices.
+#'
+#' @keywords MBECS Phyloseq Getter
+#' @param input.obj MbecData object
+#' @param type Specify which type of data to add, by using one of 'cor'
+#' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss' (Total Scaled-Sum).
+#' @param label For type 'cor' this specifies the name within the
+#' list.
+#' @return A phyloseq object that contains the chosen abundance table as
+#' otu_table.
+#' @export
+#'
+#' @examples
+#' # This will return a phyloseq object that contains the clr-transformed
+#' # abundances as otu_table
+#' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
+.mbecGetPhyloseq <- function(input.obj, type=c("otu","cor","clr","tss"), label=character()) {
+
+  # match correct argument
+  type <- match.arg(type, choices = c("otu","cor","clr","tss"))
+
+  if( type == "cor" && length(label) == 0 ) {
+    warning("For type 'cor' you need to specifiy the label-parameter.")
+    return(NULL)
+  }
+  # extract table in fxs orientation
+  table2use <- mbecGetData(input.obj, orientation = "fxs", type=eval(type), label=eval(label))[[1]]
+  # create return object of class phyloseq
+  ret.ps <- phyloseq::phyloseq(phyloseq::otu_table(table2use , taxa_are_rows = TRUE),
+                               input.obj@sam_data,
+                               input.obj@tax_table,
+                               input.obj@phy_tree,
+                               input.obj@refseq)
+  # and return
+  return(ret.ps)
+}
+
+
+
+#' Return Phyloseq after correction
+#'
+#' This function extracts the abundance table of choice and returns a phyloseq
+#' object for downstream analyses.
+#'
+#' The argument type determines which slot to access, i.e. the base
+#' matrices for un-transformed counts "otu", total sum-scaled counts "tss",
+#' cumulative log-ratio transformed counts "clr" and batch effect corrected
+#' counts "cor". The later additionally requires the use of the argument 'label'
+#' that specifies the name within the list of corrected matrices.
+#'
+#' @keywords MBECS Phyloseq Getter
+#' @param input.obj MbecData object
+#' @param type Specify which type of data to add, by using one of 'cor'
+#' (Correction), 'clr' (Cumulative Log-Ratio) or 'tss' (Total Scaled-Sum).
+#' @param label For type 'cor' this specifies the name within the
+#' list.
+#' @return A phyloseq object that contains the chosen abundance table as
+#' otu_table.
+#' @export
+#'
+#' @examples
+#' # This will return a phyloseq object that contains the clr-transformed
+#' # abundances as otu_table
+#' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
+setMethod("mbecGetPhyloseq", "MbecData",
+          function(input.obj, type=c("otu","cor","clr","tss"),
+                   label=character()) {
+            .mbecGetPhyloseq(input.obj, type=type, label=label)
           }
 )
 
