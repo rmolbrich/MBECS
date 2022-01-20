@@ -8,6 +8,7 @@
 #' @param rle.df 'mbecRLE'  data output
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring
+#' @param label Name of the plot displayed as legend title.
 #' @return ggplot2 object
 #' @export
 #'
@@ -17,7 +18,7 @@
 #' rle.df <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' type="clr", return.data=TRUE)
 #' plot.rle <- mbecRLEPlot(rle.df, c('group','batch'))
-mbecRLEPlot <- function(rle.df, model.vars) {
+mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 
   mbecCols <- pals::tableau20(20)
   n.tiles <- dim(unique(rle.df[,eval(model.vars[2])]))[1]
@@ -44,6 +45,7 @@ mbecRLEPlot <- function(rle.df, model.vars) {
     #                     space = "free_x", drop = TRUE) +
     ggplot2::scale_fill_manual(values = mbecCols) +
     ggplot2::theme_bw() +
+    ggplot2::labs(title = eval(label), fill = mbecUpperCase(eval(model.vars[1]))) +
     # adjustments for the legend
     ggplot2::theme(legend.position="bottom",
                    legend.text = ggplot2::element_text(color = "black", size=12),
@@ -67,6 +69,7 @@ mbecRLEPlot <- function(rle.df, model.vars) {
 #' @param tmp Count of selected features.
 #' @param otu.idx Index of selected Otus in the data.
 #' @param model.var Which covariate to group Otus by.
+#' @param label Name of the plot displayed as legend title.
 #' @return ggplot2 object
 #' @export
 #'
@@ -76,7 +79,7 @@ mbecRLEPlot <- function(rle.df, model.vars) {
 #' box.df <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
 #' model.var='batch', type="otu", return.data=TRUE)
 #' plot.box <- mbecBoxPlot(box.df[[1]], box.df[[2]], 'batch')
-mbecBoxPlot <- function(tmp, otu.idx, model.var) {
+mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
 
   mbecCols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
   x.angle = 0
@@ -86,8 +89,8 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var) {
   legend.cex = 0.7
   legend.title.cex =0.75
 
-  legend.title <- gsub("(^|[[:space:]])([[:alpha:]])",
-                       "\\1\\U\\2", model.var, perl = TRUE)
+  legend.title <- paste(label, gsub("(^|[[:space:]])([[:alpha:]])",
+                       "\\1\\U\\2", model.var, perl = TRUE), sep = " ")
   ret.plot <- list()
 
   for (idx in otu.idx) {
@@ -174,12 +177,11 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var) {
 #' Takes data.frame from 'mbecHeat()' and produces a ggplot2 object.
 #'
 #' @keywords RLE relative log expression
-#' @param center Boolean flag to indicate whether data is centered or not.
-#' @param scale Boolean flag to indicate whether data is scaled or not.
 #' @param tmp.cnts Count values of selected features.
 #' @param tmp.meta Covariate information for potting.
 #' @param model.vars Two covariates of interest to select by first variable
 #' selects panels and second one determines coloring.
+#' @param label Name of the plot displayed as legend title.
 #' @return ggplot2 object
 #' @export
 #'
@@ -190,10 +192,9 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var) {
 #' center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
 #' plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=heat.df[[1]],
 #' tmp.meta=heat.df[[2]], model.vars=c('group','batch'))
-mbecHeatPlot <- function(center, scale, tmp.cnts, tmp.meta, model.vars) {
+mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
 
-  p.title <- paste("Heatmap - Centered: ", center, " Scaled: ",
-                   scale, sep = "")
+  p.title <- paste("Heatmap - ", label, sep = "")
   heat.plot <-
     pheatmap::pheatmap(tmp.cnts, scale = "none",
                        cluster_rows = FALSE, cluster_cols = TRUE,
@@ -328,6 +329,7 @@ mbecMosaicPlot <- function(study.summary,
 #' @param model.vars two covariates of interest to select by first variable
 #' selects panels and second one determines coloring.
 #' @param pca.axes NMumerical two-piece vector that selects PCs to plot.
+#' @param label Name of the plot displayed as legend title.
 #' @return ggplot2 object
 #' @export
 #'
@@ -338,7 +340,7 @@ mbecMosaicPlot <- function(study.summary,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #' plot.pca <- mbecPCAPlot(plot.df=pca.df[[1]], metric.df=pca.df[[2]],
 #' model.vars=c('group','batch'), pca.axes=c(1,2))
-mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
+mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
   mbecCols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17)]
   x.angle = 0
   x.hjust = 0.5
@@ -367,7 +369,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
                      colour = get(var.color),shape = get(var.shape))) +
       ggplot2::scale_shape_manual(values=c(0,1,2,3,6,8,15,16,17,23,25,4,5,9)) +
       ggplot2::geom_point() + ggplot2::scale_color_manual(values = mbecCols) +
-      ggplot2::labs(colour = label.col, shape = label.sha) +
+      ggplot2::labs(title = label, colour = label.col, shape = label.sha) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                     metric.df$axis.max[pca.axes[1]]) +
       ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
@@ -451,7 +453,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes) {
     pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                      1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
       ggplot2::geom_point() + ggplot2::scale_color_manual(values = mbecCols) +
-      ggplot2::labs(colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
+      ggplot2::labs(title = label, colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                                                                            metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
                                                                                                                             metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
                                                                                                                                                                                                        1]), ": ", metric.df$var.explained[pca.axes[1]], "% expl.var")) + ggplot2::ylab(paste0(colnames(plot.df[pca.axes[2] +
@@ -701,7 +703,6 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
 #' model.vars=c('batch','group'), method='s.coef', type='clr')
 #' plot.scoef <- mbecSCOEFStatsPlot(scoef.obj=df.var.scoef)
 mbecSCOEFStatsPlot <- function(scoef.obj) {
-  ## ToDo: make my own colors - with black jack and hookers
   cols <- pals::tableau20(20)
   # first tidy-magic to create df for plotting
   plot.df <- scoef.obj %>%
@@ -717,7 +718,7 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
                                                                              hjust = 1), strip.text = ggplot2::element_text(size = 12), panel.grid = ggplot2::element_blank(),
                                          axis.text = ggplot2::element_text(size = 10), axis.title = ggplot2::element_text(size = 15),
                                          legend.title = ggplot2::element_text(size = 15), legend.text = ggplot2::element_text(size = 12)) +
-    ggplot2::scale_color_manual(values = cols) + ggplot2::labs(x = "Silhouette Coefficient", y = "Silhouette Coefficient",
+    ggplot2::scale_color_manual(values = cols) + ggplot2::labs(x = "Silhouette Coefficient", y = "Grouping",
                                                                name = "Type") +
     ggplot2::facet_grid(cols = ggplot2::vars(type), scales = "free",
                         space = "free_x", drop = TRUE)

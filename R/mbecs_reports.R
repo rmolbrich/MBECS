@@ -29,7 +29,7 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
   prelim.report.list[["mosaic"]] <- mbecMosaic(input.obj, model.vars=eval(model.vars), return.data = eval(return.data))
   prelim.report.list[["pca"]] <- mbecPCA(input.obj, model.vars=eval(model.vars), pca.axes = c(1,2), type=eval(type), return.data = eval(return.data))
   prelim.report.list[["rle"]] <- mbecRLE(input.obj, model.vars=eval(model.vars), type=eval(type), return.data = eval(return.data))
-  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=5, model.vars=eval(model.vars), type=eval(type), return.data = eval(return.data))
+  prelim.report.list[["heat"]] <- mbecHeat(input.obj, method="TOP", n=10, model.vars=eval(model.vars), type=eval(type), return.data = eval(return.data))
   prelim.report.list[["box"]] <- mbecBox(input.obj, method="TOP", n=5, model.var=eval(model.vars)[1], type=eval(type), return.data = eval(return.data))
   # Dendrogramm needs better function if possible
   #prelim.report.list[["dendro"]] <- mbecDendro(input.obj, method="TOP", n=5, model.var=eval(model.vars)[2] )

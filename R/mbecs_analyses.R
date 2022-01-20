@@ -54,6 +54,10 @@ mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
   tmp.cnts <- tmp[[1]]
   tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var="specimen")
 
+  if( !(type == "cor") ) {
+    label <- type
+  }
+
   tmp.long <- NULL
   for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
     message("Calculating RLE for group: ", g.idx)
@@ -82,7 +86,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
   if (return.data) {
     return(tmp.long)
   }
-  return(mbecRLEPlot(tmp.long, model.vars))
+  return(mbecRLEPlot(tmp.long, model.vars, label=label))
 }
 
 
@@ -150,6 +154,10 @@ setGeneric("mbecPCA", signature = "input.obj",
 
   tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
+  if( !(type == "cor") ) {
+    label <- type
+  }
+
   # calculate IQR and sort counts in decreasing order
   iqr <- apply(tmp.cnts, 2, stats::IQR)
   tmp.cnts <- tmp.cnts[, order(iqr, decreasing = TRUE)]
@@ -184,7 +192,7 @@ setGeneric("mbecPCA", signature = "input.obj",
     return(list(plot.df, metric.df, pca.axes))
   }
 
-  return(mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes))
+  return(mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes, label=label))
 }
 
 
@@ -305,6 +313,10 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10,
                      label=label)
   tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
+  if( !(type == "cor") ) {
+    label <- type
+  }
+
   otu.idx <- colnames(tmp[[1]])
 
   tmp <- tmp[[1]] %>%
@@ -332,7 +344,7 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10,
     return(list(tmp, otu.idx))
   }
 
-  return(mbecBoxPlot(tmp, otu.idx, model.var))
+  return(mbecBoxPlot(tmp, otu.idx, model.var, label=label))
 }
 
 
@@ -399,6 +411,10 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
   tmp.meta <- tmp[[2]]
   otu.idx <- colnames(tmp[[1]])
 
+  if( !(type == "cor") ) {
+    label <- type
+  }
+
   for (g.idx in c(seq_along(model.vars))) {
     if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
       warning("Grouping variables need to be factors. Coercing variable: ",
@@ -425,7 +441,7 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
   if (return.data) {
     return(list(tmp.cnts, tmp.meta))
   }
-  return(mbecHeatPlot(center, scale, tmp.cnts, tmp.meta, model.vars))
+  return(mbecHeatPlot(tmp.cnts, tmp.meta, model.vars, label=label))
 }
 
 
@@ -1014,7 +1030,7 @@ mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
   tmp.prcomp <- stats::prcomp(tmp.cnts,
                               center = TRUE, scale = FALSE)
 
-  tmp.dist <- stats::dist(tmp.prcomp$x,
+  tmp.dist <- stats::dist(tmp.prcomp$x[,1:3],
                           method = "euclidian")
 
   avg.sil.df <- NULL

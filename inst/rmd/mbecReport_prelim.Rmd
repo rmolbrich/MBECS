@@ -1,6 +1,6 @@
 ---
-title: "PreliminaryReport"
-author: "Michael Olbrich"
+title: "Preliminary Report"
+author: "MBECS"
 # output: pdf_document
 output:
   html_document:
@@ -24,40 +24,30 @@ params:
 
 ```{r SETUP, echo=FALSE}
 knitr::opts_chunk$set(echo=FALSE)
-
 ```
 
 
 # Study Summary {.tabset}
 
-This section will contain all the information about this data-set. Starting off with a literal summary, e.g., #samples, #samples per group/treatment/other factor, #covariates and #factors, etc...
-
-```{r STUDY_SUMMARY}
-
-# sth. or other
-
-```
+A synopsis of covariates, sample dissemination over study grouping/batches and sample clustering.
 
 
 ## Covariates
 
-some sort of table to have an overview of the meta-data.
+A summary of the data-sets covariate information.
 
 ```{r COVARIATES, comment=''}
-
-# Some nicely formatted table here
+# Summarize the covariate information.
 summary(params$report.data[[2]])
-
-
 ```
 
 
 ## Sample Distribution
 
-Select two covariates of interest, e.g., 'treatment' and 'batch', and display bars for the number of samples from one covariate grouping that fall into the categories of the grouping.
+How are the samples disseminated over batches and the effect of interest.
 
 ```{r MOSAIC}
-# Mosaic style plots (and maybe pie-charts)
+# Mosaic style plot
 plot(params$report.list$mosaic)
 
 ```
@@ -65,11 +55,11 @@ plot(params$report.list$mosaic)
 
 ## Sample Separation
 
-Technically, the function 'prcomp' performs a singular value decomposition to retrieve the eigenvectors for projection. Computes covariance-matrix on counts, extract the orthogonal eigenvectors and rank them by amount of variance they correspond to. Plot the samples on a grid, using selected eigenvectors as axes. This shows sample-relatedness (clustering) and can help identify the presence of confounding factors.
+The Principal Component Analysis shows sample-relatedness (clustering) on a 2D plane and can help identify the presence of confounding factors.
 
 ```{r PCA}
 
-# PCA plot and description.
+# PCA plot
 plot(params$report.list$pca)
 
 ```
@@ -77,22 +67,16 @@ plot(params$report.list$pca)
 
 # Visualization {.tabset}
 
-Aka some more plots here.
-
-```{r VISUALIZATION}
-
-# ToDo: come up with sth. to write/show here
-
-```
+Show how feature abundances are distributed over study grouping and batches.
 
 
 ## Relative Log Expression (RLE)
 
-Separate samples by covariate of interest (CoI), e.g., treatment or study group, calculate the median value for every feature count and subtract it from all samples respectively. Express the remaining variability in counts per sample in a box-plot (including outliers, median values, whiskers, the whole shabang) and color them by batch membership. Repeat for all factors in the CoI and use 'facet_grid' to display side-by-side.
+Separate samples by covariate of interest (CoI), e.g., treatment or study group, calculate the median value for every feature count and subtract it from all samples respectively.
 
 ```{r RLE}
 
-# RLE plot and description.
+# RLE plot
 plot(params$report.list$rle)
 
 ```
@@ -100,8 +84,7 @@ plot(params$report.list$rle)
 
 ## Heatmap
 
-Center/Scale both features and samples. Select 'ALL', 'TOPxx' (by IQR value) or list of features to display in a heatmap with covariates of interest.
-
+Show the top ten most dispersed features by interquartile range.
 
 ```{r HEAT}
 
@@ -111,99 +94,59 @@ print(params$report.list$heat)
 ```
 
 
-
-## Dendrogram
-
-```{r DENDROGRAM}
-
-# ToDo: add le dendrogram
-
-message("Comes with the next update.")
-
-
-```
-
-
 ## BOX-plot
 
-Select 'ALL' or 'TOP' xx features based on IQR, i.e., variability over all samples. Produce box-plot showing expression with respect to a covariate of interest (CoI) 
+Show the top five most dispersed features by interquartile range and show within batches.
 
 ```{r BOX}
-
-# ToDo: implement some logic to organize and format these plots
 for( p.idx in params$report.list$box ) {
 
   plot(p.idx)
 
 }
-
-# gridExtra::marrangeGrob(grobs=params$report.list$box, ncol = 2, nrow=5)
-
-
 ```
 
 # Variance Assessment {.tabset}
 
 
-Several different approaches are used to estimate the amount of variability attributable to covaraites of interest.
+Several different approaches are used to estimate the amount of variability attributable to covariates of interest.
 
 
 ## Linear Model (LM)
 
-This method fits a linear model to every feature respectively and estimates the proportion of variance that the modelled covariates of interest (coi) account for. The results are visualized in a box-plot that shows the coi and the residual values. In case of the comparative analysis between two correction methods or transformations, the plot function will create panels that show the resulting boxes for the respective transformations (count-matrices since meta is the same - therefore same covariates and so on)  
+This method fits the linear model 'y ~ group + batch' to every feature respectively and estimates the proportion of variance that the modeled covariates of interest (coi) account for. The results are visualized in a box-plot that shows the coi and the residual values.
 
 ```{r LINMOD}
-
-# avg. variance in linear model plot and description.
+# avg. variance in linear model plot
 print(params$report.list$linmod)
-
 ```
 
 
 ## Linear (Mixed) Model (LMM)
 
+This method fits the linear mixed model 'y ~ group + (1|batch)' to every feature respectively and estimates the proportion of variance that the modeled covariates of interest (coi) account for. The results are visualized in a box-plot that shows the coi and the residual values.
+
 ```{r LINMIXMOD}
-
-# avg. variance in linear model plot and description.
+# avg. variance in linear model plot
 print(params$report.list$linmixmod)
-
 ```
 
 
 ## Redundancy Analysis (pRDA)
 
-pRDA / pCCA: (Legendre & Legendre (2012), Table 11.5 (p. 650))
-The Redundancy Analysis (RDA) 
-A linear regression model is fitted to the feature-matrix (i.e. counts) while conditioning on one COI at a time to extract the proportion of explained variance for the variables. In this case the result is a single number(value) for every covariate in every transformation and thus the plot is one/or more panels of bar-plots. 
+A linear regression model is fitted to the feature-matrix (i.e. counts) while conditioning on one COI at a time to extract the proportion of explained variance for the variables. Then this procedure is repeated with switched covariates.
 
-Basically we take counts ~ group + Condition(batch)  and subtract counts ~ group and see how much variance batch accounts for - then repeat with group as Condition
-
-!! NEGATIVE COMPONENTS ARE NOT TO BE TRUSTED
-
-Interpretation:
-Without a condition we can just see how much variance (i.e. squared standard deviation in the distribution of counts) our model (which is the constrained part) accounts for. 
-Redundant terms (i.e. parts of a variable that are already explained by sth. else as for example Age and Birthdate). This is an indicator for the usefulness of the model.
-
-By performing pRDA with a condition the algorithm computes two models, one with all variables and the other with the condition removed --> the difference in explained variance is attributed to the condition. This is also why the sum of all conditions will be close to but not exactly the total amount of explained variance!
-
-Information concerning a number of constrained axes (RDA axes) and unconstrained axes (PCA axes) are often presented in the results of an RDA.
-- Inertia = sum(eigenvalues of all axes) --> proportion for one axis_1 equals (eigenvalue_1 / intertia)
-- The PCA axes represent the unconstrained (i.e. residual uncharacterised factors)
-
+Basically, it takes 'counts ~ group + Condition(batch)'  and subtract counts ~ group and see how much variance batch accounts for - then repeat with group as Condition
 
 ```{r RDA}
-
 # RDA plot and description.
 print(params$report.list$rda)
-
 ```
 
 
-## PrincipalVariance Component Analysis (PVCA)
+## Principal Variance Component Analysis (PVCA)
 
-Algorithm - calculate the correlation of the fxs count-matrix - from there extract the eigenvectors and eigenvalues and calculate the proportion of explained variance per eigenvector (i.e. principal component) by dividing the eigenvalues by the sum of eigenvalues. Now select as many PCs as required to fill a chosen quota for the total proportion of explained variance. Iterate over all PCs and fit a linear mixed model that contains all covariates as random effect and all unique interactions between two covariates. Compute variance covariance components form the resulting model --> From there we get the Variance that each covariate(variable) contributes to this particular PC.
-Then just standardize variance by dividing it through the sum of variance for that model.
-Scale each PCs results by the proportion this PC accounted for in the first place. And then do it again by dividing it through the total amount of explained variance, i.e. the cutoff to select the number of PCs to take (but obviously not the cutoff but rather the actual values for the selected PCs). Finally take the average over each random variable and interaction term and display in a nice plot
+Select the number of principal components that are required to account for more than 65% of variance and iterate over all PCs and fit a linear mixed model that contains all covariates as random effect and all unique interactions between two covariates. Compute variance covariance components form the resulting model and extract the variance that each covariate contributes to this particular PC. Standardize variance by dividing it through the sum of variance for that model. Scale each PCs results by the proportion this PC accounted for in the first place. And then do it again by dividing it through the total amount of explained variance, i.e. the cutoff to select the number of PCs to take, or rather the actual values for the selected PCs. Finally take the average over each random variable and interaction term and display in a bar-plot.
 
 ```{r PVCA}
 
@@ -215,8 +158,8 @@ print(params$report.list$pvca)
 
 ## Silhouette Coefficient
 
-Calculate principal components and get samplewise distances on the resulting sxPC matrix.
-Then iterate over all the covariates and calculate the cluster silhouette (which is basically either zero, if the cluster contains only a single element, or it is the distance to the closest different cluster minus the distance of the sample within its own cluster divided (scaled) by the maximum distance). Average over each element in a cluster for all clusters and there is the representation of how good the clustering is.
+Calculate principal components and get sample-wise distances on the resulting sxPC matrix.
+Then iterate over all the covariates and calculate the cluster silhouette. This is essentially either zero, if the cluster contains only a single element, or it is the distance to the closest different cluster minus the distance of the sample within its own cluster divided (scaled) by the maximum distance. Average over each element in a cluster for all clusters respectively and obtain a representation of how good the clustering is.
 
 ```{r SCOEF}
 
