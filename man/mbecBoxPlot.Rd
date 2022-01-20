@@ -4,7 +4,7 @@
 \alias{mbecBoxPlot}
 \title{Variability boxes plotting function}
 \usage{
-mbecBoxPlot(tmp, otu.idx, model.var)
+mbecBoxPlot(tmp, otu.idx, model.var, label = NULL)
 }
 \arguments{
 \item{tmp}{Count of selected features.}
@@ -12,6 +12,8 @@ mbecBoxPlot(tmp, otu.idx, model.var)
 \item{otu.idx}{Index of selected Otus in the data.}
 
 \item{model.var}{Which covariate to group Otus by.}
+
+\item{label}{Name of the plot displayed as legend title.}
 }
 \value{
 ggplot2 object

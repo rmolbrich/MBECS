@@ -133,7 +133,7 @@ test_that("mbecHeat works", {
   # expect no warnings
   expect_warning(heat.test, NA)
   # now put in plotting function for further testing
-  heat.plot.test <- evaluate_promise(mbecHeatPlot(center=T, scale=T, heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
+  heat.plot.test <- evaluate_promise(mbecHeatPlot(heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
   # expect list of 10 grobs
   expect_s3_class(heat.plot.test$result, "pheatmap")
   # expect no warnings
@@ -152,7 +152,7 @@ test_that("mbecHeat works", {
   # expect no warnings
   expect_warning(heat.test, NA)
   # now put in plotting function for further testing
-  heat.plot.test <- evaluate_promise(mbecHeatPlot(center=T, scale=T, heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
+  heat.plot.test <- evaluate_promise(mbecHeatPlot(heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
   # expect list of 10 grobs
   expect_s3_class(heat.plot.test$result, "pheatmap")
   # expect no warnings
@@ -172,7 +172,7 @@ test_that("mbecHeat works", {
   # expect no warnings
   expect_warning(heat.test, NA)
   # now put in plotting function for further testing
-  heat.plot.test <- evaluate_promise(mbecHeatPlot(center=T, scale=T, heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
+  heat.plot.test <- evaluate_promise(mbecHeatPlot(heat.test$result[[1]], heat.test$result[[2]], c("batch", "group")))
   # expect list of 10 grobs
   expect_s3_class(heat.plot.test$result, "pheatmap")
   # expect no warnings

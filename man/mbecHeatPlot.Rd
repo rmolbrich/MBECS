@@ -4,19 +4,17 @@
 \alias{mbecHeatPlot}
 \title{Heatmap plotting function}
 \usage{
-mbecHeatPlot(center, scale, tmp.cnts, tmp.meta, model.vars)
+mbecHeatPlot(tmp.cnts, tmp.meta, model.vars, label = NULL)
 }
 \arguments{
-\item{center}{Boolean flag to indicate whether data is centered or not.}
-
-\item{scale}{Boolean flag to indicate whether data is scaled or not.}
-
 \item{tmp.cnts}{Count values of selected features.}
 
 \item{tmp.meta}{Covariate information for potting.}
 
 \item{model.vars}{Two covariates of interest to select by first variable
 selects panels and second one determines coloring.}
+
+\item{label}{Name of the plot displayed as legend title.}
 }
 \value{
 ggplot2 object
@@ -29,7 +27,7 @@ Takes data.frame from 'mbecHeat()' and produces a ggplot2 object.
 # assessment.
 heat.df <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
-plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=heat.df[[1]],
+plot.heat <- mbecHeatPlot(tmp.cnts=heat.df[[1]],
 tmp.meta=heat.df[[2]], model.vars=c('group','batch'))
 }
 \keyword{RLE}

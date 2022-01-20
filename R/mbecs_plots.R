@@ -190,7 +190,7 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
 #' # assessment.
 #' heat.df <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
-#' plot.heat <- mbecHeatPlot(center=TRUE, scale=TRUE, tmp.cnts=heat.df[[1]],
+#' plot.heat <- mbecHeatPlot(tmp.cnts=heat.df[[1]],
 #' tmp.meta=heat.df[[2]], model.vars=c('group','batch'))
 mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
 

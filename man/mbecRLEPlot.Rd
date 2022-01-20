@@ -4,13 +4,15 @@
 \alias{mbecRLEPlot}
 \title{RLE plotting function}
 \usage{
-mbecRLEPlot(rle.df, model.vars)
+mbecRLEPlot(rle.df, model.vars, label = NULL)
 }
 \arguments{
 \item{rle.df}{'mbecRLE'  data output}
 
 \item{model.vars}{two covariates of interest to select by first variable
 selects panels and second one determines coloring}
+
+\item{label}{Name of the plot displayed as legend title.}
 }
 \value{
 ggplot2 object

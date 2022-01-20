@@ -4,7 +4,7 @@
 \alias{mbecPCAPlot}
 \title{PCA plotting function}
 \usage{
-mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes)
+mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes, label = NULL)
 }
 \arguments{
 \item{plot.df}{Data.frame containing principal component data.}
@@ -15,6 +15,8 @@ mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes)
 selects panels and second one determines coloring.}
 
 \item{pca.axes}{NMumerical two-piece vector that selects PCs to plot.}
+
+\item{label}{Name of the plot displayed as legend title.}
 }
 \value{
 ggplot2 object

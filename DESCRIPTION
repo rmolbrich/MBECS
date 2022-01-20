@@ -1,6 +1,6 @@
 Package: MBECS
 Title: Evaluation and correction of batch effects in microbiome data-sets
-Version: 0.99.3
+Version: 0.99.4
 Authors@R: 
     person(given = "Michael",
        family = "Olbrich",
