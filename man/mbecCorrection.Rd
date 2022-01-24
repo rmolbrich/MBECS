@@ -7,8 +7,7 @@
 mbecCorrection(
   input.obj,
   model.vars = c("batch", "group"),
-  method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "pn",
-    "svd"),
+  method,
   type = "clr",
   nc.features = NULL
 )

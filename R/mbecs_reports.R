@@ -83,6 +83,8 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"), type="clr
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #' @export
 mbecReportPost <- function(input.obj, model.vars=c("batch","group"), type="clr", return.data = FALSE) {
+  # check if covariates are available
+  input.ob <- mbecProcessInput(input.ob, model.vars)
 
   n.cor <- length(input.obj@corrections)
   n.ass <- length(input.obj@assessments)

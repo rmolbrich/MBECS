@@ -28,7 +28,7 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
     nrows = 1
   } else {
     ncols = 3
-    nrows = (n.tiles / 3)
+    nrows = ceiling((n.tiles / 3))
   }
 
   rle.plot <- ggplot2::ggplot(
@@ -453,6 +453,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
     pMain <- ggplot2::ggplot(data = plot.df, ggplot2::aes(x = get(colnames(plot.df[pca.axes[1] +
                                                                                      1])), y = get(colnames(plot.df[pca.axes[2] + 1])), colour = get(var.color))) +
       ggplot2::geom_point() + ggplot2::scale_color_manual(values = mbecCols) +
+      ggplot2::theme_bw() +
       ggplot2::labs(title = label, colour = label.col, shape = label.sha) + ggplot2::xlim(metric.df$axis.min[pca.axes[1]],
                                                                            metric.df$axis.max[pca.axes[1]]) + ggplot2::ylim(metric.df$axis.min[pca.axes[2]],
                                                                                                                             metric.df$axis.max[pca.axes[2]]) + ggplot2::xlab(paste0(colnames(plot.df[pca.axes[1] +
@@ -463,7 +464,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                                                                                     1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                           alpha = 0.5) + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[1]], metric.df$axis.max[pca.axes[1]]) +
-      #theme_pca() +
+      ggplot2::theme_bw() +
       ggplot2::labs(title = ggplot2::element_blank()) + ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                                                                   axis.title.y = ggplot2::element_text(size = ggplot2::rel(0.8)), plot.title = ggplot2::element_text(hjust = 0.5,
                                                                                                                                                                      size = ggplot2::rel(1.5))) #+
@@ -474,7 +475,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                                                                                       1])), fill = get(var.color))) + ggplot2::geom_density(size = 0.2,
                                                                                                                                             alpha = 0.5) + ggplot2::coord_flip() + ggplot2::ylab("Density") + ggplot2::scale_fill_manual(values = mbecCols) +
       ggplot2::xlim(metric.df$axis.min[pca.axes[2]], metric.df$axis.max[pca.axes[2]]) +
-      #theme_pca() +
+      ggplot2::theme_bw() +
       ggplot2::theme(axis.title.x = ggplot2::element_text(size = ggplot2::rel(0.8)),
                                    axis.title.y = ggplot2::element_blank(), axis.line = ggplot2::element_blank(),
                                    plot.title = ggplot2::element_blank()) #+

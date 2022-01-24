@@ -59,7 +59,7 @@ The Principal Component Analysis shows sample-relatedness (clustering) on a 2D p
 
 ```{r PCA}
 # PCA plot
-gridExtra::marrangeGrob(grobs=params$report.list$pca, ncol = 2, nrow=2)
+gridExtra::marrangeGrob(grobs=params$report.list$pca, ncol = 1, nrow=2, top=NULL)
 ```
 
 
@@ -74,7 +74,7 @@ Separate samples by covariate of interest (CoI), e.g., treatment or study group,
 
 ```{r RLE}
 # RLE plot
-gridExtra::marrangeGrob(grobs=params$report.list$rle, ncol = 2, nrow=2)
+gridExtra::marrangeGrob(grobs=params$report.list$rle, ncol = 1, nrow=2, top=NULL)
 ```
 
 
@@ -84,7 +84,7 @@ Show the top ten most dispersed features by interquartile range.
 
 ```{r HEAT}
 # Heatmap features of interest
-gridExtra::marrangeGrob(grobs=params$report.list$heat, ncol = 2, nrow=2)
+gridExtra::marrangeGrob(grobs=params$report.list$heat, ncol = 1, nrow=2, top=NULL)
 ```
 
 
@@ -95,25 +95,25 @@ Show the top four most dispersed features by interquartile range and show within
 ```{r BOX}
 p.names <- names(params$report.list$box)
 
-gridExtra::marrangeGrob(grobs=params$report.list$box$pre, ncol = 2, nrow=2)
+gridExtra::marrangeGrob(grobs=params$report.list$box$pre, ncol = 2, nrow=2, top="Pre-Correction")
 
 if( "ruv3" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$ruv3, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$ruv3, ncol = 2, nrow=2, top="RUV-3")
 }
 if( "bmc" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$bmc, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$bmc, ncol = 2, nrow=2, top="Batch Mean Centering")
 }
 if( "bat" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$bat, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$bat, ncol = 2, nrow=2, top="ComBat")
 }
 if( "rbe" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$rbe, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$rbe, ncol = 2, nrow=2, top="Remove Batch Effects")
 }
 if( "pn" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$pn, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$pn, ncol = 2, nrow=2, top="Percentile Normalization")
 }
 if( "svd" %in% p.names ) {
-  gridExtra::marrangeGrob(grobs=params$report.list$box$svd, ncol = 2, nrow=2)
+  gridExtra::marrangeGrob(grobs=params$report.list$box$svd, ncol = 2, nrow=2, top="SVD")
 }
 
 ```

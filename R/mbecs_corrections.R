@@ -185,9 +185,7 @@ mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"), type="c
 #' study.obj <- mbecCorrection(dummy.mbec, model.vars=c("batch","group"),
 #' method="pn", type="tss")
 mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
-                           method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc",
-                                    "bat","rbe","pn","svd"),
-                           type="clr", nc.features=NULL) {
+                           method, type="clr", nc.features=NULL) {
 
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
@@ -447,7 +445,7 @@ mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
   } else {
     message("No negative control features provided. Using pseudo-negative controls.")
     tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
-    tmp.nc <- tmp.group.p > 0.05
+    tmp.nc <- tmp.group.p > 0.9
   }
 
   message("Applying Remove Unwanted Variantion v3 (RUV-III) for batch-correction.")
