@@ -196,25 +196,6 @@ test_that("mbecSVD works", {
 })
 
 
-# TEST CORRECTION WRAPPER -------------------------------------------------
-
-
-test_that("mbecCorrection works", {
-
-  # ToDo:
-
-})
-
-
-
-
-
-
-test_that("mbecRunCorrections wrapper works", {
-
-  # ToDo:
-
-})
 
 
 

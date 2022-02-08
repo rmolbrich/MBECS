@@ -37,7 +37,7 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
     # construct linear model from covariates
     message("Construct lm-formula from covariates.")
 
-    model.form = stats::as.formula(paste("y", " ~ ", paste(model.vars,
+    model.form <- stats::as.formula(paste("y", " ~ ", paste(model.vars,
                                                            collapse = " + ")))
   }
   # if model.form is complete --> remove LHS

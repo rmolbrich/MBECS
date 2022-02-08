@@ -24,11 +24,11 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
   n.tiles <- dim(unique(rle.df[,eval(model.vars[2])]))[1]
 
   if( n.tiles <= 3 ) {
-    ncols = n.tiles
-    nrows = 1
+    ncols <- n.tiles
+    nrows <- 1
   } else {
-    ncols = 3
-    nrows = ceiling((n.tiles / 3))
+    ncols <- 3
+    nrows <- ceiling((n.tiles / 3))
   }
 
   rle.plot <- ggplot2::ggplot(
@@ -82,12 +82,12 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
 
   mbecCols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
-  x.angle = 0
-  x.hjust = 0.5
-  density.lwd = 0.2
-  title.cex = 1.5
-  legend.cex = 0.7
-  legend.title.cex =0.75
+  x.angle <- 0
+  x.hjust <- 0.5
+  density.lwd <- 0.2
+  title.cex <- 1.5
+  legend.cex <- 0.7
+  legend.title.cex <- 0.75
 
   legend.title <- paste(label, gsub("(^|[[:space:]])([[:alpha:]])",
                        "\\1\\U\\2", model.var, perl = TRUE), sep = " ")
@@ -229,13 +229,13 @@ mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
 mbecMosaicPlot <- function(study.summary,
                            model.vars) {
 
-  main_color = "#004B5A"
-  x.angle = 0
-  x.hjust = 0.5
-  density.lwd = 0.2
-  title.cex = 1.5
-  legend.cex = 0.7
-  legend.title.cex =0.75
+  main_color <- "#004B5A"
+  x.angle <- 0
+  x.hjust <- 0.5
+  density.lwd <- 0.2
+  title.cex <- 1.5
+  legend.cex <- 0.7
+  legend.title.cex <- 0.75
 
   vars.axes <- mbecUpperCase(model.vars)
 
@@ -342,20 +342,10 @@ mbecMosaicPlot <- function(study.summary,
 #' model.vars=c('group','batch'), pca.axes=c(1,2))
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
   mbecCols <- pals::tableau20(20)[c(1,3,5,7,9,11,13,15,17)]
-  x.angle = 0
-  x.hjust = 0.5
-  # density.lwd = 0.2
-  # title.cex = 1.5
-  legend.cex = 0.7
-  legend.title.cex =0.75
-
-  # meh
-  # ks.table <- mbecPCTest(plot.df, pca.axes, model.vars)
-  # plot.annotation.top <- paste(colnames(ks.table),
-  #                              ks.table[1,], sep = ": ", collapse = " \n")
-  # plot.annotation.right <- paste(colnames(ks.table),
-  #                                ks.table[2,], sep = ": ", collapse = " \n")
-  # meh
+  x.angle <- 0
+  x.hjust <- 0.5
+  legend.cex <- 0.7
+  legend.title.cex <- 0.75
 
   var.color <- model.vars[1]; var.shape <- model.vars[2]
   label.col <- mbecUpperCase(model.vars[1])

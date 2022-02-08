@@ -66,7 +66,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
       dplyr::select(
         tmp.cnts,tmp.meta$specimen[tmp.meta[,eval(model.vars[2])] %in% g.idx])
 
-    feature.med = apply(tmp.cnts.group, 1, stats::median)
+    feature.med <- apply(tmp.cnts.group, 1, stats::median)
 
     tmp.group.long <- apply(tmp.cnts.group, 2,
                             function(sample.col) sample.col - feature.med) %>%
@@ -631,14 +631,14 @@ mbecModelVariance <- function(input.obj, model.vars=character(),
 
   # handle optional parameters
   if (is.null(na.action)) {
-    na.action = getOption("na.action")
+    na.action <- getOption("na.action")
   }
 
   method <- match.arg(method, choices = c("lm","lmm", "rda", "pvca", "s.coef"))
   type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
 
   ## PVCA stuff
-  pct_threshold = 0.5876  # threshold for explained variances
+  pct_threshold <- 0.5876  # threshold for explained variances
 
   tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
                      required.col=eval(model.vars), type=eval(type),
@@ -719,7 +719,7 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
     tmp.formula <- stats::as.formula(model.form)
   } else {
     message("Construct formula from covariates.")
-    tmp.formula = stats::as.formula(paste("y", " ~ ", paste(model.vars,
+    tmp.formula <- stats::as.formula(paste("y", " ~ ", paste(model.vars,
                                                             collapse = " + ")))
   }
 
@@ -780,7 +780,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
   message("Fitting linear-mixed model to every feature and extract proportion
           of variance explained by covariates.")
   # FixMe: maybe include the option to adjust this
-  control=lme4::lmerControl(calc.derivs=TRUE, check.rankX="stop.deficient")
+  control <- lme4::lmerControl(calc.derivs=TRUE, check.rankX="stop.deficient")
 
   if (!is.null(model.form)) {
     message("Use provided model formula.")
@@ -843,7 +843,7 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' @include mbecs_classes.R
 mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
 
-  model.variances = data.frame(matrix(nrow = length(model.vars),
+  model.variances <- data.frame(matrix(nrow = length(model.vars),
                                       ncol = 1, dimnames = list(model.vars,
                                                                 eval(type))))
   # Add a progress bar.
@@ -851,7 +851,7 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
                                   width = 80, char="=")
 
   for (condition.idx in seq_along(model.vars)) {
-    tmp.formula = stats::as.formula(
+    tmp.formula <- stats::as.formula(
       paste("tmp.cnts"," ~ ",
             paste(model.vars[-eval(condition.idx)],
                   "+", collapse = " "), " Condition(",
@@ -920,7 +920,7 @@ mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
   n.vars <- length(model.vars)
   s.names <- rownames(tmp.cnts)
 
-  tmp.cnts = apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
+  tmp.cnts <- apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
     t()
   colnames(tmp.cnts) <- s.names
   tmp.cor <- stats::cor(tmp.cnts)
@@ -1037,7 +1037,7 @@ mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
   for (var.elem in model.vars) {
     print(var.elem)
 
-    tmp.sil = cluster::silhouette(x=as.numeric(tmp.meta[,eval(var.elem)]),
+    tmp.sil <- cluster::silhouette(x=as.numeric(tmp.meta[,eval(var.elem)]),
                                   dist = tmp.dist)
 
     avg.sil.df <- rbind.data.frame(avg.sil.df,
@@ -1122,7 +1122,7 @@ mbecVarianceStats <- function(model.fit) {
 #' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLM <- function(model.fit) {
 
-  vp = stats::anova(model.fit) %>%
+  vp <- stats::anova(model.fit) %>%
     data.frame() %>%
     dplyr::mutate(variance =
                     dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,"Sum.Sq")),
@@ -1164,7 +1164,7 @@ mbecVarianceStatsLMM <- function(model.fit) {
 
   total.var.LUT <- unlist(lapply(vc, function(var.comp) {
     if (length(var.comp) > 1) {
-      weights = (table(
+      weights <- (table(
         model.fit@frame[[lib.df[eval(paste(names(var.comp),
                                            collapse = ",")),
                                 ]]])/nrow(model.fit@frame))
@@ -1297,13 +1297,13 @@ colinScore <- function(model.fit) {
   # 'NA' values or non-square matrix
   if (any(is.na(V)) || nrow(V) == 0) {
     score <- ifelse(any(is.na(V)), 1, 0)
-    attr(score, "vcor") = NA
+    attr(score, "vcor") <- NA
   } else {
     # scale to correlation
     C <- stats::cov2cor(as.matrix(V))
     # get largest correlation
-    score = max(abs(C[lower.tri(C)]))
-    attr(score, "vcor") = C
+    score <- max(abs(C[lower.tri(C)]))
+    attr(score, "vcor") <- C
   }
   return(score)
 }

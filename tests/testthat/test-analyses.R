@@ -409,7 +409,7 @@ test_that("colinScore works", {
                      "batch"=factor(c(1,2,1,2)), row.names = "sID")
   # expect warning
   mval.test <- evaluate_promise(colinScore(lme4::lmer(cnts[,1] ~ group + (1|batch),data=meta)))
-  expect_equal(mval.test$result[1], 6.3220273e-08)
+  expect_true(mval.test$result[1] < 0.0001)
   expect_identical(names(attributes(mval.test$result)), "vcor")
   expect_warning(mval.test, NA)
 })
