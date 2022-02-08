@@ -347,7 +347,8 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
   legend.cex <- 0.7
   legend.title.cex <- 0.75
 
-  var.color <- model.vars[1]; var.shape <- model.vars[2]
+  var.color <- model.vars[1]
+  var.shape <- model.vars[2]
   label.col <- mbecUpperCase(model.vars[1])
   label.sha <- mbecUpperCase(model.vars[2])
   title <- paste("PCA:", label.sha, "-", label.col)
