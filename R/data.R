@@ -1,6 +1,6 @@
 #' Mock-up microbiome abundance table and meta-data.
 #'
-#' A dataset containing pre-processed abundance table of
+#' A data-set containing pre-processed abundance table of
 #' microbial communities and a matrix of covariate information.
 #'
 #' @format An mbecData object including tss and clr transformed counts:
