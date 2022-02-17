@@ -22,13 +22,6 @@
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #'
 #' @export
-#'
-#' @examples
-#' # This will return return a list of data.frames containing the results for
-#' # the ten standard report-metrics.
-#' data(dummy.mbec)
-#' preRep.data <- mbecReportPrelim(input.obj=dummy.mbec,
-#' model.vars=c("batch","group"), type="clr", return.data = TRUE)
 mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
                              type="clr", file.name=NULL, file.dir=getwd(),
                              return.data = FALSE) {
@@ -126,15 +119,6 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #'
 #' @export
-#'
-#' @examples
-#' # This will return return a list of data.frames containing the results for
-#' # the ten comparative report-metrics.
-#' data(dummy.mbec)
-#' dummy.mbec <- mbecCorrection(input.obj=dummy.mbec,
-#' model.vars=c("batch","group"), method="bat", type="clr" )
-#' posRep.data <- mbecReportPost(input.obj=dummy.mbec,
-#' model.vars=c("batch","group"), type="clr", return.data = TRUE)
 mbecReportPost <- function(input.obj, model.vars=c("batch","group"),
                            type="clr", file.name=NULL, file.dir=getwd(),
                            return.data = FALSE) {

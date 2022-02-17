@@ -40,10 +40,3 @@ function will check if required covariates are present and apply
 normalization with default parameters according to chosen type, i.e., 'clr'
 (cumulative log-ratio) or 'tss' (total sum scaled).
 }
-\examples{
-# This will return return a list of data.frames containing the results for
-# the ten standard report-metrics.
-data(dummy.mbec)
-preRep.data <- mbecReportPrelim(input.obj=dummy.mbec,
-model.vars=c("batch","group"), type="clr", return.data = TRUE)
-}
