@@ -63,6 +63,7 @@ can supply their own matrices with own names.
 }
 \examples{
 # This will return the plot-frame of all features in the data-set.
+data(dummy.mbec)
 data.Box <- mbecBox(input.obj=dummy.mbec, method='ALL', model.var='batch',
 type='clr', return.data=TRUE)
 

@@ -139,6 +139,7 @@ contain the result of the respective chosen method.
 \examples{
 # This call will use 'ComBat' for batch effect correction on CLR-transformed
 # abundances and store the new counts in the 'corrections' attribute.
+data(dummy.mbec)
 study.obj <- mbecCorrection(input.obj=dummy.mbec,
 model.vars=c("batch","group"), method="bat", type="clr")
 

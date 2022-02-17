@@ -31,13 +31,14 @@ MbecData(
 \arguments{
 \item{cnt_table}{either class phyloseq or a matrix of counts}
 
-\item{meta_data}{A table with covariate information, whose row-names correspond to sample-IDs}
+\item{meta_data}{A table with covariate information, whose row-names
+correspond to sample-IDs.}
 
-\item{tax_table}{taxonomic table from phyloseq as optional input}
+\item{tax_table}{Taxonomic table from phyloseq as optional input.}
 
-\item{phy_tree}{phylogenetic tree as optional input}
+\item{phy_tree}{Phylogenetic tree as optional input.}
 
-\item{refseq}{reference sequences as optional input}
+\item{refseq}{Reference sequences as optional input.}
 
 \item{assessments}{A list for the results of BEAAs.}
 
@@ -103,9 +104,11 @@ algorithms (BECA) that produce adjusted abundance matrices.}
 \examples{
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
+data(dummy.list)
 mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 # use constructor with default parameters to create object from count-matrix
 # and meta-data table.
+data(dummy.list)
 mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 }
 \keyword{Class}

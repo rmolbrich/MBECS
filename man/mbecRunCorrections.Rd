@@ -13,15 +13,21 @@ mbecRunCorrections(
 )
 }
 \arguments{
-\item{input.obj}{phyloseq object or numeric matrix (correct orientation is handeled internally)}
+\item{input.obj}{Phyloseq object or a list that contains numeric matrix and
+meta-data table. Requires sample names as row/col-names to handle correct
+orientation.}
 
-\item{model.vars}{two covariates of interest to select by first variable selects panels and second one determines coloring}
+\item{model.vars}{Two covariates of interest to select by first variable
+selects panels and second one determines coloring.}
 
-\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.}
+\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix
+to use for evaluation.}
 
 \item{method}{algorithms to use}
 
-\item{nc.features}{(OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls}
+\item{nc.features}{(OPTIONAL) A vector of features names to be used as
+negative controls in RUV-3. If not supplied, the algorithm will use an 'lm'
+to find pseudo-negative controls}
 }
 \value{
 an object of class MbecDataSet
@@ -33,6 +39,7 @@ as matrices to the data-set.
 \examples{
 # This call will use 'ComBat' for batch effect correction and store the new
 # counts in a list-obj in the output.
+data(dummy.mbec)
 study.obj <- mbecRunCorrections(input.obj=dummy.mbec,
 model.vars=c("batch","group"), method=c("bat","bmc"))
 

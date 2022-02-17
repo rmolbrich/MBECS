@@ -30,6 +30,7 @@ and the function will do the rest.
 }
 \examples{
 # This will return NULL because it is estimable.
+data(dummy.mbec)
 eval.obj <- mbecTestModel(input.obj=dummy.mbec,
 model.vars=c("group","batch"))
 }

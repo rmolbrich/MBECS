@@ -25,6 +25,7 @@ Takes data.frame from 'mbecHeat()' and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
+data(dummy.mbec)
 heat.df <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 center=TRUE, scale=TRUE, method='TOP', n=5, return.data=TRUE)
 plot.heat <- mbecHeatPlot(tmp.cnts=heat.df[[1]],

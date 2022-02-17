@@ -29,6 +29,7 @@ for the data-set can be an MbecData-object.
 }
 \examples{
 # This will return the plot-df of the samples grouped by group and batch.
+data(dummy.mbec)
 data.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
 model.vars=c('group','batch'), return.data=TRUE)
 

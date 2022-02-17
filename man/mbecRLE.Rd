@@ -56,6 +56,7 @@ can supply their own matrices with own names.
 }
 \examples{
 # This will return the data.frame for plotting.
+data(dummy.mbec)
 data.RLE <- mbecRLE(input.obj=dummy.mbec, type="clr",
 model.vars=c('group','batch'), return.data=TRUE)
 

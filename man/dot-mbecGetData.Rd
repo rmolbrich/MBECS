@@ -58,6 +58,7 @@ lists of corrections and assessments.
 # This will return the un-transformed (OTU) abundance matrix with features as
 # columns and it will test if the columns "group" and "batch" are present in
 # the meta-data table.
+data(dummy.mbec)
 list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
     required.col=c("group","batch"), type="otu")
 

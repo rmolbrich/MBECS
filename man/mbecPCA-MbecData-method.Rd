@@ -58,6 +58,7 @@ can supply their own matrices with own names.
 }
 \examples{
 # This will return the data.frame for plotting.
+data(dummy.mbec)
 data.PCA <- mbecPCA(input.obj=dummy.mbec,
 model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 

@@ -23,6 +23,7 @@ Takes data.frame from mbecRLE and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
+data(dummy.mbec)
 rle.df <- mbecRLE(input.obj=dummy.mbec, model.vars=c('group','batch'),
 type="clr", return.data=TRUE)
 plot.rle <- mbecRLEPlot(rle.df, c('group','batch'))

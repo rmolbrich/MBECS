@@ -2,23 +2,34 @@
 % Please edit documentation in R/mbecs_reports.R
 \name{mbecReportPrelim}
 \alias{mbecReportPrelim}
-\title{Constructs an initial report of a single data-set without comparative analyses.}
+\title{Constructs an initial report of a single data-set.}
 \usage{
 mbecReportPrelim(
   input.obj,
   model.vars = c("batch", "group"),
   type = "clr",
+  file.name = NULL,
+  file.dir = getwd(),
   return.data = FALSE
 )
 }
 \arguments{
-\item{input.obj}{list of phyloseq objects to compare, first element is considered uncorrected data}
+\item{input.obj}{list of phyloseq objects to compare, first element is
+considered uncorrected data}
 
 \item{model.vars}{required covariates to build models}
 
-\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.}
+\item{type}{One of 'otu', 'tss' or 'clr' to determine the abundance matrix
+to use for evaluation.}
 
-\item{return.data}{TRUE will return a list of all produced plots, FALSE will start rendering the report}
+\item{file.name}{Optional file name, parameter defaults to NULL and template
+name will be used}
+
+\item{file.dir}{Optional output directory, parameter defaults to current
+working directory.}
+
+\item{return.data}{TRUE will return a list of all produced plots, FALSE will
+start rendering the report}
 }
 \value{
 either a ggplot2 object or a formatted data-frame to plot from
@@ -28,4 +39,11 @@ Input can be of class MbecData, phyloseq or list(counts, meta-data). The
 function will check if required covariates are present and apply
 normalization with default parameters according to chosen type, i.e., 'clr'
 (cumulative log-ratio) or 'tss' (total sum scaled).
+}
+\examples{
+# This will return return a list of data.frames containing the results for
+# the ten standard report-metrics.
+data(dummy.mbec)
+preRep.data <- mbecReportPrelim(input.obj=dummy.mbec,
+model.vars=c("batch","group"), type="clr", return.data = TRUE)
 }

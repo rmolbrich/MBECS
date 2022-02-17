@@ -31,6 +31,7 @@ model matrix)
 }
 \examples{
 # This will return the variance of random/mixed components.
+data(dummy.list)
 limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
 data=dummy.list$meta)
 list.variance <- mbecMixedVariance(model.fit=limimo)

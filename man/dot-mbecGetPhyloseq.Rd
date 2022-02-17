@@ -37,6 +37,7 @@ that specifies the name within the list of corrected matrices.
 \examples{
 # This will return a phyloseq object that contains the clr-transformed
 # abundances as otu_table
+data(dummy.mbec)
 ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
 }
 \keyword{Getter}

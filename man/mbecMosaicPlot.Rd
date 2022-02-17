@@ -21,6 +21,7 @@ Takes data.frame from mbecMosaic and produces a ggplot2 object.
 \examples{
 # This will return a paneled plot that shows results for the variance
 # assessment.
+data(dummy.mbec)
 mosaic.df <- mbecMosaic(input.obj=dummy.mbec, model.vars=c('group','batch'),
 return.data=TRUE)
 plot.mosaic <- mbecMosaicPlot(study.summary=mosaic.df,

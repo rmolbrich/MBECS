@@ -24,6 +24,7 @@ Takes data.frame from mbecBox and produces a ggplot2 object.
 \examples{
 # This will return a list of the five most variable features grouped by the
 # covariate 'batch'.
+data(dummy.mbec)
 box.df <- mbecBox(input.obj=dummy.mbec, method='TOP', n=5,
 model.var='batch', type="otu", return.data=TRUE)
 plot.box <- mbecBoxPlot(box.df[[1]], box.df[[2]], 'batch')

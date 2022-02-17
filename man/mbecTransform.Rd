@@ -36,6 +36,7 @@ names.
 \examples{
 # This will return the cumulative log-ratio transformed counts in an
 # MbecData object.
+data(dummy.mbec)
 mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="clr", offset=0,
 required.col=c("batch","group"))
 

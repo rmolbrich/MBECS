@@ -27,6 +27,7 @@ the second use-case for objects that are already of class MbecData.
 \examples{
 # This will check for the presence of variables 'group' and 'batch' in the
 # meta-data and return an object of class 'MbecData'.
+data(dummy.mbec)
 MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
     required.col=c("group","batch"))
 }

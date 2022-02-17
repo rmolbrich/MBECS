@@ -37,6 +37,7 @@ lists of corrections and assessments.
 }
 \examples{
 # This will fill the 'tss' slot with the supplied matrix.
+data(dummy.mbec, dummy.list)
 MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
     type='tss')
 

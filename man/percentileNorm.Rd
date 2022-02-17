@@ -28,6 +28,7 @@ The function returns a matrix of normalized abundances.
 \examples{
 # This will return a matrix of normalized counts, according to the covariate
 # information in meta
+data(dummy.list)
 mtx.pn_counts <- percentileNorm(cnts=dummy.list$cnts,
 meta=dummy.list$meta[,c("batch","group")])
 }

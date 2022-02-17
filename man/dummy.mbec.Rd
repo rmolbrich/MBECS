@@ -18,7 +18,7 @@ An mbecData object including tss and clr transformed counts:
 dummy.mbec
 }
 \description{
-A dataset containing pre-processed abundance table of
+A data-set containing pre-processed abundance table of
 microbial communities and a matrix of covariate information.
 }
 \keyword{datasets}

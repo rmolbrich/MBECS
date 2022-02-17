@@ -7,7 +7,7 @@
 mbecModelVariance(
   input.obj,
   model.vars = character(),
-  method = c("lm", "lmm", "rda", "pvca", "s.coef"),
+  method = "lm",
   model.form = NULL,
   type = "clr",
   label = character(),
@@ -121,6 +121,7 @@ table. Correct orientation of counts will be handled internally.
 \examples{
 # This will return a data-frame that contains the variance attributable to
 # group and batch according to linear additive model.
+data(dummy.mbec)
 df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
 model.vars=c("batch", "group"), method='lm', type='clr')
 # This will return a data-frame that contains the variance attributable to

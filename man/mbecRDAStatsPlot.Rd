@@ -24,6 +24,7 @@ display side-by-side panels to enable easy comparison.
 \examples{
 # This will return a paneled plot that shows results for three variance
 # assessments.
+data(dummy.mbec)
 df.var.rda <- mbecModelVariance(input.obj=dummy.mbec,
 model.vars=c('group','batch'), method='rda', type='clr')
 plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
