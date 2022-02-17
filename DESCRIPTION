@@ -1,6 +1,6 @@
 Package: MBECS
 Title: Evaluation and correction of batch effects in microbiome data-sets
-Version: 0.99.7
+Version: 0.99.8
 Authors@R: 
     person(given = "Michael",
        family = "Olbrich",
@@ -9,29 +9,30 @@ Authors@R:
        comment = c(ORCID = "0000-0003-2789-3382"))
 Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set of functions to evaluate and mitigate unwated noise due to processing in batches. To that end it incorporates a host of batch correcting algorithms from various packages. In addition it offers a correction and reporting pipeline that provides a preliminary look at the characteristics of a data-set before and after correcting for batch effects.
 biocViews: BatchEffect, Microbiome
+URL: https://github.com/rmolbrich/MBECS
+BugReports: https://github.com/rmolbrich/MBECS/issues/new
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 7.1.2
 Imports: 
     magrittr,
     phyloseq
 Suggests: 
     BiocStyle,
-    testthat (>= 3.0.0),
-    bapred,
+    testthat (>= 3.0.0)
+Depends: 
+    R (>= 4.1),
+    limma,
+    lme4,
+    lmerTest,
+    pheatmap,
+    rmarkdown,
+    markdown,
     cluster,
     dplyr,
     ggplot2,
     gridExtra,
-    limma,
-    lme4,
-    lmerTest,
-    pals,
-    permute,
-    pheatmap,
-    rmarkdown,
-    markdown,
     ruv,
     sva,
     tibble,
@@ -41,9 +42,8 @@ Suggests:
     stats,
     utils,
     knitr
-Depends: 
-    R (>= 4.1.0)
 Collate: 
+    'MBECS-package.R'
     'data.R'
     'mbecs_classes.R'
     'mbecs_analyses.R'
