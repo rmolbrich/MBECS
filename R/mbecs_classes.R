@@ -25,6 +25,7 @@
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
+#' data(dummy.list)
 #' mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
 MbecData <- setClass("MbecData", contains = "phyloseq",
                      slots = list(assessments="list", corrections="list",
@@ -55,10 +56,11 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #'
 #' @keywords MBECS Constructor
 #' @param cnt_table either class phyloseq or a matrix of counts
-#' @param meta_data A table with covariate information, whose row-names correspond to sample-IDs
-#' @param tax_table taxonomic table from phyloseq as optional input
-#' @param phy_tree phylogenetic tree as optional input
-#' @param refseq reference sequences as optional input
+#' @param meta_data A table with covariate information, whose row-names
+#' correspond to sample-IDs.
+#' @param tax_table Taxonomic table from phyloseq as optional input.
+#' @param phy_tree Phylogenetic tree as optional input.
+#' @param refseq Reference sequences as optional input.
 #' @param assessments A list for the results of BEAAs.
 #' @param corrections A list for the results of BECAs.
 #' @param tss Total-sum-squared features matrix.
@@ -70,100 +72,89 @@ MbecData <- setClass("MbecData", contains = "phyloseq",
 #' @examples
 #' # use constructor with default parameters to create object from count-matrix
 #' # and meta-data table.
+#' data(dummy.list)
 #' mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
-MbecData <- function( cnt_table=NULL,
-                      meta_data=NULL,
-                      tax_table=NULL,
-                      phy_tree=NULL,
-                      refseq=NULL,
-                      assessments=list(),
-                      corrections=list(),
-                      tss=NULL,
-                      clr=NULL) {
+MbecData <- function( cnt_table=NULL, meta_data=NULL, tax_table=NULL,
+                      phy_tree=NULL, refseq=NULL,
+                      assessments=list(), corrections=list(),
+                      tss=NULL, clr=NULL) {
 
     ## Make all the necessary tests for matrix-like inputs and return counts
     if( !all(apply(cnt_table, 2, is.numeric)) ) {
-      stop("All the values in your count-table need to be numeric!", call. = FALSE)
+        stop("All the values in your count-table need to be numeric!",
+             call.=FALSE)
     }
     ## check if meta is set and contains all the required columns
     if( is.null(meta_data) ) {
-      stop("You need to supply a meta-frame.", call. = FALSE)
+        stop("You need to supply a meta-frame.", call. = FALSE)
     }
-    ## check for 'sID' column and set it as row-names - or create 'sID' column from row-names
+    ## check for 'sID' column and set it as row-names - or create 'sID' column
+    # from row-names
     if( any(colnames(meta_data) %in% "sID") ) {
-      # 'sID' exists --> test if it is equal to rownames - else set as rownames
-      if( !all(meta_data[,"sID"] %in% rownames(meta_data)) ) {
-        message("sID column does not match with rownames, changing rownames to match sID column now.")
-      } # else is ok
+        # 'sID' exists -> test if it is equal to rownames - else set as rownames
+        if( !all(meta_data$sID %in% rownames(meta_data)) ) {
+            rownames(meta_data) <- meta_data$sID
+        } # else is ok
 
 
     } else {
-      # check for rownames and basically make the taxa_are_rows_check here already
-      message("No 'sID' column present, creating from rownames now.")
-      meta_data$sID <- rownames(meta_data)
+        # check for rownames and peform the taxa_are_rows_check here already
+        message("No 'sID' column present, creating from rownames now.")
+        meta_data$sID <- rownames(meta_data)
     }
 
-  # IF initialized with 'tss' or 'clr' this will ensure 'fxs' orientation
-  # DEBUG: tss and clr init needs some work but this will do for now.. I think
+    # IF initialized with 'tss' or 'clr' this will ensure 'fxs' orientation
+    # DEBUG: tss and clr init needs some work but this will do for now.. I think
 
-  if( !is.null(tss) ) {
-    ## 1. figure out orientation and adjust accordingly
-    if( all(meta_data$sID %in% colnames(tss)) ) {
-      # fxs orientation do nothing
+    if( !is.null(tss) ) {
+        ## 1. figure out orientation and adjust accordingly
+        if( all(meta_data$sID %in% colnames(tss)) ) {
+            # fxs orientation do nothing
 
-    } else if( all(meta_data$sID %in% rownames(tss)) ) {
-      # change from sxf to fxs orientation
-      tss <- t(tss)
+        } else if( all(meta_data$sID %in% rownames(tss)) ) {
+            # change from sxf to fxs orientation
+            tss <- t(tss)
 
-      } else {
-      warning("sth. is fishy with tss rotation")
-    }
-  } else {
-    tss <- matrix(0)
-  }
-
-  if( !is.null(clr) ) {
-    ## 1. figure out orientation and adjust accordingly
-    if( all(meta_data$sID %in% colnames(clr)) ) {
-      # fxs orientation do nothing
-
-    } else if( all(meta_data$sID %in% rownames(clr)) ) {
-      # change from sxf to fxs orientation
-      clr <- t(clr)
-
+        } else {
+            warning("sth. is fishy with tss rotation")
+        }
     } else {
-      warning("sth. is fishy with clr rotation")
+        tss <- matrix(0)
     }
-  } else {
-    clr <- matrix(0)
-  }
 
+    if( !is.null(clr) ) {
+        ## 1. figure out orientation and adjust accordingly
+        if( all(meta_data$sID %in% colnames(clr)) ) {
+            # fxs orientation do nothing
 
-    # check orientation of counts for phyloseq-constructor - meta_data needs to be sxf anyway (if not then FU)
+        } else if( all(meta_data$sID %in% rownames(clr)) ) {
+            # change from sxf to fxs orientation
+            clr <- t(clr)
+
+        } else {
+            warning("sth. is fishy with clr rotation")
+        }
+    } else {
+        clr <- matrix(0)
+    }
+
+    # check orientation of counts for phyloseq-constructor - meta_data needs to
+    # be sxf anyway
     if( dim(cnt_table)[1] == length(meta_data[,"sID"]) ) {
-      # taxa are columns
-      return( new("MbecData",
-                  phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows = FALSE),
-                                                                     phyloseq::sample_data(meta_data),
-                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
-                                                                     phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),
-                                                                     phyloseq::refseq(refseq, errorIfNULL = FALSE)),
-              assessments=assessments,
-              corrections=corrections,
-              tss=tss,
-              clr=clr))
+        tar <- FALSE
     } else {
-      return( new("MbecData",
-                  phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows = TRUE),
-                                                                     phyloseq::sample_data(meta_data),
-                                                                     phyloseq::tax_table(tax_table, errorIfNULL = FALSE),
-                                                                     phyloseq::phy_tree(phy_tree, errorIfNULL = FALSE),
-                                                                     phyloseq::refseq(refseq, errorIfNULL = FALSE)),
-              assessments=assessments,
-              corrections=corrections,
-              tss=tss,
-              clr=clr))
-  }
+        tar <- TRUE
+    }
+        # taxa are columns
+    return( new("MbecData",
+    phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows=eval(tar)),
+                       phyloseq::sample_data(meta_data),
+                       phyloseq::tax_table(tax_table, errorIfNULL=FALSE),
+                       phyloseq::phy_tree(phy_tree, errorIfNULL=FALSE),
+                       phyloseq::refseq(refseq, errorIfNULL=FALSE)),
+    assessments=assessments, corrections=corrections,
+    tss=tss, clr=clr))
+
 }
 
 
@@ -194,6 +185,7 @@ MbecData <- function( cnt_table=NULL,
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
+#' data(dummy.mbec, dummy.list)
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
@@ -202,9 +194,9 @@ MbecData <- function( cnt_table=NULL,
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
 setGeneric("mbecSetData", signature="input.obj",
-           function(input.obj, new.cnts=NULL, type=c("otu","ass","cor","clr","tss"),
-                    label=character())
-             standardGeneric("mbecSetData")
+           function(input.obj, new.cnts=NULL,
+                    type=c("otu","ass","cor","clr","tss"), label=character())
+               standardGeneric("mbecSetData")
 )
 
 
@@ -231,6 +223,7 @@ setGeneric("mbecSetData", signature="input.obj",
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
+#' data(dummy.mbec, dummy.list)
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
@@ -241,8 +234,8 @@ setGeneric("mbecSetData", signature="input.obj",
 setMethod("mbecSetData", "MbecData",
           function(input.obj, new.cnts=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {
-          .mbecSetData(input.obj, new.cnts=new.cnts,
-                       type=type, label=label)
+              .mbecSetData(input.obj, new.cnts=new.cnts,
+                           type=type, label=label)
           }
 )
 
@@ -270,6 +263,7 @@ setMethod("mbecSetData", "MbecData",
 #'
 #' @examples
 #' # This will fill the 'tss' slot with the supplied matrix.
+#' data(dummy.mbec, dummy.list)
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='tss')
 #'
@@ -278,61 +272,65 @@ setMethod("mbecSetData", "MbecData",
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
 .mbecSetData <- function(input.obj, new.cnts=NULL,
-                        type=c("otu","ass","cor","clr","tss"), label=character()) {
+                         type=c("otu","ass","cor","clr","tss"),
+                         label=character()) {
 
-  if( is.null(new.cnts) ) {
-    warning("Nothing to do here. Returning unchanged input.")
+    if( is.null(new.cnts) ) {
+        warning("Nothing to do here. Returning unchanged input.")
+        return(input.obj)
+    }
+
+    type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
+
+
+    if( type != "ass" ) {
+        if( !all(apply(new.cnts, 1, is.numeric)) ) {
+            stop("All the values in your count-table need to be numeric!",
+                 call.=FALSE)
+        } else if( is.null(colnames(new.cnts)) &&
+                   is.null(rownames(new.cnts)) ) {
+            stop("No col/row-names found! Not able to match to sample names.")
+        }
+    } else {
+        if( !all(apply(new.cnts, 1, is.numeric)) ) {
+            stop("All the values in your assessment vector need to be numeric!",
+                 call.=FALSE)
+        } else if( is.null(names(new.cnts)) ) {
+            stop("No col/row-names found! Not able to match to features.")
+        }
+
+    }
+
+    # 1. get sample names
+    s.names <- phyloseq::sample_names(input.obj)
+    # 2. figure out orientation and change to 'fxs' if necessary
+    if( all(s.names %in% colnames(new.cnts)) ) {
+        # fxs orientation
+        # do nothing
+
+    } else if( all(s.names %in% rownames(new.cnts)) ) {
+        # sxf orientation - rotate matrix
+        new.cnts <- t(new.cnts)
+    }
+
+    if( type == "otu" ) {
+        input.obj@otu_table <- phyloseq::otu_table(new.cnts, taxa_are_rows=TRUE)
+    } else if( type == "clr" ) {
+        input.obj@clr <- new.cnts
+    } else if( type == "tss" ) {
+        message("Set tss-transformed counts.")
+        input.obj@tss <- new.cnts
+    } else if( type == "ass" ) {
+        if( length(label) == 0 )
+            label <- paste("item",(length(input.obj@assessments)+1), sep="_")
+        input.obj@assessments[[eval(label)]] <- new.cnts
+    } else if( type == "cor" ) {
+        if( length(label) == 0 )
+            label <- paste("item",(length(input.obj@corrections)+1), sep="_")
+        input.obj@corrections[[eval(label)]] <- new.cnts
+    }
+
     return(input.obj)
-  }
-
-  type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
-
-
-  if( type != "ass" ) {
-    if( !all(apply(new.cnts, 1, is.numeric)) ) {
-      stop("All the values in your count-table need to be numeric!", call. = FALSE)
-    } else if( is.null(colnames(new.cnts)) && is.null(rownames(new.cnts)) ) {
-      stop("No col/row-names found! Not able to match to sample names.")
-    }
-  } else {
-    if( !all(apply(new.cnts, 1, is.numeric)) ) {
-      stop("All the values in your assessment vector need to be numeric!", call. = FALSE)
-    } else if( is.null(names(new.cnts)) ) {
-      stop("No col/row-names found! Not able to match to features.")
-    }
-
-  }
-
-  # 1. get sample names
-  s.names <- phyloseq::sample_names(input.obj)
-  # 2. figure out orientation and change to 'fxs' if necessary
-  if( all(s.names %in% colnames(new.cnts)) ) {
-    # fxs orientation
-    # do nothing
-
-  } else if( all(s.names %in% rownames(new.cnts)) ) {
-    # sxf orientation - rotate matrix
-    new.cnts <- t(new.cnts)
-  }
-
-  if( type == "otu" ) {
-    input.obj@otu_table <- phyloseq::otu_table(new.cnts, taxa_are_rows = TRUE)
-  } else if( type == "clr" ) {
-    input.obj@clr <- new.cnts
-  } else if( type == "tss" ) {
-    message("Set tss-transformed counts.")
-    input.obj@tss <- new.cnts
-  } else if( type == "ass" ) {
-    if( length(label) == 0 )
-      label <- paste("item",(length(input.obj@assessments)+1), sep="_")
-    input.obj@assessments[[eval(label)]] <- new.cnts
-  } else if( type == "cor" ) {
-    if( length(label) == 0 )
-      label <- paste("item",(length(input.obj@corrections)+1), sep="_")
-    input.obj@corrections[[eval(label)]] <- new.cnts
-  }
-
-  return(input.obj)
 }
 
 
@@ -380,6 +378,7 @@ setMethod("mbecSetData", "MbecData",
 #' # This will return the un-transformed (OTU) abundance matrix with features as
 #' # columns and it will test if the columns "group" and "batch" are present in
 #' # the meta-data table.
+#' data(dummy.mbec)
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
 #'     required.col=c("group","batch"), type="otu")
 #'
@@ -391,7 +390,7 @@ setMethod("mbecSetData", "MbecData",
 setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL,
                     type=c("otu","ass","cor","clr","tss"), label=character())
-             standardGeneric("mbecGetData")
+               standardGeneric("mbecGetData")
 )
 
 
@@ -436,6 +435,7 @@ setGeneric("mbecGetData", signature="input.obj",
 #' # This will return the un-transformed (OTU) abundance matrix with features as
 #' # columns and it will test if the columns "group" and "batch" are present in
 #' # the meta-data table.
+#' data(dummy.mbec)
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
 #'     required.col=c("group","batch"), type="otu")
 #'
@@ -445,64 +445,72 @@ setGeneric("mbecGetData", signature="input.obj",
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
 #'     required.col=c("group","batch"), type="clr")
 .mbecGetData <- function(input.obj, orientation="fxs", required.col=NULL,
-                         type=c("otu","ass","cor","clr","tss"), label=character()) {
+                         type=c("otu","ass","cor","clr","tss"),
+                         label=character()) {
 
-  type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
-  # in general the input should be of class phyloseq or MbecData - so just get the fields to evaluate here
-  tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL = FALSE), check.names = FALSE)
+    type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
+    # in general the input should be of class phyloseq or MbecData - so just
+    # get the fields to evaluate here
+    tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL=FALSE),
+                           check.names=FALSE)
 
-  # enable check of covariates if 'required.col' is supplied
-  if( !is.null(required.col) ) {
-    ## check if meta is set and contains all the required columns
-    if( is.null(tmp.meta) || !all(eval(required.col) %in% (colnames(tmp.meta))) ) {
-      stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
+    # enable check of covariates if 'required.col' is supplied
+    if( !is.null(required.col) ) {
+        ## check if meta is set and contains all the required columns
+        if( is.null(tmp.meta) ||
+            !all(eval(required.col) %in% (colnames(tmp.meta))) ) {
+            stop("You need to supply a meta-frame that contains the columns: ",
+                 paste(required.col, collapse=", "), call.=FALSE)
+        }
     }
-  }
 
-  if( type == "otu" ) {
-    tar <- attr(phyloseq::otu_table(input.obj), "taxa_are_rows")
-    # 1. if everything is fine
-    if( (!tar & orientation == "sxf") || (tar & orientation == "fxs") ) {
-      tmp.cnts <- data.frame(as(phyloseq::otu_table(input.obj),"matrix"), check.names = FALSE)
-    } else if( (!tar & orientation == "fxs") || (tar & orientation == "sxf") ) {
-      # if orientations do not fit - transpose count-matrix
-      tmp.cnts <- data.frame(as(t(phyloseq::otu_table(input.obj)),"matrix"), check.names = FALSE)
-    }
-  } else if( type == "clr" ) {
-    tmp.cnts <- data.frame(input.obj@clr, check.names = FALSE)
-  } else if( type == "tss" ) {
-    tmp.cnts <- data.frame(input.obj@tss, check.names = FALSE)
-  } else if( type == "ass" ) {
-    if( length(label) == 0 || !(label %in% names(input.obj@assessments)) ) {
-      message("The given matrix (label parameter) is not part of this object.
+    if( type == "otu" ) {
+        tar <- attr(phyloseq::otu_table(input.obj), "taxa_are_rows")
+        # 1. if everything is fine
+        if( (!tar & orientation == "sxf") || (tar & orientation == "fxs") ) {
+            tmp.cnts <- data.frame(as(phyloseq::otu_table(input.obj),"matrix"),
+                                   check.names=FALSE)
+        } else if( (!tar & orientation == "fxs") ||
+                   (tar & orientation == "sxf") ) {
+            # if orientations do not fit - transpose count-matrix
+            tmp.cnts <- data.frame(as(t(phyloseq::otu_table(input.obj)),
+                                      "matrix"), check.names=FALSE)
+        }
+    } else if( type == "clr" ) {
+        tmp.cnts <- data.frame(input.obj@clr, check.names=FALSE)
+    } else if( type == "tss" ) {
+        tmp.cnts <- data.frame(input.obj@tss, check.names=FALSE)
+    } else if( type == "ass" ) {
+        if( length(label) == 0 || !(label %in% names(input.obj@assessments)) ) {
+            message("The given matrix (@param label) is not part of this object.
               Returning the complete assessments list.")
-      tmp.cnts <- input.obj@assessments
-    } else {
-      tmp.cnts <- data.frame(input.obj@assessments[[eval(label)]], check.names = FALSE)
-    }
-  } else if( type == "cor" ) {
-    if( length(label) == 0 || !(label %in% names(input.obj@corrections)) ) {
-      message("The given matrix (label parameter) is not part of this object.
+            tmp.cnts <- input.obj@assessments
+        } else {
+            tmp.cnts <- data.frame(input.obj@assessments[[eval(label)]],
+                                   check.names=FALSE)
+        }
+    } else if( type == "cor" ) {
+        if( length(label) == 0 || !(label %in% names(input.obj@corrections)) ) {
+            message("The given matrix (param label) is not part of this object.
               Returning the complete corrections list.")
-      tmp.cnts <- input.obj@corrections
-    } else {
-      tmp.cnts <- data.frame(input.obj@corrections[[eval(label)]], check.names = FALSE)
+            tmp.cnts <- input.obj@corrections
+        } else {
+            tmp.cnts <- data.frame(input.obj@corrections[[eval(label)]],
+                                   check.names=FALSE)
+        }
     }
-  }
 
-  ## 1. figure out orientation and adjust accordingly
-  if( !is(tmp.cnts, "list") && (type != "otu") ) {
-    if( (all(phyloseq::sample_names(input.obj) %in% colnames(tmp.cnts))
-         && orientation == "sxf") ||
-        (all(phyloseq::sample_names(input.obj) %in% rownames(tmp.cnts))
-         && orientation == "fxs") ) {
-      tmp.cnts <- data.frame(t(tmp.cnts), check.names = FALSE)
+    ## 1. figure out orientation and adjust accordingly
+    if( !is(tmp.cnts, "list") && (type != "otu") ) {
+        if( (all(phyloseq::sample_names(input.obj) %in% colnames(tmp.cnts))
+             && orientation == "sxf") ||
+            (all(phyloseq::sample_names(input.obj) %in% rownames(tmp.cnts))
+             && orientation == "fxs") ) {
+            tmp.cnts <- data.frame(t(tmp.cnts), check.names=FALSE)
+        }
     }
-  } else {
-    # This will just return the otu object.
-  }
 
-  return(list(tmp.cnts, tmp.meta))
+    return(list(tmp.cnts, tmp.meta))
 }
 
 
@@ -547,6 +555,7 @@ setGeneric("mbecGetData", signature="input.obj",
 #' # This will return the un-transformed (OTU) abundance matrix with features as
 #' # columns and it will test if the columns "group" and "batch" are present in
 #' # the meta-data table.
+#' data(dummy.mbec)
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
 #'     required.col=c("group","batch"), type="otu")
 #'
@@ -558,8 +567,8 @@ setGeneric("mbecGetData", signature="input.obj",
 setMethod("mbecGetData", "MbecData",
           function(input.obj, orientation="fxs", required.col=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {
-            .mbecGetData(input.obj, orientation=orientation, required.col=required.col,
-                         type=type, label=label)
+              .mbecGetData(input.obj, orientation=orientation,
+                           required.col=required.col, type=type, label=label)
           }
 )
 
@@ -585,26 +594,30 @@ setMethod("mbecGetData", "MbecData",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the
 #' # meta-data and return an object of class 'MbecData'.
+#' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
            function(input.obj, required.col=NULL)
-             standardGeneric("mbecProcessInput")
+               standardGeneric("mbecProcessInput")
 )
 
 
 .mbecProcessInput <- function(input.obj, required.col=NULL) {
 
-  # check sample_data if 'required.col' is not NULL
-  # enable check of covariates if 'required.col' is supplied
-  if( !is.null(required.col) ) {
-    ## check if meta is set and contains all the required columns
-    if( is.null(phyloseq::sample_data(input.obj, errorIfNULL = FALSE)) | !all(eval(required.col) %in% (phyloseq::sample_variables(input.obj))) ) {
-      stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
+    # check sample_data if 'required.col' is not NULL
+    # enable check of covariates if 'required.col' is supplied
+    if( !is.null(required.col) ) {
+        ## check if meta is set and contains all the required columns
+        if( is.null(phyloseq::sample_data(input.obj, errorIfNULL=FALSE)) ||
+            !all(eval(required.col) %in%
+                 (phyloseq::sample_variables(input.obj))) ) {
+            stop("You need to supply a meta-frame that contains the columns: ",
+                 paste(required.col, collapse=", "), call. = FALSE)
+        }
     }
-  }
-  # If validation succeeds, just return the input unchanged.
-  return(input.obj)
+    # If validation succeeds, just return the input unchanged.
+    return(input.obj)
 }
 
 
@@ -627,11 +640,12 @@ setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the
 #' # meta-data and return an object of class 'MbecData'.
+#' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "MbecData",
           function(input.obj, required.col=NULL) {
-            .mbecProcessInput(input.obj, required.col=required.col)
+              .mbecProcessInput(input.obj, required.col=required.col)
           }
 )
 
@@ -655,28 +669,37 @@ setMethod("mbecProcessInput", "MbecData",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the
 #' # meta-data and return an object of class 'MbecData'.
-#' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
+#' data(dummy.ps)
+#' MbecData.obj <- mbecProcessInput(input.obj=dummy.ps,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "phyloseq",
-          function(input.obj, required.col=NULL) {
+    function(input.obj, required.col=NULL) {
 
-            message("DEBUG: input for mbecProcessInput is of type phyloseq.")
-            # check sample_data if 'required.col' is not NULL
-            # enable check of covariates if 'required.col' is supplied
-            if( !is.null(required.col) ) {
-              ## check if meta is set and contains all the required columns
-              if( is.null(phyloseq::sample_data(input.obj, errorIfNULL = FALSE)) | !all(eval(required.col) %in% (phyloseq::sample_variables(input.obj))) ) {
-                stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
-              }
+        # check sample_data if 'required.col' is not NULL
+        # enable check of covariates if 'required.col' is supplied
+        if( !is.null(required.col) ) {
+        ## check if meta is set and contains all the required columns
+            if( is.null(phyloseq::sample_data(input.obj, errorIfNULL=FALSE)) |
+                !all(eval(required.col) %in%
+                     (phyloseq::sample_variables(input.obj))) ) {
+                stop("Requires meta-frame that contains the columns: ",
+                     paste(required.col, collapse=", "), call.=FALSE)
             }
+        }
 
-            return.obj <- MbecData(cnt_table = phyloseq::otu_table(input.obj, taxa_are_rows = TRUE),
-                                   meta_data = phyloseq::sample_data(input.obj),
-                                   tax_table = phyloseq::tax_table(input.obj, errorIfNULL = FALSE),
-                                   phy_tree = phyloseq::phy_tree(input.obj, errorIfNULL = FALSE),
-                                   refseq = phyloseq::refseq(input.obj, errorIfNULL = FALSE))
+        return.obj <- MbecData(cnt_table=
+                                   phyloseq::otu_table(input.obj,
+                                                       taxa_are_rows=TRUE),
+                               meta_data=phyloseq::sample_data(input.obj),
+                               tax_table=
+                                   phyloseq::tax_table(input.obj,
+                                                       errorIfNULL=FALSE),
+                               phy_tree=phyloseq::phy_tree(input.obj,
+                                                           errorIfNULL=FALSE),
+                               refseq=phyloseq::refseq(input.obj,
+                                                       errorIfNULL=FALSE))
 
-            return(return.obj)
+              return(return.obj)
           }
 )
 
@@ -700,28 +723,31 @@ setMethod("mbecProcessInput", "phyloseq",
 #' @examples
 #' # This will check for the presence of variables 'group' and 'batch' in the
 #' # meta-data and return an object of class 'MbecData'.
+#' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
 setMethod("mbecProcessInput", "list",
-          function(input.obj, required.col=NULL) {
+    function(input.obj, required.col=NULL) {
+        if( length(input.obj) != 2 ) {
+            stop("Stop: Please provide an abundance-table as first element
+                 and meta-data as second element of the list.")
+        }
 
-            if( length(input.obj) != 2 ) {
-              stop("Stop: Please provide an abundance-table as first element
-                   and meta-data as second element of the list.")
-            }
-
-            # enable check of covariates if 'required.col' is supplied
-            if( !is.null(required.col) ) {
-              ## check if meta is set and contains all the required columns
-              if( is.null(input.obj[[2]]) | !all(eval(required.col) %in% (colnames(input.obj[[2]]))) ) {
-                stop("You need to supply a meta-frame that contains the columns: ", paste(required.col, collapse=", "), call. = FALSE)
+        # enable check of covariates if 'required.col' is supplied
+        if( !is.null(required.col) ) {
+            ## check if meta is set and contains all the required columns
+            if( is.null(input.obj[[2]]) | !all(eval(required.col) %in%
+                                               (colnames(input.obj[[2]]))) ) {
+                stop("You need to supply a meta-frame that contains the
+                     columns: ", paste(required.col, collapse=", "),
+                     call.=FALSE)
+                  }
               }
-            }
 
-            return.obj <- MbecData(cnt_table = input.obj[[1]],
-                                   meta_data = input.obj[[2]])
+              return.obj <- MbecData(cnt_table=input.obj[[1]],
+                                     meta_data=input.obj[[2]])
 
-            return(return.obj)
+              return(return.obj)
           }
 )
 
@@ -754,11 +780,12 @@ setMethod("mbecProcessInput", "list",
 #' @examples
 #' # This will return a phyloseq object that contains the clr-transformed
 #' # abundances as otu_table
+#' data(dummy.mbec)
 #' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
 setGeneric("mbecGetPhyloseq", signature="input.obj",
            function(input.obj, type=c("otu","cor","clr","tss"),
                     label=character())
-             standardGeneric("mbecGetPhyloseq")
+               standardGeneric("mbecGetPhyloseq")
 )
 
 
@@ -787,26 +814,30 @@ setGeneric("mbecGetPhyloseq", signature="input.obj",
 #' @examples
 #' # This will return a phyloseq object that contains the clr-transformed
 #' # abundances as otu_table
+#' data(dummy.mbec)
 #' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
-.mbecGetPhyloseq <- function(input.obj, type=c("otu","cor","clr","tss"), label=character()) {
+.mbecGetPhyloseq <- function(input.obj, type=c("otu","cor","clr","tss"),
+                             label=character()) {
 
-  # match correct argument
-  type <- match.arg(type, choices = c("otu","cor","clr","tss"))
+    # match correct argument
+    type <- match.arg(type, choices = c("otu","cor","clr","tss"))
 
-  if( type == "cor" && length(label) == 0 ) {
-    warning("For type 'cor' you need to specifiy the label-parameter.")
-    return(NULL)
-  }
-  # extract table in fxs orientation
-  table2use <- mbecGetData(input.obj, orientation = "fxs", type=eval(type), label=eval(label))[[1]]
-  # create return object of class phyloseq
-  ret.ps <- phyloseq::phyloseq(phyloseq::otu_table(table2use , taxa_are_rows = TRUE),
-                               input.obj@sam_data,
-                               input.obj@tax_table,
-                               input.obj@phy_tree,
-                               input.obj@refseq)
-  # and return
-  return(ret.ps)
+    if( type == "cor" && length(label) == 0 ) {
+        warning("For type 'cor' you need to specifiy the label-parameter.")
+        return(NULL)
+    }
+    # extract table in fxs orientation
+    table2use <- mbecGetData(input.obj, orientation = "fxs", type=eval(type),
+                             label=eval(label))[[1]]
+    # create return object of class phyloseq
+    ret.ps <- phyloseq::phyloseq(phyloseq::otu_table(table2use ,
+                                                     taxa_are_rows=TRUE),
+                                 input.obj@sam_data,
+                                 input.obj@tax_table,
+                                 input.obj@phy_tree,
+                                 input.obj@refseq)
+    # and return
+    return(ret.ps)
 }
 
 
@@ -835,11 +866,12 @@ setGeneric("mbecGetPhyloseq", signature="input.obj",
 #' @examples
 #' # This will return a phyloseq object that contains the clr-transformed
 #' # abundances as otu_table
+#' data(dummy.mbec)
 #' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
 setMethod("mbecGetPhyloseq", "MbecData",
           function(input.obj, type=c("otu","cor","clr","tss"),
                    label=character()) {
-            .mbecGetPhyloseq(input.obj, type=type, label=label)
+              .mbecGetPhyloseq(input.obj, type=type, label=label)
           }
 )
 

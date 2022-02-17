@@ -17,42 +17,46 @@
 #' @param model.form Formula for a linear model to test.
 #' @return Either NULL if everything is fine or a vector of strings that denote
 #' covariates and their respective problematic levels.
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return NULL because it is estimable.
+#' data(dummy.mbec)
 #' eval.obj <- mbecTestModel(input.obj=dummy.mbec,
 #' model.vars=c("group","batch"))
 mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
-  if( is.null(model.vars) && is.null(model.form) )
-    stop("Please supply covariates and/or model-formula.")
-  input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
+    if( is.null(model.vars) && is.null(model.form) )
+        stop("Please supply covariates and/or model-formula.")
+    input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
 
-  # 1. extract covariate information
-  tmp.meta <- mbecGetData(input.obj)[[2]]
+    # 1. extract covariate information
+    tmp.meta <- mbecGetData(input.obj)[[2]]
 
-  # 2. check if model-formula was supplied
-  if( is.null(model.form) || !is(model.form, "formula") ) {
-    # construct linear model from covariates
-    message("Construct lm-formula from covariates.")
+    # 2. check if model-formula was supplied
+    if( is.null(model.form) || !is(model.form, "formula") ) {
+        # construct linear model from covariates
+        message("Construct lm-formula from covariates.")
 
-    model.form <- stats::as.formula(paste("y", " ~ ", paste(model.vars,
-                                                           collapse = " + ")))
-  }
-  # if model.form is complete --> remove LHS
-  if( length(model.form) == 3 ) model.form <- model.form[-2]
+        model.form <- stats::as.formula(paste("y", " ~ ",
+                                              paste(model.vars,
+                                                    collapse=" + ")))
+    }
+    # if model.form is complete --> remove LHS
+    if( length(model.form) == 3 ) model.form <- model.form[-2]
 
-  # create model matrix from RHS
-  model.mtx <- stats::model.matrix(model.form, tmp.meta)
+    # create model matrix from RHS
+    model.mtx <- stats::model.matrix(model.form, tmp.meta)
 
-  res.est <- limma::nonEstimable(model.mtx)
+    res.est <- limma::nonEstimable(model.mtx)
 
-  if( !is.null(res.est) ) {
-    message("There is a problem with the estimatibility of your model.
-            Check out covariate: ", paste("'",res.est, "'", sep="", collapse=", "))
-  }
-  return(res.est)
+    if( !is.null(res.est) ) {
+        message("There is a problem with the estimatibility of your model.
+            Check out covariate: ", paste("'",res.est, "'", sep="",
+                                          collapse=", "))
+    }
+    return(res.est)
 }
 
 
@@ -68,7 +72,7 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
 #' @param input Any string whose first letter should be capitalized.
 #' @return Input with first letter capitalized
 mbecUpperCase <- function(input=character()) {
-  return(gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",input,perl = TRUE))
+    return(gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",input,perl = TRUE))
 }
 
 
@@ -99,57 +103,63 @@ mbecUpperCase <- function(input=character()) {
 #' 'cor' was selected as type.
 #' @return A vector of fdr corrected p-values that show significance of
 #' treatment for every feature
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return p-value for the linear model fit of every feature.
+#' data(dummy.mbec)
 #' val.score <- mbecLM(input.obj=dummy.mbec, model.vars=c("batch","group"),
 #' method="lm")
-mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"), type="clr", label=character()) {
-  # ToDo: standard model is '~group+batch' but maybe an alternative mode is nice
-  #       alternative correction methods
-  #       auto mode selection procedure --> detect unbalanced design?!
+mbecLM <- function(input.obj, method=c("lm","lmm"),
+                   model.vars=c("batch","group"), type="clr",
+                   label=character()) {
 
-  type <- match.arg(type, choices = c("otu","clr","tss","cor"))
-  ## check and prepare inputs
-  input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.vars), type=eval(type), label=eval(label))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    type <- match.arg(type, choices = c("otu","clr","tss","cor"))
+    ## check and prepare inputs
+    input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
+    tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                       required.col = eval(model.vars), type=eval(type),
+                       label=eval(label))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  if( method == "auto" ) {
-    # ToDo: sth.
-    message("This feature is supposed to detect unbalanced designs and select lmm instead of lm. Alas, it has not been implemented and doesn't do jack-shit so far.")
+    if( method == "auto" ) {
+        # ToDo: sth.
+        message("This feature is supposed to detect unbalanced designs and
+                select lmm instead of lm. Alas, it has not been implemented.")
 
-  } else if( method == "lm" ) {
-    # fit lm to every feature with treatment and batch as as model parameters
-    # then extract p-value for treatment
-    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y){
-      nc.lm <- stats::lm(y ~ get(model.vars[1]) + get(model.vars[2]), data = tmp.meta)
-      nc.lm.summary <- summary(nc.lm)
-      # extract p-value of group (treatment)
-      p <- nc.lm.summary$coefficients[2,4]
-    })
+    } else if( method == "lm" ) {
+        # fit lm to every feature with treatment and batch as as model parameters
+        # then extract p-value for treatment
+        tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y){
+            nc.lm <- stats::lm(y ~ get(model.vars[1]) + get(model.vars[2]),
+                               data=tmp.meta)
+            nc.lm.summary <- summary(nc.lm)
+            # extract p-value of group (treatment)
+            p <- nc.lm.summary$coefficients[2,4]
+        })
 
-  } else if( method == "lmm" ) {
-    # overkill, but just keep it for now
-    f.terms <- paste("(1|",model.vars[1],")", sep="")
+    } else if( method == "lmm" ) {
+        # overkill, but just keep it for now
+        f.terms <- paste("(1|",model.vars[1],")", sep="")
 
-    tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y) {
-      # FixMe: one-off formula construction should also work, but i'm in no mood to break stuff right now
-      tmp.formula <- stats::as.formula(paste(paste("y", model.vars[-1], sep=" ~ "), paste(f.terms[], collapse=" + "), sep=" + "))
-      nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula), data = tmp.meta)))
-      nc.lmm.summary <- summary(nc.lmm)
-      p <- nc.lmm.summary$coefficients[2,5]
+        tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y) {
+            tmp.formula <- stats::as.formula(paste(
+                paste("y", model.vars[-1], sep=" ~ "), paste(f.terms[],
+                                                             collapse=" + "),
+                sep=" + "))
+            nc.lmm <- eval(bquote(lmerTest::lmer(.(tmp.formula),
+                                                 data=tmp.meta)))
+            nc.lmm.summary <- summary(nc.lmm)
+            p <- nc.lmm.summary$coefficients[2,5]
+        })
+    }
 
-    })
-  }
+    # correct for multiple testing
+    tmp.group.p <- stats::p.adjust(tmp.group.p, method = 'fdr')
 
-  # correct for multiple testing
-  tmp.group.p <- stats::p.adjust(tmp.group.p, method = 'fdr')
-
-  return(tmp.group.p)
+    return(tmp.group.p)
 }
 
 
@@ -183,6 +193,7 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 #' @examples
 #' # This will return the cumulative log-ratio transformed counts in an
 #' # MbecData object.
+#' data(dummy.mbec)
 #' mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="clr", offset=0,
 #' required.col=c("batch","group"))
 #'
@@ -191,32 +202,32 @@ mbecLM <- function(input.obj, method=c("lm","lmm"), model.vars=c("batch","group"
 #' required.col=c("batch","group"))
 mbecTransform <- function(input.obj, method = "clr",
                           offset = 0, required.col=NULL) {
-  ## 00. Check if 'method' was chosen correctly and get optional arguments
-  method <- match.arg(method, choices = c("clr","tss"))
-  ## VALIDATE input and change to 'MbecData' if needed
-  input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
+    ## 00. Check if 'method' was chosen correctly and get optional arguments
+    method <- match.arg(method, choices = c("clr","tss"))
+    ## VALIDATE input and change to 'MbecData' if needed
+    input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 
-  ## needs sxf orientation
-  tmp <- mbecGetData(input.obj, orientation="sxf", type="otu")
+    ## needs sxf orientation
+    tmp <- mbecGetData(input.obj, orientation="sxf", type="otu")
 
-  if( method == "clr" ) {
+    if( method == "clr" ) {
 
-    tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
-    # rebuild sample AND feature names for reassembly
-    colnames(tmp.cnts) <- colnames(tmp[[1]])
-    rownames(tmp.cnts) <- rownames(tmp[[1]])
+        tmp.cnts <- mbecCLR(tmp[[1]], offset = offset)
+        # rebuild sample AND feature names for reassembly
+        colnames(tmp.cnts) <- colnames(tmp[[1]])
+        rownames(tmp.cnts) <- rownames(tmp[[1]])
 
-    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr")
-  } else if( method == "tss" ) {
-    tmp.cnts <- t(apply(tmp[[1]], 1, function(x){x/sum(x)}))
-    # rebuild sample AND feature names for reassembly
-    colnames(tmp.cnts) <- colnames(tmp[[1]])
-    rownames(tmp.cnts) <- rownames(tmp[[1]])
+        input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="clr")
+    } else if( method == "tss" ) {
+        tmp.cnts <- t(apply(tmp[[1]], 1, function(x){x/sum(x)}))
+        # rebuild sample AND feature names for reassembly
+        colnames(tmp.cnts) <- colnames(tmp[[1]])
+        rownames(tmp.cnts) <- rownames(tmp[[1]])
 
-    input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="tss")
-  }
+        input.obj <- mbecSetData(input.obj, new.cnts=tmp.cnts, type="tss")
+    }
 
-  return(input.obj)
+    return(input.obj)
 }
 
 
@@ -235,39 +246,42 @@ mbecTransform <- function(input.obj, method = "clr",
 #' @param meta Data-frame of covariate columns, first column contains batches,
 #' second column contains grouping.
 #' @return Numeric matrix of corrected/normalized counts.
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return a matrix of normalized counts, according to the covariate
 #' # information in meta
+#' data(dummy.list)
 #' mtx.pn_counts <- percentileNorm(cnts=dummy.list$cnts,
 #' meta=dummy.list$meta[,c("batch","group")])
 percentileNorm <- function(cnts, meta) {
 
-  ref.group <- levels(meta[,2])[1]
-  message("Group ",ref.group, " is considered control group, i.e., reference
+    ref.group <- levels(meta[,2])[1]
+    message("Group ",ref.group, " is considered control group, i.e., reference
           for normalization procedure. To change reference please 'relevel()'
           grouping factor accordingly.")
 
-  norm.cnts <- cnts; norm.cnts[,] <- NA
+    norm.cnts <- cnts; norm.cnts[,] <- NA
 
-  # for every batch
-  for( b.idx in levels(meta[,1]) ) {
-    # for every feature
-    for( f.idx in seq_len(ncol(cnts)) ) {
-      # which are the control-group values
-      ctrl.group.vec <- cnts[which((meta[,2] %in% ref.group) &
-                                   (meta[,1] %in% b.idx)), f.idx]
-      # for every sample in the batch
-      for( s.idx in which(meta[,1] %in% b.idx) ) {
-        # call 'poscore' and get normalized value
-        norm.cnts[s.idx, f.idx] <- poscore(ctrl.group.vec, cnts[s.idx, f.idx],
-                                           "mean")
-      }
+    # for every batch
+    for( b.idx in levels(meta[,1]) ) {
+        # for every feature
+        for( f.idx in seq_len(ncol(cnts)) ) {
+            # which are the control-group values
+            ctrl.group.vec <- cnts[which((meta[,2] %in% ref.group) &
+                                             (meta[,1] %in% b.idx)), f.idx]
+            # for every sample in the batch
+            for( s.idx in which(meta[,1] %in% b.idx) ) {
+                # call 'poscore' and get normalized value
+                norm.cnts[s.idx, f.idx] <- poscore(ctrl.group.vec,
+                                                   cnts[s.idx, f.idx],
+                                                   "mean")
+            }
+        }
     }
-  }
-  return(norm.cnts)
+    return(norm.cnts)
 }
 
 
@@ -297,6 +311,7 @@ percentileNorm <- function(cnts, meta) {
 #' @param type One of 'rank', 'weak', 'strict' or 'mean' to determine how the
 #' score is calculated.
 #' @return A score for given count in relation to reference counts.
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
@@ -306,26 +321,26 @@ percentileNorm <- function(cnts, meta) {
 #' val.score <- poscore(cnt.vec=runif(100, min=0, max=100), cnt=42,
 #' type="strict")
 poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
-  # check argument
-  type <- match.arg(type)
-  # get number of cnts
-  n <- length(cnt.vec)
+    # check argument
+    type <- match.arg(type)
+    # get number of cnts
+    n <- length(cnt.vec)
 
-  # if nothing to compare to, then return max value
-  if( n == 0 ) {
-    return(100)
+    # if nothing to compare to, then return max value
+    if( n == 0 ) {
+        return(100)
 
-  } else {
-    left <- sum(cnt.vec < cnt)
-    right <- sum(cnt.vec <= cnt)
+    } else {
+        left <- sum(cnt.vec < cnt)
+        right <- sum(cnt.vec <= cnt)
 
-    pos <- switch(type,
-                  rank = (right + left + ifelse(right > left, 1, 0)) * 50/n,
-                  weak = right / n*100,
-                  strict = left / n*100,
-                  mean = (right + left) * 50/n)
-  }
-  return(pos)
+        pos <- switch(type,
+                      rank = (right + left + ifelse(right > left, 1, 0)) * 50/n,
+                      weak = right / n*100,
+                      strict = left / n*100,
+                      mean = (right + left) * 50/n)
+    }
+    return(pos)
 }
 
 
@@ -342,29 +357,29 @@ poscore <- function( cnt.vec, cnt, type=c("rank","weak","strict","mean") ) {
 #' @return A matrix of transformed counts of same size and orientation as the
 #' input.
 mbecCLR <- function(input.mtx, offset = 0) {
-  if( dim(input.mtx)[2] < 2 ) {
-    message("No basis for transformation. Matrix contains less than 2 features,
-            returning unchanged.")
-    return(input.mtx)
-  }
-  # 1. stop for negative values and NAs
-  if( any(input.mtx < 0 | is.na(input.mtx)) ) {
-    stop("Examine your data for NAs and negative values, CLR transformation
+    if( dim(input.mtx)[2] < 2 ) {
+        message("No basis for transformation. Matrix contains less than 2
+                features, returning unchanged.")
+        return(input.mtx)
+    }
+    # 1. stop for negative values and NAs
+    if( any(input.mtx < 0 | is.na(input.mtx)) ) {
+        stop("Examine your data for NAs and negative values, CLR transformation
          requires complete positive values.\n")
-  }
-  if( any(input.mtx==0) & offset==0 ) {
-    message("Found zeros, function will add a small pseudo-count (1/#features)
-            to enable log-ratio transformation.")
-    offset <- 1/ncol(input.mtx)
-  }
-  # add the offset
-  input.mtx <- input.mtx + offset
-  # 1: geometric-mean is n-th root of the product of all values for a sample
-  gman <- apply(input.mtx, 1, function(s.row) exp(mean(log(s.row))))
-  # 2: clr(mtx) <- [ ln(x_sample.i / geometric-mean(x_sample.i))]
-  input.mtx <- log((input.mtx / gman))
+    }
+    if( any(input.mtx==0) & offset==0 ) {
+        message("Found zeros, function will add a small pseudo-count
+                (1/#features) for log-ratio transformation.")
+        offset <- 1/ncol(input.mtx)
+    }
+    # add the offset
+    input.mtx <- input.mtx + offset
+    # 1: geometric-mean is n-th root of the product of all values for a sample
+    gman <- apply(input.mtx, 1, function(s.row) exp(mean(log(s.row))))
+    # 2: clr(mtx) <- [ ln(x_sample.i / geometric-mean(x_sample.i))]
+    input.mtx <- log((input.mtx / gman))
 
-  return(input.mtx)
+    return(input.mtx)
 }
 
 

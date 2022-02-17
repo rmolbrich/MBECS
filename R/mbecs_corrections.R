@@ -6,18 +6,26 @@
 #' as matrices to the data-set.
 #'
 #' @keywords Batch-Effect Correction Pipeline
-#' @param input.obj phyloseq object or numeric matrix (correct orientation is handeled internally)
-#' @param model.vars two covariates of interest to select by first variable selects panels and second one determines coloring
-#' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix to use for evaluation.
+#' @param input.obj Phyloseq object or a list that contains numeric matrix and
+#' meta-data table. Requires sample names as row/col-names to handle correct
+#' orientation.
+#' @param model.vars Two covariates of interest to select by first variable
+#' selects panels and second one determines coloring.
+#' @param type One of 'otu', 'tss' or 'clr' to determine the abundance matrix
+#' to use for evaluation.
 #' @param method algorithms to use
-#' @param nc.features (OPTIONAL) A vector of features names to be used as negative controls in RUV-3. If not supplied, the algorithm will use an 'lm' to find pseudo-negative controls
+#' @param nc.features (OPTIONAL) A vector of features names to be used as
+#' negative controls in RUV-3. If not supplied, the algorithm will use an 'lm'
+#' to find pseudo-negative controls
 #' @return an object of class MbecDataSet
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This call will use 'ComBat' for batch effect correction and store the new
 #' # counts in a list-obj in the output.
+#' data(dummy.mbec)
 #' study.obj <- mbecRunCorrections(input.obj=dummy.mbec,
 #' model.vars=c("batch","group"), method=c("bat","bmc"))
 #'
@@ -25,30 +33,32 @@
 #' # and replace the old count matrix.
 #' study.obj <- mbecRunCorrections(dummy.mbec, model.vars=c("batch","group"),
 #' method=c("pn"))
-mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"), type="clr",
-                           method=c("ruv3","bmc","bat","rbe","pn","svd"),
-                           nc.features=NULL) {
+mbecRunCorrections <- function(input.obj,
+                               model.vars=c("batch","group"), type="clr",
+                               method=c("ruv3","bmc","bat","rbe","pn","svd"),
+                               nc.features=NULL) {
 
-  input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
+    input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
-  if( all(dim(input.obj@clr) == 1) )
-    input.obj <- mbecTransform(input.obj, method="clr")
+    if( all(dim(input.obj@clr) == 1) )
+        input.obj <- mbecTransform(input.obj, method="clr")
 
-  if( all(dim(input.obj@tss) == 1) )
-    input.obj <- mbecTransform(input.obj, method="tss")
+    if( all(dim(input.obj@tss) == 1) )
+        input.obj <- mbecTransform(input.obj, method="tss")
 
-  for( m.idx in method ) {
-    if( m.idx == "pn" ) {
-      # because percentile norm is supposed to run on total sum scaled data
-      input.obj <- mbecCorrection(input.obj = input.obj, method = "pn",
-                                  type="tss")
-    } else {
-      input.obj <- mbecCorrection(input.obj = input.obj, method = eval(m.idx),
-                                  type=eval(type))
+    for( m.idx in method ) {
+        if( m.idx == "pn" ) {
+            # because percentile norm is supposed to run on tss data
+            input.obj <- mbecCorrection(input.obj = input.obj,
+                                        method = "pn", type="tss")
+        } else {
+            input.obj <- mbecCorrection(input.obj = input.obj, type=eval(type),
+                                        method=eval(m.idx),
+                                        nc.features=eval(nc.features))
+        }
     }
-  }
 
-  return(input.obj)
+    return(input.obj)
 
 }
 
@@ -170,12 +180,14 @@ mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"), type="c
 #' negative controls in RUV-2/3/4. If not supplied, the algorithm will use a
 #' linear model to find pseudo-negative controls
 #' @return An updated object of class MbecData.
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This call will use 'ComBat' for batch effect correction on CLR-transformed
 #' # abundances and store the new counts in the 'corrections' attribute.
+#' data(dummy.mbec)
 #' study.obj <- mbecCorrection(input.obj=dummy.mbec,
 #' model.vars=c("batch","group"), method="bat", type="clr")
 #'
@@ -187,64 +199,65 @@ mbecRunCorrections <- function(input.obj, model.vars=c("batch","group"), type="c
 mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
                            method, type="clr", nc.features=NULL) {
 
-  input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
+    input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
-  ##  Check if 'method' was chosen correctly.
-  method <- match.arg(method, choices = c("lm","lmm","sva","ruv2","ruv4","ruv3",
-                                          "bmc","bat","rbe","pn","svd"))
-  ## START WITH ASSESSMENT METHODS
-  if( method == "lm" ) {
-    message("Applying Linear Model (LM) to account for batch-effects.")
-    res.assess <- mbecLM(input.obj = input.obj, method = "lm",
-                         model.vars=model.vars,
-                         type=eval(type))
-  } else if( method == "lmm" ) {
-    message("Applying Linear Mixed Model (LMM) to account for batch-effects.")
-    res.assess <- mbecLM(input.obj = input.obj, method = "lmm",
-                          model.vars=model.vars,
-                          type=eval(type))
-  } else if( method == "sva" ) {
-    res.assess <- mbecSVA(input.obj, model.vars,
-                          type=eval(type))
-  } else if( method == "ruv2" ) {
-    res.assess <- mbecRUV2(input.obj, model.vars,
-                           type=eval(type), nc.features)
-  } else if( method == "ruv4" ) {
-    res.assess <- mbecRUV4(input.obj, model.vars,
-                           type=eval(type), nc.features)
-    ## CORRECTION METHODS FROM HERE
-  } else if( method == "ruv3" ) {
-    res.correct <- mbecRUV3(input.obj, model.vars,
-                            type=eval(type), nc.features)
-  } else if( method == "bmc" ) {
-    res.correct <- mbecBMC(input.obj, model.vars,
-                           type=eval(type))
-  } else if( method == "bat" ) {
-    res.correct <- mbecBat(input.obj, model.vars,
-                           type=eval(type))
-  } else if( method == "rbe" ) {
-    res.correct <- mbecRBE(input.obj, model.vars,
-                           type=eval(type))
-  } else if( method == "pn" ) {
-    # !This is supposed to work on TSS counts
-    res.correct <- mbecPN(input.obj, model.vars,
-                          type=eval(type))
-  } else if( method == "svd" ) {
-    res.correct <- mbecSVD(input.obj, model.vars,
-                           type=eval(type))
-  }
+    ##  Check if 'method' was chosen correctly.
+    method <- match.arg(method,
+                        choices = c("lm","lmm","sva","ruv2","ruv4","ruv3",
+                                    "bmc","bat","rbe","pn","svd"))
+    ## START WITH ASSESSMENT METHODS
+    if( method == "lm" ) {
+        message("Applying Linear Model (LM).")
+        res.assess <- mbecLM(input.obj = input.obj, method = "lm",
+                             model.vars=model.vars,
+                             type=eval(type))
+    } else if( method == "lmm" ) {
+        message("Applying Linear Mixed Model (LMM)")
+        res.assess <- mbecLM(input.obj = input.obj, method = "lmm",
+                             model.vars=model.vars,
+                             type=eval(type))
+    } else if( method == "sva" ) {
+        res.assess <- mbecSVA(input.obj, model.vars,
+                              type=eval(type))
+    } else if( method == "ruv2" ) {
+        res.assess <- mbecRUV2(input.obj, model.vars,
+                               type=eval(type), nc.features)
+    } else if( method == "ruv4" ) {
+        res.assess <- mbecRUV4(input.obj, model.vars,
+                               type=eval(type), nc.features)
+        ## CORRECTION METHODS FROM HERE
+    } else if( method == "ruv3" ) {
+        res.correct <- mbecRUV3(input.obj, model.vars,
+                                type=eval(type), nc.features)
+    } else if( method == "bmc" ) {
+        res.correct <- mbecBMC(input.obj, model.vars,
+                               type=eval(type))
+    } else if( method == "bat" ) {
+        res.correct <- mbecBat(input.obj, model.vars,
+                               type=eval(type))
+    } else if( method == "rbe" ) {
+        res.correct <- mbecRBE(input.obj, model.vars,
+                               type=eval(type))
+    } else if( method == "pn" ) {
+        # !This is supposed to work on TSS counts
+        res.correct <- mbecPN(input.obj, model.vars,
+                              type=eval(type))
+    } else if( method == "svd" ) {
+        res.correct <- mbecSVD(input.obj, model.vars,
+                               type=eval(type))
+    }
 
-  ## figure out where to put the result
-  if( method %in% c("lm","lmm","sva","ruv2","ruv4") ) {
-    return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.assess,
-                              type = "ass", label = eval(method))
-  } else if( method %in% c("ruv3","bmc","bat","rbe","pn", "svd") ) {
-    return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.correct,
-                              type = "cor", label = eval(method))
-  }
+    ## figure out where to put the result
+    if( method %in% c("lm","lmm","sva","ruv2","ruv4") ) {
+        return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.assess,
+                                  type = "ass", label = eval(method))
+    } else if( method %in% c("ruv3","bmc","bat","rbe","pn", "svd") ) {
+        return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.correct,
+                                  type = "cor", label = eval(method))
+    }
 
-  return(return.obj)
-  ## Point of no return. *badum tsss*
+    return(return.obj)
+    ## Point of no return. *badum tsss*
 }
 
 
@@ -271,28 +284,29 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
 #' 'clr'.
 #' @return A vector of p-values that indicate significance of the batch-effect
 #' for the features.
+#'
 #' @include mbecs_classes.R
 mbecSVA <- function(input.obj, model.vars, type="clr") {
 
-  message("Applying Surrogate Variable Analysis (SVA) to account for batch-effects.")
-  # this should only match the uncorrected abundance matrices
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj=input.obj, orientation = "fxs", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    message("Applying Surrogate Variable Analysis (SVA).")
+    # this should only match the uncorrected abundance matrices
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj=input.obj, orientation="fxs", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]])
-  tmp.mod0 <- stats::model.matrix( ~ 1, data=tmp.meta[[model.vars[1]]])
-  tmp.sva.n <- sva::num.sv(dat = as.matrix(tmp.cnts), mod = tmp.mod)
-  tmp.sva <- sva::sva(as.matrix(tmp.cnts), tmp.mod, tmp.mod0, n.sv = tmp.sva.n)
+    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[1]]])
+    tmp.mod0 <- stats::model.matrix( ~ 1, data=tmp.meta[[model.vars[1]]])
+    tmp.sva.n <- sva::num.sv(dat = as.matrix(tmp.cnts), mod = tmp.mod)
+    tmp.sva <- sva::sva(as.matrix(tmp.cnts), tmp.mod, tmp.mod0, n.sv=tmp.sva.n)
 
-  message("Number of significant surrogate variables is: ", tmp.sva$n.sv)
-  # do sth. that I have to understand yet
-  tmp.mod.bat <- cbind(tmp.mod, tmp.sva$sv)
-  tmp.mod0.bat <- cbind(tmp.mod0, tmp.sva$sv)
-  tmp.sva.trt_p <- sva::f.pvalue(as.matrix(tmp.cnts), tmp.mod.bat, tmp.mod0.bat)
-  tmp.sva.trt_adjp <- stats::p.adjust(tmp.sva.trt_p, method = 'fdr')
+    message("Number of significant surrogate variables is: ", tmp.sva$n.sv)
+    # do sth. that I have to understand yet
+    tmp.mod.ba <- cbind(tmp.mod, tmp.sva$sv)
+    tmp.mod0.ba <- cbind(tmp.mod0, tmp.sva$sv)
+    tmp.sva.trt_p <- sva::f.pvalue(as.matrix(tmp.cnts), tmp.mod.ba, tmp.mod0.ba)
+    tmp.sva.trt_adjp <- stats::p.adjust(tmp.sva.trt_p, method = 'fdr')
 
-  return(tmp.sva.trt_adjp)
+    return(tmp.sva.trt_adjp)
 }
 
 
@@ -327,31 +341,34 @@ mbecSVA <- function(input.obj, model.vars, type="clr") {
 #' to find pseudo-negative controls
 #' @return A vector of p-values that indicate significance of the batch-effect
 #' for the features.
+#'
 #' @include mbecs_classes.R
 mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    type <- match.arg(type, choices=c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  ## check for neg. controls or generate pseudo negatives
-  if( !is.null(nc.features) ) {
-    tmp.nc <- colnames(tmp.cnts) %in% nc.features
-    names(tmp.nc) <- colnames(tmp.cnts)
-  } else {
-    message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
-    tmp.nc <- tmp.group.p > 0.05
-  }
+    ## check for neg. controls or generate pseudo negatives
+    if( !is.null(nc.features) ) {
+        tmp.nc <- colnames(tmp.cnts) %in% nc.features
+        names(tmp.nc) <- colnames(tmp.cnts)
+    } else {
+        message("No negative control features provided.
+                Using pseudo-negative controls.")
+        tmp.group.p <- mbecLM(input.obj=input.obj, method="lm",
+                              model.vars=model.vars, type=eval(type))
+        tmp.nc <- tmp.group.p > 0.05
+    }
 
-  message("Applying Remove Unwanted Variantion v2 (RUV-II) for batch-correction.")
-  tmp.ruv2 <- ruv::RUV2(Y = tmp.cnts, X = tmp.meta[[model.vars[1]]],
-                        ctl = tmp.nc, k = 3) # k is subjective
+    message("Applying Remove Unwanted Variantion v2 (RUV-II).")
+    tmp.ruv2 <- ruv::RUV2(Y = tmp.cnts, X = tmp.meta[[model.vars[1]]],
+                          ctl = tmp.nc, k = 3) # k is subjective
 
-  tmp.ruv2.trt_p <- tmp.ruv2$p
-  tmp.ruv2.trt_adjp <- stats::p.adjust(tmp.ruv2.trt_p, method="fdr")
+    tmp.ruv2.trt_p <- tmp.ruv2$p
+    tmp.ruv2.trt_adjp <- stats::p.adjust(tmp.ruv2.trt_p, method="fdr")
 
-  return(tmp.ruv2.trt_adjp)
+    return(tmp.ruv2.trt_adjp)
 }
 
 
@@ -381,31 +398,34 @@ mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' to find pseudo-negative controls
 #' @return A vector of p-values that indicate significance of the batch-effect
 #' for the features.
+#'
 #' @include mbecs_classes.R
 mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  ## check for neg. controls or generate pseudo negatives
-  if( !is.null(nc.features) ) {
-    tmp.nc <- colnames(tmp.cnts) %in% nc.features
-    names(tmp.nc) <- colnames(tmp.cnts)
-  } else {
-    message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
-    tmp.nc <- tmp.group.p > 0.05
-  }
+    ## check for neg. controls or generate pseudo negatives
+    if( !is.null(nc.features) ) {
+        tmp.nc <- colnames(tmp.cnts) %in% nc.features
+        names(tmp.nc) <- colnames(tmp.cnts)
+    } else {
+        message("No negative control features provided.
+                Using pseudo-negative controls.")
+        tmp.group.p <- mbecLM(input.obj=input.obj, method="lm",
+                              model.vars=model.vars, type=eval(type))
+        tmp.nc <- tmp.group.p > 0.05
+    }
 
-  message("Applying Remove Unwanted Variantion v4 (RUV-IV) for batch-correction.")
-  tmp.k <- ruv::getK(Y = tmp.cnts, X = tmp.meta$group, ctl = tmp.nc)
-  tmp.k <- ifelse(tmp.k$k !=0, tmp.k$k, 1)
+    message("Applying Remove Unwanted Variantion v4 (RUV-IV).")
+    tmp.k <- ruv::getK(Y=tmp.cnts, X=tmp.meta$group, ctl=tmp.nc)
+    tmp.k <- ifelse(tmp.k$k !=0, tmp.k$k, 1)
 
-  tmp.ruv4 <- ruv::RUV4(Y = tmp.cnts, X = tmp.meta$group, ctl = tmp.nc, k = tmp.k)
-  tmp.ruv4.trt_p <- tmp.ruv4$p
-  tmp.ruv4.trt_adjp <- stats::p.adjust(tmp.ruv4.trt_p, method="fdr")
+    tmp.ruv4 <- ruv::RUV4(Y=tmp.cnts, X=tmp.meta$group, ctl=tmp.nc, k=tmp.k)
+    tmp.ruv4.trt_p <- tmp.ruv4$p
+    tmp.ruv4.trt_adjp <- stats::p.adjust(tmp.ruv4.trt_p, method="fdr")
 
-  return(tmp.ruv4.trt_adjp)
+    return(tmp.ruv4.trt_adjp)
 }
 
 
@@ -431,36 +451,40 @@ mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' negative controls in RUV-3. If not supplied, the algorithm will use an 'lm'
 #' to find pseudo-negative controls
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  ## check for neg. controls or generate pseudo negatives
-  if( !is.null(nc.features) ) {
-    tmp.nc <- colnames(tmp.cnts) %in% nc.features
-    names(tmp.nc) <- colnames(tmp.cnts)
-  } else {
-    message("No negative control features provided. Using pseudo-negative controls.")
-    tmp.group.p <- mbecLM(input.obj = input.obj, method = "lm", model.vars=model.vars, type=eval(type))
-    tmp.nc <- tmp.group.p > 0.9
-  }
+    ## check for neg. controls or generate pseudo negatives
+    if( !is.null(nc.features) ) {
+        tmp.nc <- colnames(tmp.cnts) %in% nc.features
+        names(tmp.nc) <- colnames(tmp.cnts)
+    } else {
+        message("No negative control features provided.
+                Using pseudo-negative controls.")
+        tmp.group.p <- mbecLM(input.obj=input.obj, method="lm",
+                              model.vars=model.vars, type=eval(type))
+        tmp.nc <- tmp.group.p > 0.9
+    }
 
-  message("Applying Remove Unwanted Variantion v3 (RUV-III) for batch-correction.")
-  tmp.replicate <- tmp.meta$replicate
-  if( length(tmp.replicate) == length(unique(tmp.replicate)) ) {
-    warning("No technical replicates found. RUV-3 is not available for this data-set!")
-    return(NULL)
-  } else {
-    tmp.replicate.matrix <- ruv::replicate.matrix(tmp.replicate)
-  }
+    message("Applying Remove Unwanted Variantion v3 (RUV-III).")
+    tmp.replicate <- tmp.meta$replicate
+    if( length(tmp.replicate) == length(unique(tmp.replicate)) ) {
+        warning("No technical replicates found. RUV-3 is not available!")
+        return(NULL)
+    } else {
+        tmp.replicate.matrix <- ruv::replicate.matrix(tmp.replicate)
+    }
 
-  corrected.cnts <- ruv::RUVIII(Y = tmp.cnts, M = tmp.replicate.matrix, ctl = tmp.nc)
-  rownames(corrected.cnts) <- rownames(tmp.cnts)
+    corrected.cnts <- ruv::RUVIII(Y=tmp.cnts, M=tmp.replicate.matrix,
+                                  ctl=tmp.nc)
+    rownames(corrected.cnts) <- rownames(tmp.cnts)
 
-  return(corrected.cnts)
+    return(corrected.cnts)
 }
 
 
@@ -483,27 +507,31 @@ mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr'.
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecBMC <- function(input.obj, model.vars, type="clr") {
-  message("Applying Batch Mean-Centering (BMC) for batch-correction.")
+    message("Applying Batch Mean-Centering (BMC) for batch-correction.")
 
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  # get unique batches
-  input.batches <- unique(tmp.meta[[model.vars[1]]])
+    # get unique batches
+    input.batches <- unique(tmp.meta[[model.vars[1]]])
 
-  corrected.cnts <- NULL
-  for( batch.idx in input.batches ) {
-    tmp <- scale(tmp.cnts[tmp.meta$sID[tmp.meta[[model.vars[1]]] %in% batch.idx], ], center = TRUE, scale = FALSE)
-    corrected.cnts <- rbind.data.frame(corrected.cnts, tmp)
-  }
+    corrected.cnts <- NULL
+    for( batch.idx in input.batches ) {
+        tmp <- scale(tmp.cnts[tmp.meta$sID[
+            tmp.meta[[model.vars[1]]] %in% batch.idx], ],
+            center=TRUE, scale=FALSE)
 
-  # reorder according to meta-table
-  corrected.cnts <- corrected.cnts[tmp.meta$sID,]
+        corrected.cnts <- rbind.data.frame(corrected.cnts, tmp)
+    }
 
-  return(corrected.cnts)
+    # reorder according to meta-table
+    corrected.cnts <- corrected.cnts[tmp.meta$sID,]
+
+    return(corrected.cnts)
 }
 
 
@@ -524,28 +552,29 @@ mbecBMC <- function(input.obj, model.vars, type="clr") {
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr'.
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecBat <- function(input.obj, model.vars, type="clr") {
 
-  message("Applying ComBat (sva) for batch-correction.")
-  ## ComBat requires 'fxs' orientation for inputs
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    message("Applying ComBat (sva) for batch-correction.")
+    ## ComBat requires 'fxs' orientation for inputs
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  # ToDo: tmp model
-  if( length(model.vars) == 1 ) {
-    corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[1]]],
-                                  mod = 1, par.prior = FALSE,
-                                  prior.plots = FALSE)
-  } else {
-    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
+    # ToDo: tmp model
+    if( length(model.vars) == 1 ) {
+        corrected.cnts <- sva::ComBat(tmp.cnts, batch=tmp.meta[[model.vars[1]]],
+                                      mod=1, par.prior=FALSE,
+                                      prior.plots=FALSE)
+    } else {
+        tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
 
-    corrected.cnts <- sva::ComBat(tmp.cnts, batch = tmp.meta[[model.vars[1]]],
-                                  mod = tmp.mod, par.prior = FALSE,
-                                  prior.plots = FALSE)
-  }
-  return(corrected.cnts)
+        corrected.cnts <- sva::ComBat(tmp.cnts, batch=tmp.meta[[model.vars[1]]],
+                                      mod=tmp.mod, par.prior=FALSE,
+                                      prior.plots=FALSE)
+    }
+    return(corrected.cnts)
 }
 
 
@@ -571,26 +600,28 @@ mbecBat <- function(input.obj, model.vars, type="clr") {
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr'.
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecRBE <- function(input.obj, model.vars, type="clr") {
 
-  message("Applying 'removeBatchEffect' (limma) for batch-correction.")
-  ## removeBatchEffect requires 'fxs' orientation for inputs
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    message("Applying 'removeBatchEffect' (limma) for batch-correction.")
+    ## removeBatchEffect requires 'fxs' orientation for inputs
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  if( length(model.vars) == 1 ) {
-    corrected.cnts <- limma::removeBatchEffect(
-      tmp.cnts,
-      batch = tmp.meta[[model.vars[1]]],design = matrix(1,ncol(tmp.cnts),1))
-  } else {
-    tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
+    if( length(model.vars) == 1 ) {
+        corrected.cnts <- limma::removeBatchEffect(
+            tmp.cnts,
+            batch=tmp.meta[[model.vars[1]]],
+            design=matrix(1,ncol(tmp.cnts),1))
+    } else {
+        tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]])
 
-    corrected.cnts <- limma::removeBatchEffect(
-      tmp.cnts, batch = tmp.meta[[model.vars[1]]],design = tmp.mod)
-  }
-  return(corrected.cnts)
+        corrected.cnts <- limma::removeBatchEffect(
+            tmp.cnts, batch=tmp.meta[[model.vars[1]]], design=tmp.mod)
+    }
+    return(corrected.cnts)
 }
 
 
@@ -624,38 +655,40 @@ mbecRBE <- function(input.obj, model.vars, type="clr") {
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'tss'.
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecPN <- function(input.obj, model.vars, type="tss") {
 
-  message("Applying Percentile Normalization (PN) for batch-correction.")
-  ## Percentile Normalization requires 'sxf' orientation for inputs
-  type <- match.arg(type, choices = c("tss","otu","clr"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    message("Applying Percentile Normalization (PN).")
+    ## Percentile Normalization requires 'sxf' orientation for inputs
+    type <- match.arg(type, choices = c("tss","otu","clr"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  if( !is(tmp.meta[,eval(model.vars[2])], "factor") ) {
-    warning("Grouping variable is not a factor! Converting to factor now.")
-    tmp.meta[,eval(model.vars[2])] <- as.factor(tmp.meta[,eval(model.vars[2])])
-  }
+    if( !is(tmp.meta[,eval(model.vars[2])], "factor") ) {
+        warning("Grouping variable is not a factor! Converting to factor now.")
+        tmp.meta[,eval(model.vars[2])] <- as.factor(
+            tmp.meta[,eval(model.vars[2])])
+    }
 
-  # check for case/control design
-  if( nlevels(tmp.meta[,eval(model.vars[2])]) != 2 ) {
-    warning("Grouping/Treatment contains ",
-            nlevels(tmp.meta[,eval(model.vars[2])]),
-            " different categories. Percentile normalization is designed to work
-            with 2 classes only, i.e., case/control studies.")
-    return(NULL)
-  }
-  # check/adjust for zero-values
-  if( any(tmp.cnts == 0) ) {
-    warning("Abundances contain zero values. Adding small uniform offset.")
-    tmp.cnts <- apply(tmp.cnts, c(1,2),
-                      function(x) ifelse(x == 0, stats::runif(1,0,10^-9),x))
-  }
-  # do normalisation
-  corrected.cnts <- percentileNorm(tmp.cnts, tmp.meta[,eval(model.vars)])
+    # check for case/control design
+    if( nlevels(tmp.meta[,eval(model.vars[2])]) != 2 ) {
+        warning("Grouping/Treatment contains ",
+                nlevels(tmp.meta[,eval(model.vars[2])]),
+                " different categories. Percentile normalization is designed to
+                work with 2 classes only, i.e., case/control studies.")
+        return(NULL)
+    }
+    # check/adjust for zero-values
+    if( any(tmp.cnts == 0) ) {
+        warning("Abundances contain zero values. Adding small uniform offset.")
+        tmp.cnts <- apply(tmp.cnts, c(1,2),
+                          function(x) ifelse(x == 0, stats::runif(1,0,10^-9),x))
+    }
+    # do normalisation
+    corrected.cnts <- percentileNorm(tmp.cnts, tmp.meta[,eval(model.vars)])
 
-  return(corrected.cnts)
+    return(corrected.cnts)
 }
 
 
@@ -682,43 +715,44 @@ mbecPN <- function(input.obj, model.vars, type="tss") {
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr'.
 #' @return A matrix of batch-effect corrected counts
+#'
 #' @include mbecs_classes.R
 mbecSVD <- function(input.obj, model.vars, type="clr") {
 
-  message("Applying Singular Value Decomposition (SVD) for batch-correction.")
-  ## SVD requires 'sxf' orientation for inputs
-  type <- match.arg(type, choices = c("otu","clr","tss"))
-  tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
-  # sd, mean, scale
-  tmp.sd <- apply(tmp.cnts, 2, stats::sd)
-  tmp.mean <- apply(tmp.cnts, 2, mean)
-  # center and scale
-  tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)
-  # produce square matrix
-  tmp.cnts.square <- crossprod(tmp.cnts.scale)
-  # apply singular value decomposition
-  svd.res <- svd(tmp.cnts.square)
+    message("Applying Singular Value Decomposition (SVD) for batch-correction.")
+    ## SVD requires 'sxf' orientation for inputs
+    type <- match.arg(type, choices = c("otu","clr","tss"))
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    # sd, mean, scale
+    tmp.sd <- apply(tmp.cnts, 2, stats::sd)
+    tmp.mean <- apply(tmp.cnts, 2, mean)
+    # center and scale
+    tmp.cnts.scale <- scale(tmp.cnts, center=TRUE, scale=TRUE)
+    # produce square matrix
+    tmp.cnts.square <- crossprod(tmp.cnts.scale)
+    # apply singular value decomposition
+    svd.res <- svd(tmp.cnts.square)
 
-  # extract 1st singular vectors
-  svd.u1 <- svd.res$u[ ,1]
-  svd.v1 <- svd.res$v[ ,1]
+    # extract 1st singular vectors
+    svd.u1 <- svd.res$u[ ,1]
+    svd.v1 <- svd.res$v[ ,1]
 
-  # deflate component 1 from the data
-  tmp.t1 <- tmp.cnts.scale %*% svd.u1 / drop(sqrt(crossprod(svd.u1)))
-  tmp.c1 <- crossprod(tmp.cnts.scale, tmp.t1) / drop(crossprod(tmp.t1))
-  tmp.svd.defl  <- tmp.cnts.scale - tmp.t1 %*% t(tmp.c1)
+    # deflate component 1 from the data
+    tmp.t1 <- tmp.cnts.scale %*% svd.u1 / drop(sqrt(crossprod(svd.u1)))
+    tmp.c1 <- crossprod(tmp.cnts.scale, tmp.t1) / drop(crossprod(tmp.t1))
+    tmp.svd.defl  <- tmp.cnts.scale - tmp.t1 %*% t(tmp.c1)
 
-  # add mean and standard deviation
-  corrected.cnts <- tmp.cnts
-  corrected.cnts[,] <- NA
+    # add mean and standard deviation
+    corrected.cnts <- tmp.cnts
+    corrected.cnts[,] <- NA
 
-  for( c.idx in seq_len(dim(corrected.cnts)[2]) ) {
-    for( r.idx in seq_len(dim(corrected.cnts)[1]) ) {
-      corrected.cnts[r.idx, c.idx] <- tmp.svd.defl[r.idx, c.idx] *
-        tmp.sd[c.idx] + tmp.mean[c.idx]
+    for( c.idx in seq_len(dim(corrected.cnts)[2]) ) {
+        for( r.idx in seq_len(dim(corrected.cnts)[1]) ) {
+            corrected.cnts[r.idx, c.idx] <- tmp.svd.defl[r.idx, c.idx] *
+                tmp.sd[c.idx] + tmp.mean[c.idx]
+        }
     }
-  }
 
-  return(corrected.cnts)
+    return(corrected.cnts)
 }

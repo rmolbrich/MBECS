@@ -35,10 +35,12 @@
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return Either a ggplot2 object or a formatted data-frame to plot from.
+#'
 #' @export
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
+#' data(dummy.mbec)
 #' data.RLE <- mbecRLE(input.obj=dummy.mbec, type="clr",
 #' model.vars=c('group','batch'), return.data=TRUE)
 #'
@@ -48,45 +50,45 @@
 mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
                     label=character(), return.data = FALSE) {
 
-  tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
-                     required.col=eval(model.vars), type=eval(type),
-                     label=label)
-  tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var="specimen")
+    tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
+                       required.col=eval(model.vars), type=eval(type),
+                       label=label)
+    tmp.cnts <- tmp[[1]]
+    tmp.meta <- tmp[[2]] %>% tibble::rownames_to_column(., var="specimen")
 
-  if( !(type == "cor") ) {
-    label <- type
-  }
+    if( !(type == "cor") ) {
+        label <- type
+    }
 
-  tmp.long <- NULL
-  for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
-    message("Calculating RLE for group: ", g.idx)
+    tmp.long <- NULL
+    for(g.idx in unique(tmp.meta[, eval(model.vars[2])])) {
+        message("Calculating RLE for group: ", g.idx)
 
-    tmp.cnts.group <-
-      dplyr::select(
-        tmp.cnts,tmp.meta$specimen[tmp.meta[,eval(model.vars[2])] %in% g.idx])
+        tmp.cnts.group <-
+            dplyr::select(tmp.cnts,tmp.meta$specimen[
+                tmp.meta[,eval(model.vars[2])] %in% g.idx])
 
-    feature.med <- apply(tmp.cnts.group, 1, stats::median)
+        feature.med <- apply(tmp.cnts.group, 1, stats::median)
 
-    tmp.group.long <- apply(tmp.cnts.group, 2,
-                            function(sample.col) sample.col - feature.med) %>%
-      as.data.frame() %>%
-      tidyr::pivot_longer(cols = everything(),
-                          names_to = "specimen", values_to = "values")
-    tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
-  }
+        tmp.group.long <- apply(tmp.cnts.group, 2, function(sample.col)
+            sample.col - feature.med) %>%
+            as.data.frame() %>%
+            tidyr::pivot_longer(cols = tidyr::everything(),
+                                names_to = "specimen", values_to = "values")
+        tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
+    }
 
-  tmp.long <- dplyr::left_join(tmp.long, tmp.meta,
-                               by = "specimen") %>%
-    dplyr::mutate(plot.order = paste(get(model.vars[2]),
-                                     get(model.vars[1]), sep = "_")) %>%
-    dplyr::arrange(plot.order) %>%
-    dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
+    tmp.long <- dplyr::left_join(tmp.long, tmp.meta,
+                                 by = "specimen") %>%
+        dplyr::mutate(plot.order = paste(get(model.vars[2]),
+                                         get(model.vars[1]), sep = "_")) %>%
+        dplyr::arrange(plot.order) %>%
+        dplyr::mutate(specimen = factor(specimen, levels = unique(specimen)))
 
-  if (return.data) {
-    return(tmp.long)
-  }
-  return(mbecRLEPlot(tmp.long, model.vars, label=label))
+    if (return.data) {
+        return(tmp.long)
+    }
+    return(mbecRLEPlot(tmp.long, model.vars, label=label))
 }
 
 
@@ -126,11 +128,13 @@ mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
+#' data(dummy.mbec)
 #' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
@@ -148,51 +152,55 @@ setGeneric("mbecPCA", signature = "input.obj",
                      pca.axes=c(1,2), type="clr", label=character(),
                      return.data=FALSE) {
 
-  tmp <- mbecGetData(input.obj=input.obj, orientation = "sxf",
-                     required.col=eval(model.vars), type=eval(type),
-                     label=label)
+    tmp <- mbecGetData(input.obj=input.obj, orientation = "sxf",
+                       required.col=eval(model.vars), type=eval(type),
+                       label=label)
 
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  if( !(type == "cor") ) {
-    label <- type
-  }
-
-  # calculate IQR and sort counts in decreasing order
-  iqr <- apply(tmp.cnts, 2, stats::IQR)
-  tmp.cnts <- tmp.cnts[, order(iqr, decreasing = TRUE)]
-
-  PCA <- stats::prcomp(tmp.cnts, scale = FALSE)
-
-  axes.number <- dim(PCA$x)[2]
-  axes.names <- paste("PC", seq_len(axes.number), sep = "")
-
-  plot.df <- PCA$x %>%
-    data.frame(stringsAsFactors = FALSE) %>%
-    dplyr::rename_at(seq_len(axes.number), ~axes.names) %>%
-    tibble::rownames_to_column(var = "sID") %>%
-    dplyr::left_join(tmp.meta, by = "sID")
-
-  metric.df <- data.frame(var.explained=round((100 * PCA$sdev^2)/
-                                      (sum(PCA$x^2/max(1,nrow(PCA$x) - 1))), 2),
-                                      row.names = axes.names) %>%
-    dplyr::mutate(axis.min = floor(apply(PCA$x, 2, function(col) min(col)))) %>%
-    dplyr::mutate(axis.max = ceiling(apply(PCA$x, 2, function(col) max(col))))
-
-  for (idx in seq_along(model.vars) ) {
-    if (!is.factor(plot.df[, eval(model.vars[idx])])) {
-      warning("Grouping variables need to be factors.
-              Coercing to factor now, adjust beforehand to get best results.")
-      plot.df[,eval(model.vars[idx])] <- factor(plot.df[,eval(model.vars[idx])])
+    if( !(type == "cor") ) {
+        label <- type
     }
-  }
 
-  # No plotting, just return data.
-  if (return.data) {
-    return(list(plot.df, metric.df, pca.axes))
-  }
+    # calculate IQR and sort counts in decreasing order
+    iqr <- apply(tmp.cnts, 2, stats::IQR)
+    tmp.cnts <- tmp.cnts[, order(iqr, decreasing = TRUE)]
 
-  return(mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes, label=label))
+    PCA <- stats::prcomp(tmp.cnts, scale = FALSE)
+
+    axes.number <- dim(PCA$x)[2]
+    axes.names <- paste("PC", seq_len(axes.number), sep = "")
+
+    plot.df <- PCA$x %>%
+        data.frame(stringsAsFactors = FALSE) %>%
+        dplyr::rename_at(seq_len(axes.number), ~axes.names) %>%
+        tibble::rownames_to_column(var = "sID") %>%
+        dplyr::left_join(tmp.meta, by = "sID")
+
+    metric.df <- data.frame(
+        var.explained = round(
+            (100 * PCA$sdev^2)/(sum(PCA$x^2/max(1,nrow(PCA$x) - 1))), 2),
+        row.names = axes.names) %>%
+        dplyr::mutate(axis.min = floor(apply(PCA$x, 2, function(col)
+            min(col)))) %>%
+        dplyr::mutate(axis.max = ceiling(apply(PCA$x, 2, function(col)
+            max(col))))
+
+    for (idx in seq_along(model.vars) ) {
+        if (!is.factor(plot.df[, eval(model.vars[idx])])) {
+            warning("Grouping variables need to be factors.
+              Coercing to factor now, adjust beforehand to get best results.")
+            plot.df[,eval(model.vars[idx])] <-
+                factor(plot.df[,eval(model.vars[idx])])
+        }
+    }
+
+    # No plotting, just return data.
+    if (return.data) {
+        return(list(plot.df, metric.df, pca.axes))
+    }
+
+    return(mbecPCAPlot(plot.df, metric.df, model.vars, pca.axes, label=label))
 }
 
 
@@ -231,11 +239,13 @@ setGeneric("mbecPCA", signature = "input.obj",
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
+#' data(dummy.mbec)
 #' data.PCA <- mbecPCA(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), pca.axes=c(1,2), return.data=TRUE)
 #'
@@ -248,8 +258,8 @@ setMethod("mbecPCA", "MbecData", function(input.obj,
                                           pca.axes = c(1, 2), type="clr",
                                           label=character(),
                                           return.data=FALSE) {
-  .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, type=type,
-           label=label, return.data=return.data)
+    .mbecPCA(input.obj, model.vars=model.vars, pca.axes=pca.axes, type=type,
+             label=label, return.data=return.data)
 })
 
 
@@ -291,11 +301,13 @@ setMethod("mbecPCA", "MbecData", function(input.obj,
 #' @param return.data logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return the plot-frame of all features in the data-set.
+#' data(dummy.mbec)
 #' data.Box <- mbecBox(input.obj=dummy.mbec, method='ALL', model.var='batch',
 #' type='clr', return.data=TRUE)
 #'
@@ -306,45 +318,49 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10,
                     model.var = "batch", type="clr", label=character(),
                     return.data = FALSE) {
 
-  input.obj <- mbecProcessInput(input.obj = input.obj, required.col = model.var)
-  # needs sxf orientation
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col = eval(model.var), type=eval(type),
-                     label=label)
-  tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
+    input.obj <- mbecProcessInput(input.obj = input.obj,
+                                  required.col = model.var)
+    # needs sxf orientation
+    tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                       required.col = eval(model.var), type=eval(type),
+                       label=label)
+    tmp[[2]] <- tibble::rownames_to_column(tmp[[2]], var = "specimen")
 
-  if( !(type == "cor") ) {
-    label <- type
-  }
+    if( !(type == "cor") ) {
+        label <- type
+    }
 
-  otu.idx <- colnames(tmp[[1]])
+    otu.idx <- colnames(tmp[[1]])
 
-  tmp <- tmp[[1]] %>%
-    tibble::rownames_to_column(var = "specimen") %>%
-    dplyr::left_join(tmp[[2]], by = c(specimen = "specimen"))
+    tmp <- tmp[[1]] %>%
+        tibble::rownames_to_column(var = "specimen") %>%
+        dplyr::left_join(tmp[[2]], by = c(specimen = "specimen"))
 
-  if (method[1] == "TOP") {
-    iqr <- apply(tmp[, otu.idx], 2, stats::IQR)
-    iqr <- iqr[order(iqr, decreasing = TRUE)]
-    otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
+    if (method[1] == "TOP") {
+        iqr <- apply(tmp[, otu.idx], 2, stats::IQR)
+        iqr <- iqr[order(iqr, decreasing = TRUE)]
+        otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
 
-    tmp <- tmp %>%
-      dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
+        tmp <- tmp %>%
+            dplyr::select(c(dplyr::all_of(otu.idx), "specimen",
+                            eval(model.var)))
 
-  } else if (length(method) >= 2) {
-    message("'Method' parameter contains multiple elements -
+    } else if (length(method) >= 2) {
+        message("'Method' parameter contains multiple elements -
             using to select features.")
-    otu.idx <- method
-    tmp <- tmp %>%
-      dplyr::select(c(dplyr::all_of(otu.idx), "specimen", eval(model.var)))
+        otu.idx <- method
 
-  }  # else is 'select-all-mode'
+        tmp <- tmp %>%
+            dplyr::select(c(dplyr::all_of(otu.idx), "specimen",
+                            eval(model.var)))
 
-  if (return.data) {
-    return(list(tmp, otu.idx))
-  }
+    }  # else is 'select-all-mode'
 
-  return(mbecBoxPlot(tmp, otu.idx, model.var, label=label))
+    if (return.data) {
+        return(list(tmp, otu.idx))
+    }
+
+    return(mbecBoxPlot(tmp, otu.idx, model.var, label=label))
 }
 
 
@@ -387,11 +403,13 @@ mbecBox <- function(input.obj, method = c("ALL", "TOP"), n = 10,
 #' @param return.data Logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return the plot-frame of all features in the data-set.
+#' data(dummy.mbec)
 #' data.Heat <- mbecHeat(input.obj=dummy.mbec, model.vars=c('group','batch'),
 #' center=TRUE, scale=TRUE, method='ALL', return.data=TRUE)
 #'
@@ -402,46 +420,47 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
                      scale = TRUE, method = "TOP", n = 10, type="clr",
                      label=character(), return.data = FALSE) {
 
-  cols <- pals::tableau20(20)[c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19)]
+    cols <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B",
+              "#E377C2","#7F7F7F","#BCBD22","#17BECF")
 
-  tmp <- mbecGetData(input.obj=input.obj, orientation="sxf",
-                     required.col=eval(model.vars), type=eval(type),
-                     label=label)
-  tmp.cnts <- tmp[[1]]
-  tmp.meta <- tmp[[2]]
-  otu.idx <- colnames(tmp[[1]])
+    tmp <- mbecGetData(input.obj=input.obj, orientation="sxf",
+                       required.col=eval(model.vars), type=eval(type),
+                       label=label)
 
-  if( !(type == "cor") ) {
-    label <- type
-  }
+    tmp.cnts <- tmp[[1]]
+    tmp.meta <- tmp[[2]]
+    otu.idx <- colnames(tmp[[1]])
 
-  for (g.idx in c(seq_along(model.vars))) {
-    if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
-      warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(model.vars[g.idx]),
-              " to factor now, adjust beforehand to get best results.")
-      tmp.meta[, eval(model.vars[g.idx])] <-
-        factor(tmp.meta[, eval(model.vars[g.idx])])
+    if( !(type == "cor") ) {
+        label <- type
     }
-  }
-  tmp.cnts <- base::scale(tmp.cnts, center=eval(center), scale=eval(scale))
-  tmp.cnts <- base::scale(t(tmp.cnts), center=eval(center), scale=eval(scale))
-  if (method[1] == "TOP") {
-    iqr <- apply(tmp.cnts[otu.idx, ], 1, stats::IQR)
-    iqr <- iqr[order(iqr, decreasing = TRUE)]
-    otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
-    tmp.cnts <- tmp.cnts[otu.idx, ]
-  } else if (length(method) >= 2)
-  {
-    message("'Method' parameter contains multiple elements -
-            using to select features.")
-    tmp.cnts <- tmp.cnts[method, ]
 
-  }  # else is 'select-all-mode'
-  if (return.data) {
-    return(list(tmp.cnts, tmp.meta))
-  }
-  return(mbecHeatPlot(tmp.cnts, tmp.meta, model.vars, label=label))
+    for (g.idx in c(seq_along(model.vars))) {
+        if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
+            warning("Grouping variables need to be factors. Coercing: ",
+                    eval(model.vars[g.idx]),
+                    " to factor now, adjust beforehand to get best results.")
+            tmp.meta[, eval(model.vars[g.idx])] <-
+                factor(tmp.meta[, eval(model.vars[g.idx])])
+        }
+    }
+    tmp.cnts <- base::scale(tmp.cnts, center=eval(center), scale=eval(scale))
+    tmp.cnts <- base::scale(t(tmp.cnts), center=eval(center), scale=eval(scale))
+    if (method[1] == "TOP") {
+        iqr <- apply(tmp.cnts[otu.idx, ], 1, stats::IQR)
+        iqr <- iqr[order(iqr, decreasing = TRUE)]
+        otu.idx <- names(iqr)[seq_len(min(length(otu.idx), n))]
+        tmp.cnts <- tmp.cnts[otu.idx, ]
+    } else if (length(method) >= 2) {
+        message("'Method' parameter contains multiple elements -
+            using to select features.")
+        tmp.cnts <- tmp.cnts[method, ]
+
+    }  # else is 'select-all-mode'
+    if (return.data) {
+        return(list(tmp.cnts, tmp.meta))
+    }
+    return(mbecHeatPlot(tmp.cnts, tmp.meta, model.vars, label=label))
 }
 
 
@@ -461,11 +480,13 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 #' @param return.data Logical if TRUE returns the data.frame required for
 #' plotting. Default (FALSE) will return plot object.
 #' @return either a ggplot2 object or a formatted data-frame to plot from
+#'
 #' @export
 #' @include mbecs_classes.R
 #'
 #' @examples
 #' # This will return the plot-df of the samples grouped by group and batch.
+#' data(dummy.mbec)
 #' data.Mosaic <- mbecMosaic(input.obj=dummy.mbec,
 #' model.vars=c('group','batch'), return.data=TRUE)
 #'
@@ -475,38 +496,41 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
                        return.data = FALSE) {
 
-  cols <- pals::tableau20(20)
+    cols <- c("#1F77B4","#AEC7E8","#FF7F0E","#FFBB78","#2CA02C","#98DF8A",
+              "#D62728","#FF9896","#9467BD","#C5B0D5","#8C564B","#C49C94",
+              "#E377C2","#F7B6D2","#7F7F7F","#C7C7C7","#BCBD22","#DBDB8D",
+              "#17BECF","#9EDAE5")
 
-  tmp <- mbecGetData(input.obj, orientation = "sxf",
-                     required.col = eval(model.vars))
-  tmp.meta <- tmp[[2]]
+    tmp <- mbecGetData(input.obj, orientation = "sxf",
+                       required.col = eval(model.vars))
+    tmp.meta <- tmp[[2]]
 
-  if (length(model.vars) < 2) {
-    message("Only one variable specified for Mosaic-plot, two are required!")
-  } else if (length(model.vars) > 2) {
-    message("More than 2 variables specified. Mosaic will take the first two.")
-  }
-
-  for (g.idx in eval(model.vars)) {
-    if (!is.factor(tmp.meta[, eval(g.idx)])) {
-      warning("Grouping variables need to be factors. Coercing variable: '",
-              eval(g.idx),
-              "' to factor now, adjust beforehand to get best results.")
-      tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
+    if (length(model.vars) < 2) {
+        message("Only one variable set for Mosaic-plot, two are required!")
+    } else if (length(model.vars) > 2) {
+        message("More than 2 variables specified. Will take the first two.")
     }
-  }
-  n.observations <- base::dim(tmp.meta)[1]
-  study.summary <- base::table(tmp.meta[, eval(model.vars[1])],
-                               tmp.meta[, eval(model.vars[2])]) %>%
-    as.data.frame() %>%
-    dplyr::mutate(Freq.scaled = Freq/n.observations)
 
-  if (return.data)
-  {
-    return(study.summary)
-  }  # else return the plots
+    for (g.idx in eval(model.vars)) {
+        if (!is.factor(tmp.meta[, eval(g.idx)])) {
+            warning("Grouping variables need to be factors. Coercing: '",
+                    eval(g.idx),
+                    "' to factor now, adjust beforehand to get best results.")
+            tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
+        }
+    }
+    n.observations <- base::dim(tmp.meta)[1]
+    study.summary <- base::table(tmp.meta[, eval(model.vars[1])],
+                                 tmp.meta[, eval(model.vars[2])]) %>%
+        as.data.frame() %>%
+        dplyr::mutate(Freq.scaled = Freq/n.observations)
 
-  return(mbecMosaicPlot(study.summary, model.vars))
+    if (return.data)
+    {
+        return(study.summary)
+    }  # else return the plots
+
+    return(mbecMosaicPlot(study.summary, model.vars))
 
 }
 
@@ -607,12 +631,14 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
 #' supplied
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in every feature.
+#'
 #' @include mbecs_classes.R
 #' @export
 #'
 #' @examples
 #' # This will return a data-frame that contains the variance attributable to
 #' # group and batch according to linear additive model.
+#' data(dummy.mbec)
 #' df.var.lm <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='lm', type='clr')
 #' # This will return a data-frame that contains the variance attributable to
@@ -620,68 +646,70 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
 #' df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='pvca')
 mbecModelVariance <- function(input.obj, model.vars=character(),
-                              method=c("lm","lmm", "rda", "pvca", "s.coef"),
-                              model.form=NULL, type="clr", label=character(),
-                              no.warning = TRUE, na.action = NULL) {
-  oldw <- getOption("warn")
-  if (no.warning) {
-    options(warn = -1)
-  }
-  on.exit(options(warn = oldw))
-
-  # handle optional parameters
-  if (is.null(na.action)) {
-    na.action <- getOption("na.action")
-  }
-
-  method <- match.arg(method, choices = c("lm","lmm", "rda", "pvca", "s.coef"))
-  type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
-
-  ## PVCA stuff
-  pct_threshold <- 0.5876  # threshold for explained variances
-
-  tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
-                     required.col=eval(model.vars), type=eval(type),
-                     label=label)
-  tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
-
-  ## Adjust 'type' variable if selected matrix comes from 'cor' list
-  if( type == "cor" && length(label) != 0 ) type <- label
-
-  ## CHECK if grouping variables are factors
-  for (g.idx in eval(model.vars)) {
-    if (!is.factor(tmp.meta[, eval(g.idx)])) {
-      warning("Grouping variables need to be factors. Coercing variable: ",
-              eval(g.idx),
-              " to factor now, adjust beforehand to get best results.")
-      tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
+                              method="lm", model.form=NULL, type="clr",
+                              label=character(), no.warning = TRUE,
+                              na.action = NULL) {
+    oldw <- getOption("warn")
+    if (no.warning) {
+        options(warn = -1)
     }
-  }
+    on.exit(options(warn = oldw))
 
-  if (method == "lm") {
-    res <- mbecModelVarianceLM(model.form,model.vars,tmp.cnts,tmp.meta,type)
-    return(res)
+    # handle optional parameters
+    if (is.null(na.action)) {
+        na.action <- getOption("na.action")
+    }
 
-  } else if (method == "lmm") {
-    res <- mbecModelVarianceLMM(model.form,model.vars,tmp.cnts,tmp.meta,type)
-    return(res)
+    method <- match.arg(method, choices = c("lm","lmm","rda","pvca","s.coef"))
+    type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
 
-  } else if (method == "rda") {
-    res <- mbecModelVarianceRDA(model.vars,tmp.cnts,tmp.meta,type)
-    return(res)
+    ## PVCA stuff
+    pct_threshold <- 0.5876  # threshold for explained variances
 
-  } else if (method == "pvca") {
-    res <- mbecModelVariancePVCA(model.vars, tmp.cnts, tmp.meta,
-                                 type, pct_threshold, na.action)
-    return(res)
+    tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
+                       required.col=eval(model.vars), type=eval(type),
+                       label=label)
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
-  } else if (method == "s.coef") {
-    res <- mbecModelVarianceSCOEF(model.vars, tmp.cnts, tmp.meta, type)
-    return(res)
+    ## Adjust 'type' variable if selected matrix comes from 'cor' list
+    if( type == "cor" && length(label) != 0 ) type <- label
 
-  }
-  message("Input doesn't apply to any available method. Nothing was done here.")
-  return(NULL)
+    ## CHECK if grouping variables are factors
+    for (g.idx in eval(model.vars)) {
+        if (!is.factor(tmp.meta[, eval(g.idx)])) {
+            warning("Grouping variables need to be factors. Coercing: ",
+                    eval(g.idx),
+                    " to factor now, adjust beforehand to get best results.")
+            tmp.meta[, eval(g.idx)] <- as.factor(tmp.meta[, eval(g.idx)])
+        }
+    }
+
+    if (method == "lm") {
+        res <- mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta,
+                                   type)
+        return(res)
+
+    } else if (method == "lmm") {
+        res <- mbecModelVarianceLMM(model.form, model.vars, tmp.cnts, tmp.meta,
+                                    type)
+        return(res)
+
+    } else if (method == "rda") {
+        res <- mbecModelVarianceRDA(model.vars, tmp.cnts, tmp.meta, type)
+        return(res)
+
+    } else if (method == "pvca") {
+        res <- mbecModelVariancePVCA(model.vars, tmp.cnts, tmp.meta, type,
+                                     pct_threshold, na.action)
+        return(res)
+
+    } else if (method == "s.coef") {
+        res <- mbecModelVarianceSCOEF(model.vars, tmp.cnts, tmp.meta, type)
+        return(res)
+
+    }
+    message("Input doesn't apply to available methods. Nothing was done here.")
+    return(NULL)
 }
 
 
@@ -710,40 +738,43 @@ mbecModelVariance <- function(input.obj, model.vars=character(),
 #' for the transformed counts or the label of the batch corrected count-matrix.
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in a linear modelling approach.
+#'
 #' @include mbecs_classes.R
-mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type) {
-  message("Fitting linear model to every feature and extract proportion of
+mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
+                                type) {
+    message("Fitting linear model to every feature and extract proportion of
           variance explained by covariates.")
-  if (!is.null(model.form)) {
-    message("Use provided model formula.")
-    tmp.formula <- stats::as.formula(model.form)
-  } else {
-    message("Construct formula from covariates.")
-    tmp.formula <- stats::as.formula(paste("y", " ~ ", paste(model.vars,
-                                                            collapse = " + ")))
-  }
 
-  # Add a progress bar.
-  features <- colnames(tmp.cnts)
-  lm.pb <- utils::txtProgressBar(min=0, max=length(features), style=3,
-                                 width=80, char="=")
+    if (!is.null(model.form)) {
+        message("Use provided model formula.")
+        tmp.formula <- stats::as.formula(model.form)
+    } else {
+        message("Construct formula from covariates.")
+        tmp.formula <- stats::as.formula(
+            paste("y", " ~ ", paste(model.vars, collapse = " + ")))
+    }
 
-  model.variances <- NULL
-  for (x in seq_along(features)) {
-    y <- tmp.cnts[[eval(x)]]
+    # Add a progress bar.
+    features <- colnames(tmp.cnts)
+    lm.pb <- utils::txtProgressBar(min=0, max=length(features), style=3,
+                                   width=80, char="=")
 
-    model.fit <- stats::lm(tmp.formula, data = tmp.meta)
-    model.variances <- rbind.data.frame(model.variances,
-                                        mbecVarianceStats(model.fit))
-    utils::setTxtProgressBar(lm.pb, x)
-  }
-  # close progress bar
-  close(lm.pb)
+    model.variances <- NULL
+    for (x in seq_along(features)) {
+        y <- tmp.cnts[[eval(x)]]
 
-  res <- dplyr::mutate(model.variances, type = eval(type))
-  attr(res, "modelType") <- "anova"
+        model.fit <- stats::lm(tmp.formula, data = tmp.meta)
+        model.variances <- rbind.data.frame(model.variances,
+                                            mbecVarianceStats(model.fit))
+        utils::setTxtProgressBar(lm.pb, x)
+    }
+    # close progress bar
+    close(lm.pb)
 
-  return(res)
+    res <- dplyr::mutate(model.variances, type = eval(type))
+    attr(res, "modelType") <- "anova"
+
+    return(res)
 }
 
 
@@ -773,47 +804,50 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta, type
 #' for the transformed counts or the label of the batch corrected count-matrix.
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in a linear mixed modelling approach.
+#'
 #' @include mbecs_classes.R
 mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
                                  type) {
 
-  message("Fitting linear-mixed model to every feature and extract proportion
-          of variance explained by covariates.")
-  # FixMe: maybe include the option to adjust this
-  control <- lme4::lmerControl(calc.derivs=TRUE, check.rankX="stop.deficient")
+    message("Fitting linear-mixed model to every feature and extract proportion
+            of variance explained by covariates.")
+    # FixMe: maybe include the option to adjust this
+    control <- lme4::lmerControl(calc.derivs=TRUE, check.rankX="stop.deficient")
 
-  if (!is.null(model.form)) {
-    message("Use provided model formula.")
-    tmp.formula <- stats::as.formula(model.form)
-  } else {
-    message("Construct formula from covariates.")
-    f.terms <- paste("(1|", model.vars, ")", sep = "")
-    tmp.formula <- stats::as.formula(paste(paste("y", paste(model.vars[-1],
-                                                            collapse = " + "),
-                                                 sep = " ~ "),
-                                           paste(f.terms[1], collapse = " + "),
-                                           sep = " + "))
-  }
-  # Add a progress bar.
-  features <- colnames(tmp.cnts)
-  lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3,
-                                  width = 80, char="=")
+    if (!is.null(model.form)) {
+        message("Use provided model formula.")
 
-  model.variances <- NULL
-  for (x in seq_along(features)) {
-    y <- tmp.cnts[[eval(x)]]  # meh
+        tmp.formula <- stats::as.formula(model.form)
+    } else {
+        message("Construct formula from covariates.")
 
-    model.fit <- lme4::lmer(tmp.formula, data = tmp.meta, control = control)
-    model.variances <- rbind.data.frame(model.variances,
-                                        mbecVarianceStats(model.fit))
+        f.terms <- paste("(1|", model.vars, ")", sep = "")
+        tmp.formula <- stats::as.formula(
+            paste(paste("y", paste(
+                model.vars[-1],collapse = " + "),sep = " ~ "),paste(
+                    f.terms[1], collapse = " + "),sep = " + "))
+    }
+    # Add a progress bar.
+    features <- colnames(tmp.cnts)
+    lmm.pb <- utils::txtProgressBar(min = 0, max = length(features), style = 3,
+                                    width = 80, char="=")
 
-    utils::setTxtProgressBar(lmm.pb, x)
-  }
-  close(lmm.pb)
-  res <- dplyr::mutate(model.variances, type = eval(type))
-  attr(res, "modelType") <- "linear-mixed model"
+    model.variances <- NULL
+    for (x in seq_along(features)) {
+        y <- tmp.cnts[[eval(x)]]  # meh
 
-  return(res)
+        model.fit <- lme4::lmer(tmp.formula, data = tmp.meta, control = control)
+        model.variances <- rbind.data.frame(model.variances,
+                                            mbecVarianceStats(model.fit))
+
+        utils::setTxtProgressBar(lmm.pb, x)
+    }
+
+    close(lmm.pb)
+    res <- dplyr::mutate(model.variances, type = eval(type))
+    attr(res, "modelType") <- "linear-mixed model"
+
+    return(res)
 }
 
 #' Estimate Explained Variance with Redundancy Analysis
@@ -840,38 +874,39 @@ mbecModelVarianceLMM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 #' for the transformed counts or the label of the batch corrected count-matrix.
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in a partial redundancy analysis approach.
+#'
 #' @include mbecs_classes.R
 mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
 
-  model.variances <- data.frame(matrix(nrow = length(model.vars),
-                                      ncol = 1, dimnames = list(model.vars,
-                                                                eval(type))))
-  # Add a progress bar.
-  rda.pb <- utils::txtProgressBar(min = 0, max = length(model.vars), style = 3,
-                                  width = 80, char="=")
+    model.variances <- data.frame(matrix(nrow = length(model.vars),
+                                         ncol = 1, dimnames = list(model.vars,
+                                                                   eval(type))))
+    # Add a progress bar.
+    rda.pb <- utils::txtProgressBar(min = 0, max = length(model.vars),
+                                    style = 3, width = 80, char="=")
 
-  for (condition.idx in seq_along(model.vars)) {
-    tmp.formula <- stats::as.formula(
-      paste("tmp.cnts"," ~ ",
-            paste(model.vars[-eval(condition.idx)],
-                  "+", collapse = " "), " Condition(",
-            model.vars[eval(condition.idx)],")", sep = ""))
+    for (condition.idx in seq_along(model.vars)) {
+        tmp.formula <- stats::as.formula(
+            paste("tmp.cnts"," ~ ",
+                  paste(model.vars[-eval(condition.idx)],
+                        "+", collapse = " "), " Condition(",
+                  model.vars[eval(condition.idx)],")", sep = ""))
 
-    tmp.rda.covariate <- vegan::rda(tmp.formula,
-                                    data = tmp.meta)
+        tmp.rda.covariate <- vegan::rda(
+            tmp.formula, data = tmp.meta)
 
-    model.variances[condition.idx,eval(type)] <-
-      summary(tmp.rda.covariate)$partial.chi *
-      100/summary(tmp.rda.covariate)$tot.chi
+        model.variances[condition.idx,eval(type)] <-
+            summary(tmp.rda.covariate)$partial.chi *
+            100/summary(tmp.rda.covariate)$tot.chi
 
-    utils::setTxtProgressBar(rda.pb, condition.idx)
-  }
-  close(rda.pb)
-  res <- data.frame(t(model.variances)) %>%
-    dplyr::mutate(type = eval(type))
-  attr(res, "modelType") <- "rda"
+        utils::setTxtProgressBar(rda.pb, condition.idx)
+    }
+    close(rda.pb)
+    res <- data.frame(t(model.variances)) %>%
+        dplyr::mutate(type = eval(type))
+    attr(res, "modelType") <- "rda"
 
-  return(res)
+    return(res)
 }
 
 
@@ -914,74 +949,79 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
 #' @param na.action Set NA handling, will take global option if not supplied.
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in a principal variance component analysis approach.
+#'
 #' @include mbecs_classes.R
 mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
                                   pct_threshold, na.action) {
-  n.vars <- length(model.vars)
-  s.names <- rownames(tmp.cnts)
+    n.vars <- length(model.vars)
+    s.names <- rownames(tmp.cnts)
 
-  tmp.cnts <- apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
-    t()
-  colnames(tmp.cnts) <- s.names
-  tmp.cor <- stats::cor(tmp.cnts)
+    tmp.cnts <- apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
+        t()
+    colnames(tmp.cnts) <- s.names
+    tmp.cor <- stats::cor(tmp.cnts)
 
-  eCor <- eigen(tmp.cor)
-  eVal <- eCor$values
-  eVec <- eCor$vectors
-  rownames(eVec) <- s.names
-  n.eVal <- length(eVal)
-  sum.eVal <- sum(eVal)
-  prop.PCs <- eVal/sum.eVal
+    eCor <- eigen(tmp.cor)
+    eVal <- eCor$values
+    eVec <- eCor$vectors
+    rownames(eVec) <- s.names
+    n.eVal <- length(eVal)
+    sum.eVal <- sum(eVal)
+    prop.PCs <- eVal/sum.eVal
 
-  n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs),
-                                   function(x) x >= pct_threshold,
-                                   FUN.VALUE = logical(1)))))
-  # suppress tibble verbose output
-  suppressMessages(lmm.df <- eVec %>%
-    tibble::as_tibble(.name_repair = "unique") %>%
-    dplyr::select_at(seq_len(eval(n.PCs))) %>%
-    cbind(., tmp.meta))
+    n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs),
+                                     function(x) x >= pct_threshold,
+                                     FUN.VALUE = logical(1)))))
+    # suppress tibble verbose output
+    suppressMessages(lmm.df <- eVec %>%
+                         tibble::as_tibble(.name_repair = "unique") %>%
+                         dplyr::select_at(seq_len(eval(n.PCs))) %>%
+                         cbind(., tmp.meta))
 
-  f.terms <- paste("(1|", model.vars, ")", sep = "")
+    f.terms <- paste("(1|", model.vars, ")", sep = "")
 
-  for( var.idx in seq_len((n.vars - 1)) ) {
-    for( interaction.idx in seq.int(from=(var.idx + 1), to=(n.vars), by=1) ) {
-      f.terms <- c(f.terms, paste("(1|", model.vars[var.idx], ":",
-                                  model.vars[interaction.idx], ")", sep = ""))
+    for( var.idx in seq_len((n.vars - 1)) ) {
+        for( int.idx in seq.int(from=(var.idx + 1), to=(n.vars), by=1) ) {
+            f.terms <- c(f.terms, paste("(1|",
+                                        model.vars[var.idx],
+                                        ":",
+                                        model.vars[int.idx], ")",
+                                        sep = ""))
+        }
     }
-  }
-  n.effects <- length(f.terms) + 1
-  randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
+    n.effects <- length(f.terms) + 1
+    randomEffectsMatrix <- matrix(data = 0, nrow = n.PCs, ncol = n.effects)
 
-  model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",
-                                           paste(f.terms,
-                                                 collapse = " + "), sep = ""))
+    model.formula <- stats::as.formula(paste("lmm.df[,vec.idx]", " ~ ",
+                                             paste(f.terms, collapse = " + "),
+                                             sep = ""))
 
-  for (vec.idx in seq_len(n.PCs)) {
-    randomEffects <- data.frame(lme4::VarCorr(Rm1ML <-
-                                              lme4::lmer(model.formula,lmm.df,
-                                                         REML = TRUE,
-                                                         verbose = 0,
-                                                         na.action=na.action)))
+    for (vec.idx in seq_len(n.PCs)) {
+        randomEffects <- data.frame(
+            lme4::VarCorr(Rm1ML <- lme4::lmer(model.formula, lmm.df,
+                                              REML = TRUE, verbose = 0,
+                                              na.action = na.action)))
 
-    randomEffectsMatrix[vec.idx, ] <- as.numeric(randomEffects[, 4])
-  }
+        randomEffectsMatrix[vec.idx, ] <- as.numeric(randomEffects[, 4])
+    }
 
-  names.effects <- randomEffects[, 1]
-  randomEffectsMatrix.std <- randomEffectsMatrix/rowSums(randomEffectsMatrix)
+    names.effects <- randomEffects[, 1]
+    randomEffectsMatrix.std <-
+        randomEffectsMatrix / rowSums(randomEffectsMatrix)
 
-  scaled.eVal <- eVal/sum(eVal)
-  randomEffectsMatrix.wgt <- randomEffectsMatrix.std*scaled.eVal[seq_len(n.PCs)]
+    scaled.eVal <- eVal / sum(eVal)
+    randomEffectsMatrix.wgt <-
+        randomEffectsMatrix.std * scaled.eVal[seq_len(n.PCs)]
 
-  model.variances <- colSums(randomEffectsMatrix.wgt)/
-    sum(colSums(randomEffectsMatrix.wgt))
-  names(model.variances) <- names.effects
+    model.variances <-
+        colSums(randomEffectsMatrix.wgt) / sum(colSums(randomEffectsMatrix.wgt))
+    names(model.variances) <- names.effects
 
-  res <- data.frame(t(model.variances)) %>%
-    dplyr::mutate(type = eval(type))
-  attr(res, "modelType") <- "PVCA - lmm"
+    res <- data.frame(t(model.variances)) %>%
+        dplyr::mutate(type = eval(type))
+    attr(res, "modelType") <- "PVCA - lmm"
 
-  return(res)
+    return(res)
 }
 
 
@@ -1024,34 +1064,36 @@ mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
 #' for the transformed counts or the label of the batch corrected count-matrix.
 #' @return Data.frame that contains proportions of variance for given covariates
 #' in a silhouette coefficient analysis approach.
+#'
 #' @include mbecs_classes.R
 mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
 
-  tmp.prcomp <- stats::prcomp(tmp.cnts,
-                              center = TRUE, scale = FALSE)
+    tmp.prcomp <- stats::prcomp(tmp.cnts,
+                                center = TRUE, scale = FALSE)
+    # Just use the first 3, maybe make this accessible later on?!
+    tmp.dist <- stats::dist(tmp.prcomp$x[,c(1,2,3)],
+                            method = "euclidian")
 
-  tmp.dist <- stats::dist(tmp.prcomp$x[,1:3],
-                          method = "euclidian")
+    avg.sil.df <- NULL
+    for (var.elem in model.vars) {
+        print(var.elem)
 
-  avg.sil.df <- NULL
-  for (var.elem in model.vars) {
-    print(var.elem)
+        tmp.sil <- cluster::silhouette(x=as.numeric(tmp.meta[,eval(var.elem)]),
+                                       dist = tmp.dist)
 
-    tmp.sil <- cluster::silhouette(x=as.numeric(tmp.meta[,eval(var.elem)]),
-                                  dist = tmp.dist)
+        avg.sil.df <-
+            rbind.data.frame(
+                avg.sil.df,
+                data.frame(variable=var.elem,
+                           cluster=levels(tmp.meta[,eval(var.elem)]),
+                           sil.coefficient=c(summary(tmp.sil))$clus.avg.widths))
+    }
 
-    avg.sil.df <- rbind.data.frame(avg.sil.df,
-                        data.frame(variable=var.elem,
-                                   cluster=levels(tmp.meta[,eval(var.elem)]),
-                                   sil.coefficient =
-                                          c(summary(tmp.sil))$clus.avg.widths))
-  }
+    res <- avg.sil.df %>%
+        dplyr::mutate(type = eval(type))
+    attr(res, "modelType") <- "s.coef"
 
-  res <- avg.sil.df %>%
-    dplyr::mutate(type = eval(type))
-  attr(res, "modelType") <- "s.coef"
-
-  return(res)
+    return(res)
 }
 
 
@@ -1079,32 +1121,34 @@ mbecModelVarianceSCOEF <- function(model.vars, tmp.cnts, tmp.meta, type) {
 #' @keywords lm lmm proportion variance
 #' @param model.fit A linear (mixed) model object of class 'lm' or 'lmerMod'.
 #' @return A named row-vector, containing proportional variance for model terms.
+#'
 #' @export
 #'
 #' @examples
 #' # This will return the data.frame for plotting.
+#' data(dummy.list)
 #' limo <- stats::lm(dummy.list$cnts[,1] ~ group + batch, data=dummy.list$meta)
 #' vec.variance <- mbecVarianceStats(model.fit=limo)
 mbecVarianceStats <- function(model.fit) {
 
-  ### ToDo: implement glm versions of this
+    ### ToDo: implement glm versions of this
 
-  # check validity of model fit
-  mbecValidateModel(model.fit)
+    # check validity of model fit
+    mbecValidateModel(model.fit)
 
-  # linear model
-  if (is(model.fit, "lm")) {
+    # linear model
+    if (is(model.fit, "lm")) {
 
-    res <- mbecVarianceStatsLM(model.fit)
+        res <- mbecVarianceStatsLM(model.fit)
 
-  } else if (is(model.fit, "lmerMod")) {
+    } else if (is(model.fit, "lmerMod")) {
 
-    res <- mbecVarianceStatsLMM(model.fit)
+        res <- mbecVarianceStatsLMM(model.fit)
 
-  } else if (is(model.fit, "glm")) {
-    ### ToDon't
-  }
-  return(res)
+    } else if (is(model.fit, "glm")) {
+        ### ToDon't
+    }
+    return(res)
 }
 
 
@@ -1122,14 +1166,15 @@ mbecVarianceStats <- function(model.fit) {
 #' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLM <- function(model.fit) {
 
-  vp <- stats::anova(model.fit) %>%
-    data.frame() %>%
-    dplyr::mutate(variance =
-                    dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,"Sum.Sq")),
-                  .keep = "none") %>%
-    t()
+    vp <- stats::anova(model.fit) %>%
+        data.frame() %>%
+        dplyr::mutate(
+            variance =
+                dplyr::select(., "Sum.Sq")/sum(dplyr::select(.,"Sum.Sq")),
+            .keep = "none") %>%
+        t()
 
-  return(vp)
+    return(vp)
 }
 
 
@@ -1151,47 +1196,44 @@ mbecVarianceStatsLM <- function(model.fit) {
 #' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLMM <- function(model.fit) {
 
-  vc <- mbecMixedVariance(model.fit)
+    vc <- mbecMixedVariance(model.fit)
 
-  lib.df <- data.frame(
-    covariates = colnames(model.fit@frame),
-    row.names = vapply(colnames(model.fit@frame),
-                       function(covariate)
-                         paste(paste(covariate,
-                                     levels(model.fit@frame[, eval(covariate)]),
-                                     sep = ""), collapse = ","),
-                       FUN.VALUE = character(1)))
+    lib.df <- data.frame(
+        covariates = colnames(model.fit@frame),
+        row.names = vapply(colnames(model.fit@frame), function(covariate)
+            paste(paste(
+                covariate, levels(model.fit@frame[,eval(covariate)]), sep = ""),
+                collapse = ","), FUN.VALUE = character(1)))
 
-  total.var.LUT <- unlist(lapply(vc, function(var.comp) {
-    if (length(var.comp) > 1) {
-      weights <- (table(
-        model.fit@frame[[lib.df[eval(paste(names(var.comp),
-                                           collapse = ",")),
-                                ]]])/nrow(model.fit@frame))
-      var.comp %*% weights
-    } else {
-      names(var.comp) <- NULL
-      var.comp
+    total.var.LUT <- unlist(lapply(vc, function(var.comp) {
+        if (length(var.comp) > 1) {
+            weights <-
+                table(model.fit@frame[[lib.df[eval(paste(
+                    names(var.comp),collapse = ",")),]]])/nrow(model.fit@frame)
+            var.comp %*% weights
+        } else {
+            names(var.comp) <- NULL
+            var.comp
+        }
+    }), use.names = TRUE, recursive = FALSE)
+
+    vp <- list()
+
+    for (effect in names(vc)) {
+
+        # value of this effect divided by the total variance
+        tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in%
+                                                  eval(effect))])
+        vp[[eval(effect)]] <- vc[[eval(effect)]]/(tmp.t.var +
+                                                      vc[[eval(effect)]])
     }
-  }), use.names = TRUE, recursive = FALSE)
 
-  vp <- list()
+    vp <- unlist(vp)
+    names(vp) <- gsub(".(Intercept)", replacement = "",
+                      names(vp), fixed = TRUE)
+    vp <- data.frame(t(vp))
 
-  for (effect in names(vc)) {
-
-    # value of this effect divided by the total variance
-    tmp.t.var <- sum(total.var.LUT[-which(names(total.var.LUT) %in%
-                                            eval(effect))])
-    vp[[eval(effect)]] <- vc[[eval(effect)]]/(tmp.t.var +
-                                                vc[[eval(effect)]])
-  }
-
-  vp <- unlist(vp)
-  names(vp) <- gsub(".(Intercept)", replacement = "",
-                    names(vp), fixed = TRUE)
-  vp <- data.frame(t(vp))
-
-  return(vp)
+    return(vp)
 }
 
 
@@ -1215,33 +1257,35 @@ mbecVarianceStatsLMM <- function(model.fit) {
 #' @param model.fit A linear mixed model object of class 'lmerMod'.
 #' @return A named list, containing proportional variance for model terms that
 #' describe mixed effects.
+#'
 #' @export
 #'
 #' @examples
 #' # This will return the variance of random/mixed components.
+#' data(dummy.list)
 #' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
 #' data=dummy.list$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
 mbecMixedVariance <- function(model.fit) {
 
-  rVC <- lme4::VarCorr(model.fit)
+    rVC <- lme4::VarCorr(model.fit)
 
-  randomVar <- c(Residuals = attr(rVC, "sc")^2, lapply(rVC, diag))
+    randomVar <- c(Residuals = attr(rVC, "sc")^2, lapply(rVC, diag))
 
-  n.scaling <- (stats::nobs(model.fit) - 1)/stats::nobs(model.fit)
+    n.scaling <- (stats::nobs(model.fit) - 1)/stats::nobs(model.fit)
 
-  fixedVar <- t(t(model.fit@pp$X) * lme4::fixef(model.fit)) %>%
-    as.data.frame() %>%
-    dplyr::select(!"(Intercept)") %>%
-    dplyr::mutate(total.var = apply(., 1, sum)) %>%
-    apply(2, function(effect) stats::var(effect) * n.scaling)
+    fixedVar <- t(t(model.fit@pp$X) * lme4::fixef(model.fit)) %>%
+        as.data.frame() %>%
+        dplyr::select(!"(Intercept)") %>%
+        dplyr::mutate(total.var = apply(., 1, sum)) %>%
+        apply(2, function(effect) stats::var(effect) * n.scaling)
 
-  fixedVar <- lapply(
-    split(utils::head(fixedVar, -1)/sum(utils::head(fixedVar,-1)) *
-            utils::tail(fixedVar, 1), names(utils::head(fixedVar, -1))),
-                     unname)
+    fixedVar <- lapply(
+        split(utils::head(fixedVar, -1)/sum(utils::head(fixedVar,-1)) *
+                  utils::tail(fixedVar, 1), names(utils::head(fixedVar, -1))),
+        unname)
 
-  return(c(randomVar, fixedVar))
+    return(c(randomVar, fixedVar))
 }
 
 
@@ -1257,19 +1301,21 @@ mbecMixedVariance <- function(model.fit) {
 #' @param model.fit lm() or lmm() output.
 #' @param colinearityThreshold Cut-off for model rejection, I=[0,1].
 #' @return No return values. Stops execution if validation fails.
+#'
 #' @export
 #'
 #' @examples
 #' # This will just go through if colinearity threshold is met.
+#' data(dummy.list)
 #' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
 #' data=dummy.list$meta)
 #' mbecValidateModel(model.fit=limimo, colinearityThreshold=0.999)
 mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
-  ## ToDo: health & Safety
-  if( colinScore(model.fit) > colinearityThreshold) {
-    warning("Some covariates are strongly correlated.
+    ## ToDo: health & Safety
+    if( colinScore(model.fit) > colinearityThreshold) {
+        warning("Some covariates are strongly correlated.
             Please re-evaluate the variable selection and try again.")
-  }
+    }
 }
 
 
@@ -1284,26 +1330,28 @@ mbecValidateModel <- function(model.fit, colinearityThreshold = 0.999) {
 #' @keywords collinearity model validation
 #' @param model.fit lm() or lmm() output
 #' @return Maximum amount of correlation for given model variables.
+#'
 #' @export
 #'
 #' @examples
 #' # This will return the maximum colinearity score in the given model
+#' data(dummy.list)
 #' limimo <- lme4::lmer(dummy.list$cnts[,1] ~ group + (1|batch),
 #' data=dummy.list$meta)
 #' num.max_corr <- colinScore(model.fit=limimo)
 colinScore <- function(model.fit) {
-  # get variance-covariance matrix
-  V <- stats::vcov(model.fit)
-  # 'NA' values or non-square matrix
-  if (any(is.na(V)) || nrow(V) == 0) {
-    score <- ifelse(any(is.na(V)), 1, 0)
-    attr(score, "vcor") <- NA
-  } else {
-    # scale to correlation
-    C <- stats::cov2cor(as.matrix(V))
-    # get largest correlation
-    score <- max(abs(C[lower.tri(C)]))
-    attr(score, "vcor") <- C
-  }
-  return(score)
+    # get variance-covariance matrix
+    V <- stats::vcov(model.fit)
+    # 'NA' values or non-square matrix
+    if (any(is.na(V)) || nrow(V) == 0) {
+        score <- ifelse(any(is.na(V)), 1, 0)
+        attr(score, "vcor") <- NA
+    } else {
+        # scale to correlation
+        C <- stats::cov2cor(as.matrix(V))
+        # get largest correlation
+        score <- max(abs(C[lower.tri(C)]))
+        attr(score, "vcor") <- C
+    }
+    return(score)
 }
