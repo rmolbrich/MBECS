@@ -513,8 +513,8 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
             xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ": ",
                                  metric.df$var.explained[pca.axes[1]],
                                  "% expl.var")) +
-            ylab(paste0(colnames(plot.df[pca.axes[2] +
-                                                                                                                                                                                                                                                                                                                                          1]), ": ", metric.df$var.explained[pca.axes[2]], "% expl.var")) #+ theme_pca()
+            ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
+                        metric.df$var.explained[pca.axes[2]], "% expl.var"))
 
         pTop <- ggplot(data=plot.df,
                                 aes_string(
@@ -758,7 +758,8 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
         geom_bar(stat="identity", position="dodge", colour="black") +
         geom_text(data=plot.df,
                            aes_string(
-                               "covariate", "variance.offset", label="variance.p"),
+                               "covariate", "variance.offset",
+                               label="variance.p"),
                            position=position_dodge(width=0.9),
                            size = 3) + theme_bw() +
         facet_grid(cols=vars(type), scales="free",
@@ -830,7 +831,8 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
     # now plot
     lePlot <-
         ggplot(plot.df, aes_string(
-            x="variable", y="sil.coefficient", color="cluster", shape="variable")) +
+            x="variable", y="sil.coefficient", color="cluster",
+            shape="variable")) +
         geom_point() + facet_grid(cols=vars(type)) +
         theme_bw() +
         theme(axis.text.x=element_text(angle=60, hjust=1),

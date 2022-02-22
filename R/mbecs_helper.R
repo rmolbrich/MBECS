@@ -113,7 +113,8 @@ mbecUpperCase <- function(input=character()) {
 #' val.score <- mbecLM(input.obj=dummy.mbec, model.vars=c("batch","group"),
 #' method="lm")
 mbecLM <- function(input.obj, method=c("lm","lmm"),
-                   model.vars=c("batch","group"), type=c("clr","otu","tss","cor"),
+                   model.vars=c("batch","group"),
+                   type=c("clr","otu","tss","cor"),
                    label=character()) {
 
     type <- match.arg(type)
@@ -130,8 +131,8 @@ mbecLM <- function(input.obj, method=c("lm","lmm"),
                 select lmm instead of lm. Alas, it has not been implemented.")
 
     } else if( method == "lm" ) {
-        # fit lm to every feature with treatment and batch as as model parameters
-        # then extract p-value for treatment
+        # fit lm to every feature with treatment and batch as as model
+        # parameters then extract p-value for treatment
         tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y){
             nc.lm <- stats::lm(y ~ get(model.vars[1]) + get(model.vars[2]),
                                data=tmp.meta)

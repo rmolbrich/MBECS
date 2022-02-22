@@ -147,7 +147,7 @@ mbec.obj <- mbecProcessInput(dummy.list,
 
 ## Start from phyloseq object
 
-The start is the same if the data is already of class `phyloseq`. The `dummy.ps` 
+The start is the same if the data is already of class `phyloseq`. The `dummy.ps`
 object contains the same data as `dummy.list`, but it is of class `phyloseq`. 
 Create an `MbecData` object from `phyloseq` input. 
 
@@ -285,9 +285,9 @@ algorithms (BECA).
     and remove this effect from the data.
 
 The user has the choice between two functions `mbecCorrection()` and 
-`mbecRunCorrections()`, the latter one acts as a wrapper that can apply multiple 
+`mbecRunCorrections()`, the latter one acts as a wrapper that can apply multiple
 correction methods in a single run. <span style="color: #87B13F;">If the input 
-to `mbecRunCorrections()` is missing CLR and TSS transformed abundance matrices, 
+to `mbecRunCorrections()` is missing CLR and TSS transformed abundance matrices,
 they will be created with default settings, i.e., offsets for zero values will 
 be set to 1/#features.</span>
 
@@ -339,7 +339,7 @@ Because the `MbecData` class extends the `phyloseq` class, all functions from
 slot and will return an object of class `phyloseq`, i.e., any transformations 
 or corrections will be lost. To retrieve an object of class `phyloseq` that 
 contains the `otu_table` of corrected counts, for downstream analyses, the user 
-can employ the `mbecGetPhyloseq()` function. As before, the arguments `type` and 
+can employ the `mbecGetPhyloseq()` function. As before, the arguments `type` and
 `label` are used to specify which abundance table should be used in the 
 returned object.
 

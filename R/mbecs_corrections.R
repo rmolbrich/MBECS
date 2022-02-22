@@ -344,7 +344,8 @@ mbecSVA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 #' for the features.
 #'
 #' @include mbecs_classes.R
-mbecRUV2 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
+mbecRUV2 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
+                     nc.features=NULL) {
 
     type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
@@ -401,7 +402,8 @@ mbecRUV2 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.featur
 #' for the features.
 #'
 #' @include mbecs_classes.R
-mbecRUV4 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
+mbecRUV4 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
+                     nc.features=NULL) {
     type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
@@ -454,7 +456,8 @@ mbecRUV4 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.featur
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
+mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
+                     nc.features=NULL) {
 
     type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
@@ -569,7 +572,7 @@ mbecBat <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
                                       mod=1, par.prior=FALSE,
                                       prior.plots=FALSE)
     } else {
-        tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) # full model
+        tmp.mod <- stats::model.matrix( ~ tmp.meta[[model.vars[2]]]) #full model
 
         corrected.cnts <- sva::ComBat(tmp.cnts, batch=tmp.meta[[model.vars[1]]],
                                       mod=tmp.mod, par.prior=FALSE,

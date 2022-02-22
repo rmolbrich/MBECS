@@ -23,8 +23,8 @@
 #'
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
-                             type=c("clr","otu","tss"), file.name=NULL, file.dir=getwd(),
-                             return.data = FALSE) {
+                             type=c("clr","otu","tss"), file.name=NULL,
+                             file.dir=getwd(), return.data = FALSE) {
   # just start with input processing and transform into MbecData if required
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 

@@ -72,7 +72,7 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 
     batch.dist <- stats::rnorm(n.otus, mean = 5, sd = 1)
 
-    for( c.idx in 1:n.otus ) {
+    for( c.idx in seq(n.otus) ) {
         ## SYSTEMATIC
         cnts.sys[cnts.sys[,c.idx] == 1, c.idx] <-
             abs(stats::rnorm(n=length(cnts.sys[cnts.sys[,c.idx] == 1, c.idx]),

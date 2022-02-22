@@ -597,9 +597,10 @@ methods::setMethod("mbecGetData", "MbecData",
 #' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
-methods::setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
-           function(input.obj, required.col=NULL)
-               standardGeneric("mbecProcessInput")
+methods::setGeneric("mbecProcessInput", valueClass="MbecData",
+                    signature="input.obj",
+                    function(input.obj, required.col=NULL)
+                        standardGeneric("mbecProcessInput")
 )
 
 
