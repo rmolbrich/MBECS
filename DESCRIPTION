@@ -1,6 +1,6 @@
 Package: MBECS
 Title: Evaluation and correction of batch effects in microbiome data-sets
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: 
     person(given = "Michael",
        family = "Olbrich",
@@ -8,7 +8,7 @@ Authors@R:
        email = "M.Olbrich@protonmail.com",
        comment = c(ORCID = "0000-0003-2789-3382"))
 Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set of functions to evaluate and mitigate unwated noise due to processing in batches. To that end it incorporates a host of batch correcting algorithms from various packages. In addition it offers a correction and reporting pipeline that provides a preliminary look at the characteristics of a data-set before and after correcting for batch effects.
-biocViews: BatchEffect, Microbiome
+biocViews: BatchEffect, Microbiome, ReportWriting, Visualization, Normalization, QualityControl
 URL: https://github.com/rmolbrich/MBECS
 BugReports: https://github.com/rmolbrich/MBECS/issues/new
 License: MIT + file LICENSE
@@ -16,19 +16,14 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.1.2
 Imports: 
+    methods,
     magrittr,
-    phyloseq
-Suggests: 
-    BiocStyle,
-    testthat (>= 3.0.0)
-Depends: 
-    R (>= 4.1),
+    phyloseq,
     limma,
     lme4,
     lmerTest,
     pheatmap,
     rmarkdown,
-    markdown,
     cluster,
     dplyr,
     ggplot2,
@@ -38,10 +33,16 @@ Depends:
     tibble,
     tidyr,
     vegan,
-    methods,
     stats,
     utils,
-    knitr
+    Matrix
+Suggests: 
+    knitr,
+    markdown,
+    BiocStyle,
+    testthat (>= 3.0.0)
+Depends: 
+    R (>= 4.1)
 Collate: 
     'MBECS-package.R'
     'data.R'
@@ -51,6 +52,5 @@ Collate:
     'mbecs_helper.R'
     'mbecs_plots.R'
     'mbecs_reports.R'
-    'utils-pipe.R'
 VignetteBuilder: knitr
 Config/testthat/edition: 3
