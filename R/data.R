@@ -32,7 +32,7 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
     n <- 2
     # create meta-data
     meta <- data.frame(
-        "sID"=paste("S", 1:n.samples, sep=""),
+        "sID"=paste("S", seq(n.samples), sep=""),
         "group"=factor(c(rep("A", times=n.samples/n),
                          rep("B", times=n.samples/n))),
         "batch"=factor(rep(c("B1","B2"), times=n.samples/n)),
@@ -60,13 +60,16 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 
     ## DEFINE distributions for NON-SYS, OTU, TREATMENT, BE
     # random impact of non-systematic BE
-    nsys <- sample(0:1,size=n.otus,replace=TRUE)
+    nsys <- sample(c(0,1),size=n.otus,replace=TRUE)
     # some arbitrary distribution for abundance of all OTUs
     otu.dist <- round(stats::rexp(n.otus, .01))
     # some arbitrary distribution for treatment effect
     treat.dist <- stats::rlnorm(n = n.otus, meanlog=3, sdlog=0.5)
+    treat_A <- which(meta$group %in% "A")
     # some arbitrary distribution for batch-effect
-    batch_1 <- c(1:10,21:30)
+    batch_1 <- which(meta$batch %in% "B1")
+
+
     batch.dist <- stats::rnorm(n.otus, mean = 5, sd = 1)
 
     for( c.idx in 1:n.otus ) {
@@ -77,9 +80,9 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 
         # now add 'treatment-effect' to first twenty rows/samples
         # use normal distribution for all otus for slight variation
-        cnts.sys[which(cnts.sys[1:20,c.idx] != 0), c.idx] <-
-            cnts.sys[which(cnts.sys[1:20,c.idx] != 0), c.idx] +
-            stats::rnorm(n=length(which(cnts.sys[1:20,c.idx] != 0)),
+        cnts.sys[which(cnts.sys[treat_A,c.idx] != 0), c.idx] <-
+            cnts.sys[which(cnts.sys[treat_A,c.idx] != 0), c.idx] +
+            stats::rnorm(n=length(which(cnts.sys[treat_A,c.idx] != 0)),
                          mean=treat.dist[c.idx], sd=1)
 
         # B1: now add systematic batch-effect to one batch
@@ -97,9 +100,9 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 
         # now add 'treatment-effect' to first twenty rows/samples
         # use normal distribution for all otus for slight variation
-        cnts.nonsys[which(cnts.nonsys[1:20,c.idx] != 0), c.idx] <-
-            cnts.nonsys[which(cnts.nonsys[1:20,c.idx] != 0), c.idx] +
-            stats::rnorm(n=length(which(cnts.nonsys[1:20,c.idx] != 0)),
+        cnts.nonsys[which(cnts.nonsys[treat_A,c.idx] != 0), c.idx] <-
+            cnts.nonsys[which(cnts.nonsys[treat_A,c.idx] != 0), c.idx] +
+            stats::rnorm(n=length(which(cnts.nonsys[treat_A,c.idx] != 0)),
                          mean=treat.dist[c.idx], sd=1)
 
         # B1: now add non-systematic batch-effect to one batch
