@@ -4,7 +4,7 @@
 \alias{mbecPN}
 \title{Percentile Normalization (PN)}
 \usage{
-mbecPN(input.obj, model.vars, type = "tss")
+mbecPN(input.obj, model.vars, type = c("clr", "otu", "tss"))
 }
 \arguments{
 \item{input.obj}{phyloseq object or numeric matrix (correct orientation is

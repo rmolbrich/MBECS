@@ -7,7 +7,7 @@
 mbecReportPrelim(
   input.obj,
   model.vars = c("batch", "group"),
-  type = "clr",
+  type = c("clr", "otu", "tss"),
   file.name = NULL,
   file.dir = getwd(),
   return.data = FALSE

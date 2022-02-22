@@ -8,7 +8,7 @@ mbecLM(
   input.obj,
   method = c("lm", "lmm"),
   model.vars = c("batch", "group"),
-  type = "clr",
+  type = c("clr", "otu", "tss", "cor"),
   label = character()
 )
 }

@@ -197,14 +197,15 @@ mbecRunCorrections <- function(input.obj,
 #' study.obj <- mbecCorrection(dummy.mbec, model.vars=c("batch","group"),
 #' method="pn", type="tss")
 mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
-                           method, type="clr", nc.features=NULL) {
+                           method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc",
+                                    "bat","rbe","pn","svd"),
+                           type=c("clr","otu","tss"), nc.features=NULL) {
 
     input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
     ##  Check if 'method' was chosen correctly.
-    method <- match.arg(method,
-                        choices = c("lm","lmm","sva","ruv2","ruv4","ruv3",
-                                    "bmc","bat","rbe","pn","svd"))
+    method <- match.arg(method)
+    type <- match.arg(type)
     ## START WITH ASSESSMENT METHODS
     if( method == "lm" ) {
         message("Applying Linear Model (LM).")
@@ -286,11 +287,11 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
 #' for the features.
 #'
 #' @include mbecs_classes.R
-mbecSVA <- function(input.obj, model.vars, type="clr") {
+mbecSVA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     message("Applying Surrogate Variable Analysis (SVA).")
     # this should only match the uncorrected abundance matrices
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj=input.obj, orientation="fxs", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -343,9 +344,9 @@ mbecSVA <- function(input.obj, model.vars, type="clr") {
 #' for the features.
 #'
 #' @include mbecs_classes.R
-mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
+mbecRUV2 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
 
-    type <- match.arg(type, choices=c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -400,8 +401,8 @@ mbecRUV2 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' for the features.
 #'
 #' @include mbecs_classes.R
-mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+mbecRUV4 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -453,9 +454,9 @@ mbecRUV4 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
+mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"), nc.features=NULL) {
 
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -509,10 +510,10 @@ mbecRUV3 <- function(input.obj, model.vars, type="clr", nc.features=NULL) {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecBMC <- function(input.obj, model.vars, type="clr") {
+mbecBMC <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     message("Applying Batch Mean-Centering (BMC) for batch-correction.")
 
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -554,11 +555,11 @@ mbecBMC <- function(input.obj, model.vars, type="clr") {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecBat <- function(input.obj, model.vars, type="clr") {
+mbecBat <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     message("Applying ComBat (sva) for batch-correction.")
     ## ComBat requires 'fxs' orientation for inputs
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -602,11 +603,11 @@ mbecBat <- function(input.obj, model.vars, type="clr") {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecRBE <- function(input.obj, model.vars, type="clr") {
+mbecRBE <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     message("Applying 'removeBatchEffect' (limma) for batch-correction.")
     ## removeBatchEffect requires 'fxs' orientation for inputs
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="fxs", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -657,11 +658,11 @@ mbecRBE <- function(input.obj, model.vars, type="clr") {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecPN <- function(input.obj, model.vars, type="tss") {
+mbecPN <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     message("Applying Percentile Normalization (PN).")
     ## Percentile Normalization requires 'sxf' orientation for inputs
-    type <- match.arg(type, choices = c("tss","otu","clr"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
@@ -717,11 +718,11 @@ mbecPN <- function(input.obj, model.vars, type="tss") {
 #' @return A matrix of batch-effect corrected counts
 #'
 #' @include mbecs_classes.R
-mbecSVD <- function(input.obj, model.vars, type="clr") {
+mbecSVD <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     message("Applying Singular Value Decomposition (SVD) for batch-correction.")
     ## SVD requires 'sxf' orientation for inputs
-    type <- match.arg(type, choices = c("otu","clr","tss"))
+    type <- match.arg(type)
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
     # sd, mean, scale

@@ -7,9 +7,9 @@
 mbecModelVariance(
   input.obj,
   model.vars = character(),
-  method = "lm",
+  method = c("lm", "lmm", "rda", "pvca", "s.coef"),
   model.form = NULL,
-  type = "clr",
+  type = c("otu", "clr", "tss", "ass", "cor"),
   label = character(),
   no.warning = TRUE,
   na.action = NULL

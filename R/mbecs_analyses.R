@@ -50,6 +50,9 @@
 mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
                     label=character(), return.data = FALSE) {
 
+    # local variable references to shut up check()
+    . <- plot.order <- specimen <- NULL
+
     tmp <- mbecGetData(input.obj=input.obj, orientation="fxs",
                        required.col=eval(model.vars), type=eval(type),
                        label=label)
@@ -496,6 +499,9 @@ mbecHeat <- function(input.obj, model.vars = c("batch", "group"), center = TRUE,
 mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
                        return.data = FALSE) {
 
+    # local variable references to shut up check()
+    Freq <- NULL
+
     cols <- c("#1F77B4","#AEC7E8","#FF7F0E","#FFBB78","#2CA02C","#98DF8A",
               "#D62728","#FF9896","#9467BD","#C5B0D5","#8C564B","#C49C94",
               "#E377C2","#F7B6D2","#7F7F7F","#C7C7C7","#BCBD22","#DBDB8D",
@@ -646,9 +652,11 @@ mbecMosaic <- function(input.obj, model.vars = c("batch", "group"),
 #' df.var.pvca <- mbecModelVariance(input.obj=dummy.mbec,
 #' model.vars=c("batch", "group"), method='pvca')
 mbecModelVariance <- function(input.obj, model.vars=character(),
-                              method="lm", model.form=NULL, type="clr",
-                              label=character(), no.warning = TRUE,
-                              na.action = NULL) {
+                              method=c("lm","lmm","rda","pvca","s.coef"),
+                              model.form=NULL,
+                              type=c("otu","clr","tss","ass","cor"),
+                              label=character(), no.warning=TRUE,
+                              na.action=NULL) {
     oldw <- getOption("warn")
     if (no.warning) {
         options(warn = -1)
@@ -660,8 +668,8 @@ mbecModelVariance <- function(input.obj, model.vars=character(),
         na.action <- getOption("na.action")
     }
 
-    method <- match.arg(method, choices = c("lm","lmm","rda","pvca","s.coef"))
-    type <- match.arg(type, choices = c("otu","clr","tss","ass","cor"))
+    method <- match.arg(method)
+    type <- match.arg(type)
 
     ## PVCA stuff
     pct_threshold <- 0.5876  # threshold for explained variances
@@ -953,6 +961,9 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
 #' @include mbecs_classes.R
 mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
                                   pct_threshold, na.action) {
+    # local variable references to shut up check()
+    . <- NULL
+
     n.vars <- length(model.vars)
     s.names <- rownames(tmp.cnts)
 
@@ -1166,6 +1177,9 @@ mbecVarianceStats <- function(model.fit) {
 #' @return A named row-vector, containing proportional variance for model terms.
 mbecVarianceStatsLM <- function(model.fit) {
 
+    # local variable references to shut up check()
+    . <- NULL
+
     vp <- stats::anova(model.fit) %>%
         data.frame() %>%
         dplyr::mutate(
@@ -1267,6 +1281,8 @@ mbecVarianceStatsLMM <- function(model.fit) {
 #' data=dummy.list$meta)
 #' list.variance <- mbecMixedVariance(model.fit=limimo)
 mbecMixedVariance <- function(model.fit) {
+    # local variable references to shut up check()
+    . <- NULL
 
     rVC <- lme4::VarCorr(model.fit)
 

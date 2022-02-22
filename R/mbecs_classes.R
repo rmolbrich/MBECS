@@ -27,7 +27,7 @@
 #' # and meta-data table.
 #' data(dummy.list)
 #' mbec.obj <- MbecData(cnt_table=dummy.list$cnts, meta_data = dummy.list$meta)
-MbecData <- setClass("MbecData", contains = "phyloseq",
+MbecData <- methods::setClass("MbecData", contains = "phyloseq",
                      slots = list(assessments="list", corrections="list",
                                   tss="matrix",       clr="matrix"))
 
@@ -146,7 +146,7 @@ MbecData <- function( cnt_table=NULL, meta_data=NULL, tax_table=NULL,
         tar <- TRUE
     }
         # taxa are columns
-    return( new("MbecData",
+    return( methods::new("MbecData",
     phyloseq::phyloseq(phyloseq::otu_table(cnt_table, taxa_are_rows=eval(tar)),
                        phyloseq::sample_data(meta_data),
                        phyloseq::tax_table(tax_table, errorIfNULL=FALSE),
@@ -193,7 +193,7 @@ MbecData <- function( cnt_table=NULL, meta_data=NULL, tax_table=NULL,
 #' # name "nameOfMethod".
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
-setGeneric("mbecSetData", signature="input.obj",
+methods::setGeneric("mbecSetData", signature="input.obj",
            function(input.obj, new.cnts=NULL,
                     type=c("otu","ass","cor","clr","tss"), label=character())
                standardGeneric("mbecSetData")
@@ -231,7 +231,7 @@ setGeneric("mbecSetData", signature="input.obj",
 #' # name "nameOfMethod".
 #' MBEC.obj <- mbecSetData(input.obj=dummy.mbec, new.cnts=dummy.list$cnts,
 #'     type='cor', label="nameOfMethod")
-setMethod("mbecSetData", "MbecData",
+methods::setMethod("mbecSetData", "MbecData",
           function(input.obj, new.cnts=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {
               .mbecSetData(input.obj, new.cnts=new.cnts,
@@ -280,7 +280,7 @@ setMethod("mbecSetData", "MbecData",
         return(input.obj)
     }
 
-    type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
+    type <- match.arg(type)
 
 
     if( type != "ass" ) {
@@ -387,7 +387,7 @@ setMethod("mbecSetData", "MbecData",
 #' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
 #'     required.col=c("group","batch"), type="clr")
-setGeneric("mbecGetData", signature="input.obj",
+methods::setGeneric("mbecGetData", signature="input.obj",
            function(input.obj, orientation="fxs", required.col=NULL,
                     type=c("otu","ass","cor","clr","tss"), label=character())
                standardGeneric("mbecGetData")
@@ -448,7 +448,7 @@ setGeneric("mbecGetData", signature="input.obj",
                          type=c("otu","ass","cor","clr","tss"),
                          label=character()) {
 
-    type <- match.arg(type, choices = c("otu","ass","cor","clr","tss"))
+    type <- match.arg(type)
     # in general the input should be of class phyloseq or MbecData - so just
     # get the fields to evaluate here
     tmp.meta <- data.frame(phyloseq::sample_data(input.obj, errorIfNULL=FALSE),
@@ -564,7 +564,7 @@ setGeneric("mbecGetData", signature="input.obj",
 #' # the meta-data table.
 #' list.obj <- mbecGetData(input.obj=dummy.mbec, orientation="fxs",
 #'     required.col=c("group","batch"), type="clr")
-setMethod("mbecGetData", "MbecData",
+methods::setMethod("mbecGetData", "MbecData",
           function(input.obj, orientation="fxs", required.col=NULL,
                    type=c("otu","ass","cor","clr","tss"), label=character()) {
               .mbecGetData(input.obj, orientation=orientation,
@@ -597,7 +597,7 @@ setMethod("mbecGetData", "MbecData",
 #' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
-setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
+methods::setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
            function(input.obj, required.col=NULL)
                standardGeneric("mbecProcessInput")
 )
@@ -643,7 +643,7 @@ setGeneric("mbecProcessInput", valueClass="MbecData", signature="input.obj",
 #' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
-setMethod("mbecProcessInput", "MbecData",
+methods::setMethod("mbecProcessInput", "MbecData",
           function(input.obj, required.col=NULL) {
               .mbecProcessInput(input.obj, required.col=required.col)
           }
@@ -672,7 +672,7 @@ setMethod("mbecProcessInput", "MbecData",
 #' data(dummy.ps)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.ps,
 #'     required.col=c("group","batch"))
-setMethod("mbecProcessInput", "phyloseq",
+methods::setMethod("mbecProcessInput", "phyloseq",
     function(input.obj, required.col=NULL) {
 
         # check sample_data if 'required.col' is not NULL
@@ -726,7 +726,7 @@ setMethod("mbecProcessInput", "phyloseq",
 #' data(dummy.mbec)
 #' MbecData.obj <- mbecProcessInput(input.obj=dummy.mbec,
 #'     required.col=c("group","batch"))
-setMethod("mbecProcessInput", "list",
+methods::setMethod("mbecProcessInput", "list",
     function(input.obj, required.col=NULL) {
         if( length(input.obj) != 2 ) {
             stop("Stop: Please provide an abundance-table as first element
@@ -782,7 +782,7 @@ setMethod("mbecProcessInput", "list",
 #' # abundances as otu_table
 #' data(dummy.mbec)
 #' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
-setGeneric("mbecGetPhyloseq", signature="input.obj",
+methods::setGeneric("mbecGetPhyloseq", signature="input.obj",
            function(input.obj, type=c("otu","cor","clr","tss"),
                     label=character())
                standardGeneric("mbecGetPhyloseq")
@@ -820,7 +820,7 @@ setGeneric("mbecGetPhyloseq", signature="input.obj",
                              label=character()) {
 
     # match correct argument
-    type <- match.arg(type, choices = c("otu","cor","clr","tss"))
+    type <- match.arg(type)
 
     if( type == "cor" && length(label) == 0 ) {
         warning("For type 'cor' you need to specifiy the label-parameter.")
@@ -868,7 +868,7 @@ setGeneric("mbecGetPhyloseq", signature="input.obj",
 #' # abundances as otu_table
 #' data(dummy.mbec)
 #' ps.clr.obj <- mbecGetPhyloseq(input.obj=dummy.mbec, type="clr")
-setMethod("mbecGetPhyloseq", "MbecData",
+methods::setMethod("mbecGetPhyloseq", "MbecData",
           function(input.obj, type=c("otu","cor","clr","tss"),
                    label=character()) {
               .mbecGetPhyloseq(input.obj, type=type, label=label)

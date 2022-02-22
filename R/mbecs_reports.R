@@ -23,14 +23,14 @@
 #'
 #' @export
 mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
-                             type="clr", file.name=NULL, file.dir=getwd(),
+                             type=c("clr","otu","tss"), file.name=NULL, file.dir=getwd(),
                              return.data = FALSE) {
   # just start with input processing and transform into MbecData if required
   input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
 
   # for choice of abundance matrix other than 'otu' this checks if it is present
   # and calculates it if not
-  type <- match.arg(type, choices = c("otu","clr","tss"))
+  type <- match.arg(type)
   if( !(type == "otu") && length(attr(input.obj, eval(type))) == 1  ) {
     input.obj <- mbecTransform(input.obj, method=eval(type))
   }

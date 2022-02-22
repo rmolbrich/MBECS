@@ -113,10 +113,10 @@ mbecUpperCase <- function(input=character()) {
 #' val.score <- mbecLM(input.obj=dummy.mbec, model.vars=c("batch","group"),
 #' method="lm")
 mbecLM <- function(input.obj, method=c("lm","lmm"),
-                   model.vars=c("batch","group"), type="clr",
+                   model.vars=c("batch","group"), type=c("clr","otu","tss","cor"),
                    label=character()) {
 
-    type <- match.arg(type, choices = c("otu","clr","tss","cor"))
+    type <- match.arg(type)
     ## check and prepare inputs
     input.obj <- mbecProcessInput(input.obj, required.col=model.vars)
     tmp <- mbecGetData(input.obj = input.obj, orientation = "sxf",
@@ -200,10 +200,10 @@ mbecLM <- function(input.obj, method=c("lm","lmm"),
 #' # This will return total sum-scaled counts in an MbecData object.
 #' mbec.CLR <- mbecTransform(input.obj=dummy.mbec, method="tss", offset=0,
 #' required.col=c("batch","group"))
-mbecTransform <- function(input.obj, method = "clr",
-                          offset = 0, required.col=NULL) {
+mbecTransform <- function(input.obj, method=c("clr","tss"),
+                          offset=0, required.col=NULL) {
     ## 00. Check if 'method' was chosen correctly and get optional arguments
-    method <- match.arg(method, choices = c("clr","tss"))
+    method <- match.arg(method)
     ## VALIDATE input and change to 'MbecData' if needed
     input.obj <- mbecProcessInput(input.obj, required.col=eval(required.col))
 

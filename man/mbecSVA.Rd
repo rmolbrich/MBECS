@@ -4,7 +4,7 @@
 \alias{mbecSVA}
 \title{Surrogate variable Analysis (SVA)}
 \usage{
-mbecSVA(input.obj, model.vars, type = "clr")
+mbecSVA(input.obj, model.vars, type = c("clr", "otu", "tss"))
 }
 \arguments{
 \item{input.obj}{MbecData object}

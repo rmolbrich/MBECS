@@ -4,7 +4,12 @@
 \alias{mbecTransform}
 \title{Normalizing Transformations}
 \usage{
-mbecTransform(input.obj, method = "clr", offset = 0, required.col = NULL)
+mbecTransform(
+  input.obj,
+  method = c("clr", "tss"),
+  offset = 0,
+  required.col = NULL
+)
 }
 \arguments{
 \item{input.obj}{MbecData, phyloseq, list(counts, meta-data)}
