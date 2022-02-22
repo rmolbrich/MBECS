@@ -47,3 +47,4 @@
 #'
 #' @docType package
 #' @name MBECS
+NULL
