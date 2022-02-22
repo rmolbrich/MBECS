@@ -16,7 +16,9 @@ A list object containing counts and meta-data:
 dummy.list
 }
 \description{
-A dataset containing pre-processed abundance table of
-microbial communities and a matrix of covariate information.
+An artificial data-set containing pre-processed abundance table of
+microbial communities and a matrix of covariate information. The data was
+created using the \code{\link{mbecDummy}} function for the sole purpose of
+running examples and showing the package workflow.
 }
 \keyword{datasets}
