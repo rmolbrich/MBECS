@@ -29,8 +29,8 @@ The Microbiome Batch-Effect Correction Suite aims to provide a toolkit for
 stringent assessment and correction of batch-effects in microbiome data sets. 
 To that end, the package offers wrapper-functions to summarize study-design and 
 data, e.g., PCA, Heatmap and Mosaic-plots, and to estimate the proportion of 
-variance that can be attributed to the batch effect. The `mbecsCorrection` 
-function acts as a wrapper for various batch effects correction algorithms 
+variance that can be attributed to the batch effect. The `mbecsCorrection()` 
+function acts as a wrapper for various batch effect correcting algorithms 
 (BECA) and in conjunction with the aforementioned tools, it can be used to 
 compare the effectiveness of correction methods on particular sets of data. 
 All functions of this package are accessible on their own or within the 
@@ -95,21 +95,21 @@ devtools::install_github("rmolbrich/MBECS")
 # Workflow
 
 The main application of this package is microbiome data. It is common practice 
-to use the phyloseq [@R-phyloseq] package for analyses of this type of data. 
-To that end, the MBECS package extends the phyloseq class in order to provide 
-its functionality. The user can utilize objects of class phyloseq or a list 
-object that contains an abundance table as well as meta data. The package 
-contains a dummy data-set of artificially generated data to illustrate this 
-process. To start an analysis, the user requires the `mbecProcessInput` 
+to use the `phyloseq` [@R-phyloseq] package for analyses of this type of data. 
+To that end, the `MBECS` package extends the `phyloseq` class in order to 
+provide its functionality. The user can utilize objects of class `phyloseq` or 
+a `list` object that contains an abundance table as well as meta data. The 
+package contains a dummy data-set of artificially generated data to illustrate 
+this process. To start an analysis, the user requires the `mbecProcessInput()` 
 function.
 
-Load the package via the `library` function.
+Load the package via the `library()` function.
 
 ```{r ACTIVATION, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 library(MBECS)
 ```
 
-Conveniently load the provided mockup data-sets at this point. 
+Use the `data()`function to load the provided mockup data-sets at this point. 
 
 ```{r Load_dummies, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 # List object 
@@ -124,19 +124,20 @@ data(dummy.mbec)
 ## Start from abundance table
 
 For an input that consists of an abundance table and meta-data, both tables 
-require sample names as either row or column names. The `mbecProcessInput` 
-function will handle the correct orientation and return an object of class 
-MbecData.
+require sample names as either row or column names. They need to be passed in a 
+`list` object with the abundance matrix as first element. The 
+`mbecProcessInput()` function will handle the correct orientation and return an 
+object of class `MbecData`.
 
 ```{r Structure_list, echo=TRUE, eval=TRUE, tidy=FALSE}
 # The dummy-list input object comprises two matrices:
 names(dummy.list)
 ```
 
-The optional argument required.col may be used to ensure that all covariate 
+The optional argument `required.col` may be used to ensure that all covariate 
 columns that should be there are available. For the dummy-data these are 
-<span style="color: red;">"group"</span>, <span style="color: red;">"batch"
-</span> and <span style="color: red;">"replicate"</span>.
+<span style="color: #CD3048;">"group"</span>, <span style="color: #CD3048;">
+"batch"</span> and <span style="color: #CD3048;">"replicate"</span>.
 
 ```{r Usage_list, echo=TRUE, eval=TRUE, tidy=FALSE}
 mbec.obj <- mbecProcessInput(dummy.list, 
@@ -146,14 +147,14 @@ mbec.obj <- mbecProcessInput(dummy.list,
 
 ## Start from phyloseq object
 
-The start is the same if the data is already of class `phyloseq`. The dummy.ps 
-object contains the same data as dummy.list, but it is of class phyloseq. 
-Create an MbecData object from phyloseq input. 
+The start is the same if the data is already of class `phyloseq`. The `dummy.ps` 
+object contains the same data as `dummy.list`, but it is of class `phyloseq`. 
+Create an `MbecData` object from `phyloseq` input. 
 
-The optional argument required.col may be used to ensure that all covariate 
+The optional argument `required.col` may be used to ensure that all covariate 
 columns that should be there are available. For the dummy-data these are 
-<span style="color: red;">"group"</span>, <span style="color: red;">"batch"
-</span> and <span style="color: red;">"replicate"</span>.
+<span style="color: #CD3048;">"group"</span>, <span style="color: #CD3048;">
+"batch"</span> and <span style="color: #CD3048;">"replicate"</span>.
 
 ```{r Usage_phyloseq, echo=TRUE, eval=TRUE, tidy=FALSE}
 mbec.obj <- mbecProcessInput(dummy.ps, 
@@ -166,10 +167,10 @@ mbec.obj <- mbecProcessInput(dummy.ps,
 The most common normalizing transformations in microbiome analysis are total 
 sum scaling (TSS) and centered log-ratio transformation (CLR). Hence, the 
 `MBECS` package offers these two methods. The resulting matrices will be stored 
-in their respective slots (tss, clr) in the `MbecData` object, while the 
+in their respective `slots (tss, clr)` in the `MbecData` object, while the 
 original abundance table will remain unchanged.
 
-Apply total sum scaling to the data. 
+Use `mbecTransform()` to apply total sum scaling to the data. 
 
 ```{r Usage_tss_transformation, echo=TRUE, eval=TRUE, tidy=FALSE}
 mbec.obj <- mbecTransform(mbec.obj, method = "tss")
@@ -187,21 +188,22 @@ mbec.obj <- mbecTransform(mbec.obj, method = "clr", offset = 0.0001)
 
 ## Preliminary report
 
-The preliminary report will provide the user with an overview of experimental 
-setup and the significance of the batch effect. To that end it is required to 
-declare the covariates that are related to batch effect and group effect 
-respectively. In addition it provides the option to select the abundance table 
-to use here. The CLR transformed abundances are the default and the function 
-will calculate them if they are not present in the input. Technically, the user 
-can start the analysis at this point because the function incorporates the 
-functionality of the aforementioned processing functions.
+The function `mbecReportPrelim()` will provide the user with an overview of 
+experimental setup and the significance of the batch effect. To that end it is 
+required to declare the covariates that are related to batch effect and group 
+effect respectively. In addition it provides the option to select the abundance 
+table to use here. The CLR transformed abundances are the default and the 
+function will calculate them if they are not present in the input. Technically, 
+the user can start the analysis at this point because the function incorporates 
+the functionality of the aforementioned processing functions.
 
 The parameter `model.vars` is a character vector with two elements. The first 
 denotes the covariate column that describes the batch effect and the second one 
 should be used for the presumed biological effect of interest, e.g., the group 
 effect in case/control studies. The `type` parameter selects which abundance 
-table is to be used <span style="color: red;">"otu"</span>, 
-<span style="color: red;">"clr"</span>, <span style="color: red;">"tss"</span>.
+table is to be used <span style="color: #CD3048;">"otu"</span>, 
+<span style="color: #CD3048;">"clr"</span>, <span style="color: #CD3048;">"tss"
+</span>.
 
 ```{r Usage_prelimreport, echo=TRUE, eval=FALSE, results='asis', tidy=FALSE}
 mbecReportPrelim(input.obj=mbec.obj, model.vars=c("batch","group"), 
@@ -210,10 +212,10 @@ mbecReportPrelim(input.obj=mbec.obj, model.vars=c("batch","group"),
 
 ## Run corrections
 
-The package acts as a wrapper for six different batch effect correction 
+The package acts as a wrapper for six different batch effect correcting 
 algorithms (BECA).
 
--   Remove Unwanted Variation 3 (ruv3)
+-   Remove Unwanted Variation 3 (`ruv3`)
 
     -   This algorithm is implemented in ruv-package by @R-ruv.
     -   The algorithm requires negative control-features, i.e., features that 
@@ -226,20 +228,20 @@ algorithms (BECA).
     pseudo negative controls that are not significantly affected by the batch 
     effect.
 
--   Batch Mean Centering (bmc)
+-   Batch Mean Centering (`bmc`)
 
     -   This algorithm is part of this package.
     -   For known batch effects, this method takes the batches, i.e., subgroup 
     of samples within a particular batch, and centers them to their mean value.
 
--   ComBat (bat)
+-   ComBat (`bat`)
 
     -   Described by Johnson et al. 2007 this method was initially conceived to 
     work with gene expression data and is part of the sva-package by @R-sva.
     -   This method uses an non-/parametric empirical Bayes framework to 
     correct for known batch effects.
 
--   Remove Batch Effect (rbe)
+-   Remove Batch Effect (`rbe`)
 
     -   As part of the limma-package by @R-limma this method was designed to 
     remove BEs from Micro array data.
@@ -249,7 +251,7 @@ algorithms (BECA).
     produces a residual matrix that (presumably) contains only the 
     full-model-effect, e.g., treatment.
 
--   Percentile Normalization (pn)
+-   Percentile Normalization (`pn`)
 
     -   This method was actually developed specifically to facilitate the 
     integration of microbiome data from different studies/experimental set-ups 
@@ -269,39 +271,39 @@ algorithms (BECA).
     normalization. It can only be applied to case/control designs because it 
     requires a reference group. In addition, the transformation into 
     percentiles removes information from the data.
-    - <span style="color: orange;">The 'mbecRunCorrections' wrapper will 
+    - <span style="color: #87B13F;">The 'mbecRunCorrections' wrapper will 
     automatically select Total Sum Scaled values for percentile normalization 
     because that is what it is supposed to be used on. The function 
     `mbecCorrections` can be used to manually select untransformed or centered 
     log ratio transformed abundances.</span>
     
--   Support Vector Decomposition (svd)
+-   Support Vector Decomposition (`svd`)
 
     -   Successfully applied to micro-array data by @nielsen2002.
     -   Basically perform matrix factorization and compute singular 
     eigen-vectors (SEV). Assume that the first SEV captures the batch-effect 
     and remove this effect from the data.
 
-The user has the choice between two functions `mbecCorrection` and 
-`mbecRunCorrections`, the latter one acts as a wrapper that can apply multiple 
-correction methods in a single run. <span style="color: orange;">If the input 
-to `mbecRunCorrections` is missing CLR and TSS transformed abundance matrices, 
+The user has the choice between two functions `mbecCorrection()` and 
+`mbecRunCorrections()`, the latter one acts as a wrapper that can apply multiple 
+correction methods in a single run. <span style="color: #87B13F;">If the input 
+to `mbecRunCorrections()` is missing CLR and TSS transformed abundance matrices, 
 they will be created with default settings, i.e., offsets for zero values will 
 be set to 1/#features.</span>
 
-The function mbecCorrection will apply a single correction algorithm selected 
-by the parameter `method` and return an object that contains the resulting 
-corrected abundance matrix in its cor slot with the respective name.
+The function `mbecCorrection()` will apply a single correction algorithm 
+selected by the parameter `method` and return an object that contains the 
+resulting corrected abundance matrix in its `cor slot` with the respective name.
 
 ```{r Usage_single_correction, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 mbec.obj <- mbecCorrection(mbec.obj, model.vars=c("batch","group"), 
                            method = "bat", type = "clr")
 ```
 
-The function mbecRunCorrections will apply all correction algorithms selected 
-by the parameter `method` and return an object that contains all respective 
-corrected abundance matrices in the cor slot. In this example there will be 
-three in total, named like the methods that created them.
+The function `mbecRunCorrections()` will apply all correction algorithms 
+selected by the parameter `method` and return an object that contains all 
+respective corrected abundance matrices in the `cor` slot. In this example 
+there will be three in total, named like the methods that created them.
 
 ```{r Usage_multiple_correction, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 mbec.obj <- mbecRunCorrections(mbec.obj, model.vars=c("batch","group"),
@@ -313,16 +315,17 @@ mbec.obj <- mbecRunCorrections(mbec.obj, model.vars=c("batch","group"),
 
 ## Post report
 
-The post-report will provide the user with a comparative report that shows how 
-the chosen batch effect correction algorithms changed the data-set compared to 
-the initial values.
+The `mbecReportPost()` function will provide the user with a comparative report 
+that shows how the chosen batch effect correction algorithms changed the 
+data-set compared to the initial values.
 
 The parameter `model.vars` is a character vector with two elements. The first 
 denotes the covariate column that describes the batch effect and the second one 
 should be used for the presumed biological effect of interest, e.g., the group 
 effect in case/control studies. The `type` parameter selects which abundance 
-table is to be used <span style="color: red;">"otu"</span>, 
-<span style="color: red;">"clr"</span>, <span style="color: red;">"tss"</span>.
+table is to be used <span style="color: #CD3048;">"otu"</span>, 
+<span style="color: #CD3048;">"clr"</span>, <span style="color: #CD3048;">"tss"
+</span>.
 
 ```{r Usage_postreport, echo=TRUE, eval=FALSE, results='asis', tidy=FALSE}
 mbecReportPost(input.obj=mbec.obj, model.vars=c("batch","group"), 
@@ -331,24 +334,24 @@ mbecReportPost(input.obj=mbec.obj, model.vars=c("batch","group"),
 
 ## Retrieve corrrected data
 
-Because the MbecData-class extends the phyloseq-class, all function from 
-phyloseq can be used as well. They do however only apply to the `otu_table` 
+Because the `MbecData` class extends the `phyloseq` class, all functions from 
+`phyloseq` can be used as well. They do however only apply to the `otu_table` 
 slot and will return an object of class `phyloseq`, i.e., any transformations 
-or corrections will be lost. To retrieve an object of class phyloseq that 
+or corrections will be lost. To retrieve an object of class `phyloseq` that 
 contains the `otu_table` of corrected counts, for downstream analyses, the user 
-can employ the `mbecGetPhyloseq` function. As before, the arguments `type` and 
+can employ the `mbecGetPhyloseq()` function. As before, the arguments `type` and 
 `label` are used to specify which abundance table should be used in the 
 returned object.
 
-To retrieve the clr-transformed counts, set `type` accordingly.
+To retrieve the CLR transformed counts, set `type` accordingly.
 
 ```{r Usage_returnPS_clr, echo=TRUE, eval=FALSE, results='asis', tidy=FALSE}
 ps.clr <- mbecGetPhyloseq(mbec.obj, type="clr")
 ```
 
 If the batch-mean-centering corrected counts show the best results, select 
-<span style="color: red;">"cor"</span> as `type` and set the `label` to 
-<span style="color: red;">"bmc"</span>.
+<span style="color: #CD3048;">"cor"</span> as `type` and set the `label` to 
+<span style="color: #CD3048;">"bmc"</span>.
 
 ```{r Usage_returnPS_bmc, echo=TRUE, eval=FALSE, results='asis', tidy=FALSE}
 ps.bmc <- mbecGetPhyloseq(mbec.obj, type="cor", label="bmc")
@@ -362,28 +365,30 @@ ps.bmc <- mbecGetPhyloseq(mbec.obj, type="cor", label="bmc")
 
 ### Relative Log-Expression
 
-Relative Log-Expression plots can be created with the `mbecRLE` function. 
+Relative Log-Expression plots can be created with the `mbecRLE()` function. 
 
-Produce RLE-plot on clr transformed values. The `return.data` parameter can be 
+Produce RLE-plot on CLR transformed values. The `return.data` parameter can be 
 set to <span style="color: purple;">TRUE</span> to retrieve the data for 
 inspection or use in your own plotting function.
 
 ```{r Usage_rle, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 rle.plot <- mbecRLE(input.obj=mbec.obj, model.vars = c("batch","group"), 
                     type="clr",return.data = FALSE) 
+
+# Take a look.
+plot(rle.plot)
 ```
 
 ### Principal Components Analysis
 
-PCA plots can be created with the `mbecPCA` function.
+PCA plots can be created with the `mbecPCA()` function.
 
-Produce PCA-plot on clr transformed values. The principal components can be 
+Produce PCA-plot on CLR transformed values. The principal components can be 
 selected with the `pca.axes` parameter. The vector of length two works like 
 this c(<span style="color: lightblue;">x-axis</span>, 
 <span style="color: lightblue;">y-axis</span>). The return data parameter can 
 be set to <span style="color: purple;">TRUE</span> to retrieve the data for 
 inspection or use in your own plotting function.
-
 
 
 ```{r Usage_pca_one, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
@@ -401,14 +406,14 @@ pca.plot <- mbecPCA(input.obj=mbec.obj, model.vars = c("batch","group"),
 
 ### Box Plot
 
-Box plots of the most variable features can be create with the `mbecBox` 
+Box plots of the most variable features can be create with the `mbecBox()` 
 function.
 
-Produce Box-plots of the most variable features on clr transformed values. The 
-`method` parameter determines if <span style="color: red;">"ALL"</span> or only 
-the <span style="color: red;">"TOP"</span> n features are plotted. The `n` 
-parameter selects the number of features to plot. The function will return a 
-list of plot objects to be used.
+Produce Box-plots of the most variable features on CLR transformed values. The 
+`method` parameter determines if <span style="color: #CD3048;">"ALL"</span> or 
+only the <span style="color: #CD3048;">"TOP"</span> n features are plotted. The 
+`n` parameter selects the number of features to plot. The function will return a
+`list` of plot objects to be used.
 
 ```{r Usage_box_n, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 box.plot <- mbecBox(input.obj=mbec.obj, method = "TOP", n = 2, 
@@ -433,13 +438,13 @@ plot(box.plot$OTU2)
 ### Heatmap
 
 Pheatmap is used to produce heat-maps of the most variable features with the 
-`mbecHeat` function.
+`mbecHeat()` function.
 
-Produce a heatmap of the most variable features on clr transformed values. The 
-`method` parameter determines if <span style="color: red;">"ALL"</span> or only 
-the <span style="color: red;">"TOP"</span> n features are plotted. The `n` 
-parameter selects the number of features to plot. The parameters `center` and 
-`scale` can be used to de-/activate centering and scaling prior to plotting. 
+Produce a heatmap of the most variable features on CLR transformed values. The 
+`method` parameter determines if <span style="color: #CD3048;">"ALL"</span> or 
+only the <span style="color: #CD3048;">"TOP"</span> n features are plotted. The 
+`n` parameter selects the number of features to plot. The parameters `center` 
+and `scale` can be used to de-/activate centering and scaling prior to plotting.
 The `model.vars` parameter denotes all covariates of interest.
 
 ```{r Usage_heat, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
@@ -451,7 +456,7 @@ heat.plot <- mbecHeat(input.obj=mbec.obj, method = "TOP", n = 10,
 ### Mosaic
 
 A mosaic plot of the distribution of samples over two covariates of interest 
-can be produced with the `mbecMosaic` function.
+can be produced with the `mbecMosaic()` function.
 
 ```{r Usage_mosaic, echo=TRUE, eval=TRUE, results='asis', tidy=FALSE}
 mosaic.plot <- mbecMosaic(input.obj = mbec.obj, 
@@ -466,14 +471,14 @@ selected covariates of interest and visualize the results.
 
 ### Linear Model
 
-Use the function `mbecModelVariance` with parameter `method` set to 
-<span style="color: red;">"lm"</span> to fit a linear model of the form 
+Use the function `mbecModelVariance()` with parameter `method` set to 
+<span style="color: #CD3048;">"lm"</span> to fit a linear model of the form 
 `y ~ group + batch` to every feature. Covariates of interest can be selected 
 with the `model.vars` parameter and the function will construct a 
 model-formula. The parameters `type` and `label` can be used to select the 
-desired abundance matrix to work on This defaults to clr-transformed values.
+desired abundance matrix to work on This defaults to CLR transformed values.
 
-Plot the resulting data with the `mbecVarianceStatsPlot` function and show the 
+Plot the resulting data with the `mbecVarianceStatsPlot()` function and show the
 proportion of variance with regards to the covariates in a box-plot. 
 
 ```{r Usage_varLM, echo=TRUE, eval=TRUE, results='hide', fig.keep='all', message = FALSE, warning = FALSE, tidy=FALSE}
@@ -490,14 +495,14 @@ plot(lm.plot)
 
 ### Linear Mixed Model
 
-Use the function `mbecModelVariance` with parameter `method` set to 
-<span style="color: red;">"lmm"</span> to fit a linear mixed model of the form 
-`y ~ group + (1|batch)` to every feature. Covariates of interest can be 
+Use the function `mbecModelVariance()` with parameter `method` set to 
+<span style="color: #CD3048;">"lmm"</span> to fit a linear mixed model of the 
+form `y ~ group + (1|batch)` to every feature. Covariates of interest can be 
 selected with the `model.vars` parameter and the function will construct a 
 model-formula. The parameters `type` and `label` can be used to select the 
-desired abundance matrix to work on This defaults to clr-transformed values.
+desired abundance matrix to work on This defaults to CLR transformed values.
 
-Plot the resulting data with the `mbecVarianceStatsPlot` function and show the 
+Plot the resulting data with the `mbecVarianceStatsPlot()` function and show the
 proportion of variance with regards to the covariates in a box-plot. 
 
 ```{r Usage_varLMM, echo=TRUE, eval=TRUE, results='hide', fig.keep='all', message = FALSE, warning = FALSE, tidy=FALSE}
@@ -515,14 +520,14 @@ plot(lmm.plot)
 
 ### Redundancy Analysis
 
-Use the function `mbecModelVariance` with parameter `method` set to 
-<span style="color: red;">"rda"</span> to calculate the percentage of variance 
-that can be attributed to the covariates of interest with partial Redundancy 
-Analysis. Covariates of interest can be selected with the `model.vars` 
-parameter. The parameters `type` and `label` can be used to select the desired 
-abundance matrix to work on This defaults to clr-transformed values.
+Use the function `mbecModelVariance()` with parameter `method` set to 
+<span style="color: #CD3048;">"rda"</span> to calculate the percentage of 
+variance that can be attributed to the covariates of interest with partial 
+Redundancy Analysis. Covariates of interest can be selected with the 
+`model.vars` parameter. The parameters `type` and `label` can be used to select 
+the desired abundance matrix to work on This defaults to CLR transformed values.
 
-Plot the resulting data with the `mbecRDAStatsPlot` function and show the 
+Plot the resulting data with the `mbecRDAStatsPlot()` function and show the 
 percentage of variance with regards to the covariates in a bar-plot. 
 
 ```{r Usage_varRDA, echo=TRUE, eval=TRUE, results='hide', fig.keep='all', message = FALSE, warning = FALSE, tidy=FALSE}
@@ -539,14 +544,14 @@ plot(rda.plot)
 
 ### Principal Variance Components Analysis
 
-Use the function `mbecModelVariance` with parameter `method` set to 
-<span style="color: red;">"pvca"</span> to calculate the percentage of variance 
-that can be attributed to the covariates of interest using Principal Variance 
-Components Analysis. Covariates of interest can be selected with the 
+Use the function `mbecModelVariance()` with parameter `method` set to 
+<span style="color: #CD3048;">"pvca"</span> to calculate the percentage of 
+variance that can be attributed to the covariates of interest using Principal 
+Variance Components Analysis. Covariates of interest can be selected with the 
 `model.vars` parameter. The parameters `type` and `label` can be used to select 
-the desired abundance matrix to work on This defaults to clr-transformed values.
+the desired abundance matrix to work on This defaults to CLR transformed values.
 
-Plot the resulting data with the `mbecPVCAStatsPlot` function and show the 
+Plot the resulting data with the `mbecPVCAStatsPlot()` function and show the 
 percentage of variance with regards to the covariates in a bar-plot. 
 
 ```{r Usage_varPVCA, echo=TRUE, eval=TRUE, results='hide', fig.keep='all', message = FALSE, warning = FALSE, tidy=FALSE}
@@ -566,14 +571,14 @@ plot(pvca.plot)
 Evaluate how good the samples fit to the clustering that is implied by the 
 covariates of interest.
 
-Use the function `mbecModelVariance` with parameter `method` set to 
-<span style="color: red;">"s.coef"</span> to evaluate the clustering that is 
+Use the function `mbecModelVariance()` with parameter `method` set to 
+<span style="color: #CD3048;">"s.coef"</span> to evaluate the clustering that is
 implied by the covariates of interest with the Silhouette Coefficient. 
 Covariates of interest can be selected with the `model.vars` parameter. The 
 parameters `type` and `label` can be used to select the desired abundance 
-matrix to work on This defaults to clr-transformed values.
+matrix to work on This defaults to CLR transformed values.
 
-Plot the resulting data with the `mbecSCOEFStatsPlot` function and show the 
+Plot the resulting data with the `mbecSCOEFStatsPlot()` function and show the 
 silhouette coefficients in a dot-plot. 
 
 ```{r Usage_varSCOEF, echo=TRUE, eval=TRUE, results='hide', fig.keep='all', message = FALSE, warning = FALSE, tidy=FALSE}
