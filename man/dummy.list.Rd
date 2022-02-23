@@ -9,7 +9,6 @@ A list object containing counts and meta-data:
 \describe{
   \item{cnts}{Compositional Abundance Data}
   \item{meta}{Covariate Information}
-  ...
 }
 }
 \usage{

@@ -9,7 +9,6 @@ A phyloseq object containing counts and meta-data:
 \describe{
   \item{otu_table}{Compositional Abundance Data}
   \item{sam_data}{Covariate Information}
-  ...
 }
 }
 \usage{

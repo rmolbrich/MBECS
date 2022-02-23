@@ -11,7 +11,6 @@ An mbecData object including tss and clr transformed counts:
   \item{tss}{Compositional Abundance Data Sum-Scaled}
   \item{clr}{Compositional Abundance Data Log-Ratio Transformed}
   \item{meta}{Covariate Information}
-  ...
 }
 }
 \usage{

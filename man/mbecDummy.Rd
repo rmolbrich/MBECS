@@ -28,6 +28,8 @@ performed with different parameters respectively.
 
 THIS HAS ONLY A CONCEPTUAL SIMILARITY TO MICROBIOME DATA AT BEST AND IS IN
 NO WAY USEFUL OTHER THAN TESTING PACKAGE FUNCTIONS AND VISUALIZING WORKFLOWS!
+
+This function is also the basis for the included mockup data-sets.
 }
 \examples{
 dummy.list <- mbecDummy(n.otus=100, n.samples=30)

@@ -14,6 +14,8 @@
 #' THIS HAS ONLY A CONCEPTUAL SIMILARITY TO MICROBIOME DATA AT BEST AND IS IN
 #' NO WAY USEFUL OTHER THAN TESTING PACKAGE FUNCTIONS AND VISUALIZING WORKFLOWS!
 #'
+#' This function is also the basis for the included mockup data-sets.
+#'
 #' @param n.otus Integer to determine number of features to "simulate".
 #' @param n.samples Even integer to set number of samples to "simulate".
 #' @return A list object that contains the made up abundance and the
