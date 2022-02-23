@@ -66,6 +66,7 @@
     \itemize{
         \item Reduced size of data-sets in testing procedures to stop unit-test
         timeouts.
+        \item Added examples to data objects and reporting functions.
 
     }
 }
