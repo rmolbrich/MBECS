@@ -61,7 +61,14 @@
 }
 
 
+\section{Changes in version 0.99.12, Bioconductor Pre-Release}{
 
+    \itemize{
+        \item Reduced size of data-sets in testing procedures to stop unit-test
+        timeouts.
+
+    }
+}
 
 
 
