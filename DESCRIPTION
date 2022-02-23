@@ -11,7 +11,7 @@ Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set
 biocViews: BatchEffect, Microbiome, ReportWriting, Visualization, Normalization, QualityControl
 URL: https://github.com/rmolbrich/MBECS
 BugReports: https://github.com/rmolbrich/MBECS/issues/new
-License: MIT + file LICENSE
+License: Artistic-2.0
 Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.1.2
