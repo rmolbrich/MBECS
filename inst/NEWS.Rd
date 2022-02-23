@@ -50,4 +50,19 @@
 }
 
 
+\section{Changes in version 0.99.11, Bioconductor Pre-Release}{
+
+    \itemize{
+        \item Cleaned repository.
+        \item GitHub Readme includes Installation instructions and brief
+        workflow tutorial.
+
+    }
+}
+
+
+
+
+
+
 
