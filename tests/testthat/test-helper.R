@@ -40,10 +40,11 @@ test_that("linear modeling works", {
     data(dummy.list)
 
     lm.res <- evaluate_promise(
-        mbecLM(dummy.list, "lmm", c("group","batch"), type="otu"))
+        mbecLM(list(dummy.list$cnts[,seq(20)], dummy.list$meta), "lmm",
+               c("group","batch"), type="otu"))
 
     expect_identical(
-        length(lm.res$result), dim(dummy.list$cnts)[2])
+        length(lm.res$result), as.integer(20))
 
     expect_identical(
         class(lm.res$result), "numeric")
@@ -57,9 +58,10 @@ test_that("linear mixed modeling works", {
     data(dummy.list)
 
     lmm.res <- evaluate_promise(
-        mbecLM(dummy.list, "lmm", c("group","batch"), type="otu"))
+        mbecLM(list(dummy.list$cnts[,seq(20)], dummy.list$meta), "lmm",
+               c("group","batch"), type="otu"))
 
-    expect_identical(length(lmm.res$result), dim(dummy.list$cnts)[2])
+    expect_identical(length(lmm.res$result), as.integer(20))
 
     expect_identical(class(lmm.res$result), "numeric")
 

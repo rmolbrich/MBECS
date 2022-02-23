@@ -6,15 +6,20 @@
 # TEST VARIANCE PLOTTATION ------------------------------------------------
 
 test_that("mbecVarianceStatsPlot LM works", {
-    data(dummy.mbec)
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
     # test for lm variances
     tmp <- mbecGetData(
-        input.obj=dummy.mbec, orientation="sxf",
+        input.obj=dummy.test, orientation="sxf",
         required.col=c("batch", "group"), type="clr", label=character())
     # test 'lm' modelling
     mvar.plot.test <- evaluate_promise(
         mbecVarianceStatsPlot(
-            mbecModelVariance(dummy.mbec, model.vars=c("batch", "group"),
+            mbecModelVariance(dummy.test, model.vars=c("batch", "group"),
                               method="lm", model.form=NULL, type="clr",
                               label=character(), no.warning=TRUE,
                               na.action=NULL)))
@@ -29,16 +34,20 @@ test_that("mbecVarianceStatsPlot LM works", {
 
 
 test_that("mbecVarianceStatsPlot LMM works", {
-    data(dummy.mbec)
+    data(dummy.list)
 
-    tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
+    tmp <- mbecGetData(input.obj=dummy.test, orientation="sxf",
                        required.col=c("batch", "group"), type="clr",
                        label=character())
 
     # test for lmm variances
     mvar.plot.test <- evaluate_promise(
         mbecVarianceStatsPlot(
-            mbecModelVariance(dummy.mbec, model.vars=c("batch", "group"),
+            mbecModelVariance(dummy.test, model.vars=c("batch", "group"),
                               method="lmm", model.form=NULL, type="clr",
                               label=character(), no.warning=TRUE,
                               na.action=NULL)))

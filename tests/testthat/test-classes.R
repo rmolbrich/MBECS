@@ -38,7 +38,7 @@ test_that("class constructor works", {
 # SETTER ------------------------------------------------------------------
 
 test_that("tss setter works", {
-
+    data(dummy.list)
     testdummy <- MbecData(cnt_table=dummy.list$cnts, meta_data=dummy.list$meta)
     # test tss setter
     set.res <- evaluate_promise(mbecSetData(input.obj=testdummy,

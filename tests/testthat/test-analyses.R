@@ -29,6 +29,7 @@ test_that("mbecRLE works", {
 
 
 test_that("mbecPCA works", {
+    data(dummy.mbec)
     # check out the returned data
     pca.otu.test <- evaluate_promise(
         mbecPCA(dummy.mbec, model.vars=c("batch","group"), pca.axes=c(1,2),
@@ -60,7 +61,8 @@ test_that("mbecPCA works", {
     pca.clr.test <- evaluate_promise(
         mbecPCA(dummy.mbec, model.vars=c("batch"), pca.axes=c(3,4), type="clr",
                 return.data = TRUE))
-    # expect #n.sample rows and #n.sample + #covariate columns - but it will use all of them
+    # expect #n.sample rows and #n.sample + #covariate columns - but it will
+    # use all of them
     expect_equal(
         dim(pca.clr.test$result[[1]]),
         c(nrow(dummy.mbec@sam_data),
@@ -86,12 +88,18 @@ test_that("mbecPCA works", {
 
 
 test_that("mbecBox works", {
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
     # check out the returned data
     box.test <- evaluate_promise(
-        mbecBox(dummy.mbec, method="TOP", n=10, model.var="batch", type="otu",
+        mbecBox(dummy.test, method="TOP", n=10, model.var="batch", type="otu",
                 label=character(), return.data = TRUE))
     # expect #n.sample rows and #n + 2
-    expect_equal(dim(box.test$result[[1]]), c(nrow(dummy.mbec@sam_data), 12))
+    expect_equal(dim(box.test$result[[1]]), c(nrow(dummy.test@sam_data), 12))
     # expect #n.sample rows and 3 columns
     expect_equal(length(box.test$result[[2]]), 10)
     # expect colnames
@@ -109,15 +117,15 @@ test_that("mbecBox works", {
     # repeat for method 'ALL'
     # check out the returned data
     box.test <- evaluate_promise(
-        mbecBox(dummy.mbec, method="ALL", model.var="batch", type="otu",
+        mbecBox(dummy.test, method="ALL", model.var="batch", type="otu",
                 label=character(), return.data = TRUE))
     # expect #n.sample rows and #n + 2
     expect_equal(
         dim(box.test$result[[1]]),
-        c(nrow(dummy.mbec@sam_data),
-          ncol(dummy.mbec@otu_table) + ncol(dummy.mbec@sam_data) + 1))
+        c(nrow(dummy.test@sam_data),
+          ncol(dummy.test@otu_table) + ncol(dummy.test@sam_data) + 1))
     # expect #n.sample rows and 3 columns
-    expect_equal(length(box.test$result[[2]]), ncol(dummy.mbec@otu_table))
+    expect_equal(length(box.test$result[[2]]), ncol(dummy.test@otu_table))
     # expect colnames
     expect_true(all(box.test$result[[2]] %in% colnames(box.test$result[[1]])))
     # expect no warnings
@@ -126,7 +134,7 @@ test_that("mbecBox works", {
     box.plot.test <- evaluate_promise(
         mbecBoxPlot(box.test$result[[1]], box.test$result[[2]], "batch"))
     # expect list of 500 grobs
-    expect_equal(length(box.plot.test$result), ncol(dummy.mbec@otu_table))
+    expect_equal(length(box.plot.test$result), ncol(dummy.test@otu_table))
     # expect no warnings
     expect_warning(box.plot.test, NA)
 
@@ -136,10 +144,10 @@ test_that("mbecBox works", {
         c("OTU1","OTU2","OTU3","OTU4","OTU5",
           "OTU6","OTU7","OTU8","OTU9","OTU10")
     box.test <- evaluate_promise(
-        mbecBox(dummy.mbec, method=otu.select, model.var="batch", type="otu",
+        mbecBox(dummy.test, method=otu.select, model.var="batch", type="otu",
                 label=character(), return.data = TRUE))
     # expect #n.sample rows and #n + 2
-    expect_equal(dim(box.test$result[[1]]), c(nrow(dummy.mbec@sam_data), 12))
+    expect_equal(dim(box.test$result[[1]]), c(nrow(dummy.test@sam_data), 12))
     # expect #n.sample rows and 3 columns
     expect_equal(length(box.test$result[[2]]), 10)
     # expect colnames
@@ -157,6 +165,7 @@ test_that("mbecBox works", {
 
 
 test_that("mbecHeat works", {
+    data(dummy.mbec)
     # check out the returned data
     heat.test <- evaluate_promise(
         mbecHeat(dummy.mbec, model.vars=c("batch", "group"), method="TOP",
@@ -228,6 +237,7 @@ test_that("mbecHeat works", {
 
 
 test_that("mbecMosaic works", {
+    data(dummy.mbec)
     mosaic.test <- evaluate_promise(
         mbecMosaic(dummy.mbec, model.vars=c("batch", "group"),
                    return.data=TRUE))
@@ -250,16 +260,22 @@ test_that("mbecMosaic works", {
 # TEST VARIANCE CALCULATIONS ----------------------------------------------
 
 test_that("mbecModelVariance LM works", {
-    tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
+    tmp <- mbecGetData(input.obj=dummy.test, orientation="sxf",
                        required.col=c("batch", "group"), type="clr",
                        label=character())
     # test 'lm' modelling
     mvar.test <- evaluate_promise(
-        mbecModelVariance(dummy.mbec, model.vars=c("batch", "group"),
+        mbecModelVariance(dummy.test, model.vars=c("batch", "group"),
                           method="lm", model.form=NULL, type="clr",
                           label=character(), no.warning=TRUE, na.action=NULL))
     # expect dimension
-    expect_equal(dim(mvar.test$result), c(ncol(dummy.mbec@otu_table), 4))
+    expect_equal(dim(mvar.test$result), c(ncol(dummy.test@otu_table), 4))
     # expect colnames
     expect_true(
         all(colnames(mvar.test$result) %in%
@@ -281,16 +297,22 @@ test_that("mbecModelVariance LM works", {
 
 
 test_that("mbecModelVariance LMM works", {
-    tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
+    tmp <- mbecGetData(input.obj=dummy.test, orientation="sxf",
                        required.col=c("batch", "group"), type="clr",
                        label=character())
     # test 'lmm' modelling
     mvar.test <- evaluate_promise(
-        mbecModelVariance(dummy.mbec, model.vars=c("batch", "group"),
+        mbecModelVariance(dummy.test, model.vars=c("batch", "group"),
                           method="lmm", model.form=NULL, type="clr",
                           label=character(), no.warning=TRUE, na.action=NULL))
     # expect dimension
-    expect_equal(dim(mvar.test$result), c(ncol(dummy.mbec@otu_table), 4))
+    expect_equal(dim(mvar.test$result), c(ncol(dummy.test@otu_table), 4))
     # expect colnames
     expect_true(
         all(colnames(mvar.test$result) %in%
@@ -298,7 +320,8 @@ test_that("mbecModelVariance LMM works", {
     # expect no warnings
     expect_warning(mvar.test, NA)
 
-    # build directly from 'mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)'
+    # build directly from 'mbecModelVarianceLM(model.form, model.vars,
+    # tmp.cnts, tmp.meta, type)'
     lmm.test <- evaluate_promise(
         mbecModelVarianceLMM(model.form=NULL, model.vars=c("batch", "group"),
                              tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
@@ -311,6 +334,7 @@ test_that("mbecModelVariance LMM works", {
 
 
 test_that("mbecModelVariance RDA works", {
+    data(dummy.mbec)
     tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
                        required.col=c("batch", "group"), type="clr",
                        label=character())
@@ -327,7 +351,8 @@ test_that("mbecModelVariance RDA works", {
     # expect no warnings
     expect_warning(mvar.test, NA)
 
-    # build directly from 'mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)'
+    # build directly from 'mbecModelVarianceLM(model.form, model.vars,
+    # tmp.cnts, tmp.meta, type)'
     rda.test <- evaluate_promise(
         mbecModelVarianceRDA(model.vars=c("batch", "group"),
                              tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]], type="clr"))
@@ -339,6 +364,7 @@ test_that("mbecModelVariance RDA works", {
 
 
 test_that("mbecModelVariance PVCA works", {
+    data(dummy.mbec)
     tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
                        required.col=c("batch", "group"),
                        type="clr", label=character())
@@ -356,7 +382,8 @@ test_that("mbecModelVariance PVCA works", {
     # expect no warnings
     expect_warning(mvar.test, NA)
 
-    # build directly from 'mbecModelVarianceLM(model.form, model.vars, tmp.cnts, tmp.meta, type)'
+    # build directly from 'mbecModelVarianceLM(model.form, model.vars,
+    # tmp.cnts, tmp.meta, type)'
     pvca.test <- evaluate_promise(
         mbecModelVariancePVCA(model.vars=c("batch", "group"),
                               tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]],
@@ -386,7 +413,8 @@ test_that("mbecModelVariance S.COEF works", {
     # expect no warnings
     expect_warning(mvar.test, NA)
 
-    # build directly from 'mbecModelVarianceSCOEF(model.form, model.vars, tmp.cnts, tmp.meta, type)'
+    # build directly from 'mbecModelVarianceSCOEF(model.form, model.vars,
+    # tmp.cnts, tmp.meta, type)'
     scoef.test <- evaluate_promise(
         mbecModelVarianceSCOEF(model.vars=c("batch", "group"),
                                tmp.cnts=tmp[[1]], tmp.meta=tmp[[2]],
@@ -402,12 +430,18 @@ test_that("mbecModelVariance S.COEF works", {
 # TEST VARIANCE STATISTICS ------------------------------------------------
 
 test_that("mbecVarianceStats LM works", {
-    tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
+    tmp <- mbecGetData(input.obj=dummy.test, orientation="sxf",
                        required.col=c("batch", "group"), type="clr",
                        label=character())
     # test 'lm' modelling
     mvar.test <- evaluate_promise(
-        mbecModelVariance(dummy.mbec, model.vars=c("batch", "group"),
+        mbecModelVariance(dummy.test, model.vars=c("batch", "group"),
                           method = "lm", model.form=NULL, type="clr",
                           label=character(), no.warning=TRUE, na.action=NULL))
 
@@ -424,12 +458,18 @@ test_that("mbecVarianceStats LM works", {
 
 
 test_that("mbecVarianceStats LMM works", {
+    data(dummy.list)
+
+    dummy.test <- mbecTransform( list(dummy.list$cnts[,seq(20)],
+                                      dummy.list$meta), method="tss")
+    dummy.test <- mbecTransform(dummy.test, method="clr")
+
     model.vars <- c("batch", "group")
-    tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
+    tmp <- mbecGetData(input.obj=dummy.test, orientation="sxf",
                        required.col=model.vars, type="clr", label=character())
     # test 'lm' modelling
     mvar.test <- evaluate_promise(
-        mbecModelVariance(dummy.mbec, model.vars=model.vars, method="lmm",
+        mbecModelVariance(dummy.test, model.vars=model.vars, method="lmm",
                           model.form = NULL, type="clr", label=character(),
                           no.warning = TRUE, na.action=NULL))
 
@@ -451,11 +491,13 @@ test_that("mbecVarianceStats LMM works", {
 
 
 test_that("mbecMixedvariance works", {
+    data(dummy.mbec)
     model.vars <- c("batch", "group")
     tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
                        required.col=model.vars, type="clr", label=character())
 
-    control = lme4::lmerControl(calc.derivs = TRUE, check.rankX = "stop.deficient")
+    control = lme4::lmerControl(calc.derivs = TRUE,
+                                check.rankX = "stop.deficient")
     f.terms <- paste("(1|", model.vars, ")", sep = "")
     tmp.formula <-
         stats::as.formula(
@@ -476,6 +518,7 @@ test_that("mbecMixedvariance works", {
 
 
 test_that("mbecValidateModel works", {
+    data(dummy.mbec)
     model.vars <- c("batch", "group")
     tmp <- mbecGetData(input.obj=dummy.mbec, orientation="sxf",
                        required.col=model.vars, type="clr", label=character())
@@ -510,35 +553,5 @@ test_that("colinScore works", {
     expect_true(mval.test$result[1] < 0.0001)
     expect_identical(names(attributes(mval.test$result)), "vcor")
     expect_warning(mval.test, NA)
-})
-
-
-
-
-
-# VARIANCE CALCULATION ----------------------------------------------------
-
-test_that("SOMETHING works", {
-    # Works with list, phyloseq and MbecDdata input due to 'mbecProcessInput'
-    # model is estimable and return value is NULL
-    expect_identical(mbecTestModel(input.obj=dummy.mbec,
-                                   model.vars=c("group","batch")), NULL)
-    # 'model.form' is class formula and is estimable
-    expect_identical(
-        mbecTestModel(input.obj=dummy.mbec,
-                      model.form=stats::as.formula("y ~ group + batch")), NULL)
-    # problem with estimability and return value is a character vector
-    expect_vector(mbecTestModel(input.obj=dummy.mbec,
-                                model.vars=c("sID","group","batch")),
-                  character())
-    # covariates and model-formula are missing
-    expect_error(mbecTestModel(input.obj=dummy.mbec),
-                 "Please supply covariates and/or model-formula.")
-
-    # will construct generic model-formula if input is not class 'formula'
-    form.res <- evaluate_promise(mbecTestModel(input.obj=dummy.mbec,
-                                               model.vars=c("group","batch"),
-                                               model.form="y ~ group + batch"))
-    expect_true(any(grepl("lm-formula", form.res$messages)))
 })
 
