@@ -7,7 +7,7 @@ Authors@R:
        role = c("aut", "cre"),
        email = "M.Olbrich@protonmail.com",
        comment = c(ORCID = "0000-0003-2789-3382"))
-Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set of functions to evaluate and mitigate unwated noise due to processing in batches. To that end it incorporates a host of batch correcting algorithms from various packages. In addition it offers a correction and reporting pipeline that provides a preliminary look at the characteristics of a data-set before and after correcting for batch effects.
+Description: The Microbiome Batch Effect Correction Suite (MBECS) provides a set of functions to evaluate and mitigate unwated noise due to processing in batches. To that end it incorporates a host of batch correcting algorithms (BECA) from various packages. In addition it offers a correction and reporting pipeline that provides a preliminary look at the characteristics of a data-set before and after correcting for batch effects.
 biocViews: BatchEffect, Microbiome, ReportWriting, Visualization, Normalization, QualityControl
 URL: https://github.com/rmolbrich/MBECS
 BugReports: https://github.com/rmolbrich/MBECS/issues/new

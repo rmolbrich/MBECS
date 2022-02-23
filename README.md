@@ -19,7 +19,7 @@ considered to be stable and updated every 6 months, and the development version
 contains latest updates.
 
 
-### Release version {.unnumbered}
+### Release version
 
 To install the stable release version, install `BiocManager` and the `MBECS` 
 package as follows.
@@ -29,7 +29,7 @@ install.packages("BiocManager")
 BiocManager::install("MBECS")
 ```
 
-### Development version {.unnumbered}
+### Development version
 
 To install the development version, there are two options.
 
