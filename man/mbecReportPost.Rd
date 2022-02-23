@@ -37,3 +37,13 @@ either a ggplot2 object or a formatted data-frame to plot from
 \description{
 Constructs a comparative report of batch corrected data.
 }
+\examples{
+data(dummy.list)
+dummy.test <- mbecTransform(dummy.list, method="clr")
+dummy.corrected <- mbecCorrection(input.obj=dummy.test,
+model.vars=c("batch","group"), method="bat", type="clr" )
+
+report.data <- mbecReportPost(input.obj=dummy.corrected,
+model.vars=c("batch","group"), type="clr", file.name=NULL, file.dir=NULL,
+return.data = TRUE)
+}
