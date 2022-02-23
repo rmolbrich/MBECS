@@ -22,6 +22,12 @@
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #'
 #' @export
+#'
+#' @examples
+#' data(dummy.list)
+#' report.data <- mbecReportPrelim(input.obj=list(dummy.list$cnts[,seq(20)],
+#' dummy.list$meta), model.vars=c("batch","group"),
+#' type="clr", file.name=NULL, file.dir=NULL, return.data=TRUE)
 mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
                              type=c("clr","otu","tss"), file.name=NULL,
                              file.dir=getwd(), return.data = FALSE) {
@@ -119,6 +125,16 @@ mbecReportPrelim <- function(input.obj, model.vars=c("batch","group"),
 #' @return either a ggplot2 object or a formatted data-frame to plot from
 #'
 #' @export
+#'
+#' @examples
+#' data(dummy.list)
+#' dummy.test <- mbecTransform(dummy.list, method="clr")
+#' dummy.corrected <- mbecCorrection(input.obj=dummy.test,
+#' model.vars=c("batch","group"), method="bat", type="clr" )
+#'
+#' report.data <- mbecReportPost(input.obj=dummy.corrected,
+#' model.vars=c("batch","group"), type="clr", file.name=NULL, file.dir=NULL,
+#' return.data = TRUE)
 mbecReportPost <- function(input.obj, model.vars=c("batch","group"),
                            type="clr", file.name=NULL, file.dir=getwd(),
                            return.data = FALSE) {

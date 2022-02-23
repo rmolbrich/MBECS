@@ -24,4 +24,7 @@ running examples and showing the package workflow. This particular object
 was also processed with \code{\link{mbecTransform}} function in order to
 generate "clr" and "tss" transformed abundance matrices.
 }
+\examples{
+data(dummy.mbec)
+}
 \keyword{datasets}

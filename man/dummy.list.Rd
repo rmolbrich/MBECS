@@ -20,4 +20,7 @@ microbial communities and a matrix of covariate information. The data was
 created using the \code{\link{mbecDummy}} function for the sole purpose of
 running examples and showing the package workflow.
 }
+\examples{
+data(dummy.list)
+}
 \keyword{datasets}

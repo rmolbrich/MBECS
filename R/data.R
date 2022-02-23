@@ -157,6 +157,9 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 #'   \item{clr}{Compositional Abundance Data Log-Ratio Transformed}
 #'   \item{meta}{Covariate Information}
 #' }
+#'
+#' @examples
+#' data(dummy.mbec)
 "dummy.mbec"
 
 
@@ -173,6 +176,9 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 #'   \item{otu_table}{Compositional Abundance Data}
 #'   \item{sam_data}{Covariate Information}
 #' }
+#'
+#' @examples
+#' data(dummy.ps)
 "dummy.ps"
 
 
@@ -188,6 +194,9 @@ mbecDummy <- function(n.otus=500, n.samples=40) {
 #'   \item{cnts}{Compositional Abundance Data}
 #'   \item{meta}{Covariate Information}
 #' }
+#'
+#' @examples
+#' data(dummy.list)
 "dummy.list"
 
 

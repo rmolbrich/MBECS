@@ -21,4 +21,7 @@ created using the \code{\link{mbecDummy}} function for the sole purpose of
 running examples and showing the package workflow. This particular object
 was then converted using \code{\link{phyloseq}}.
 }
+\examples{
+data(dummy.ps)
+}
 \keyword{datasets}
