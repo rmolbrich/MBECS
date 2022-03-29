@@ -78,6 +78,7 @@ mbecRLE <- function(input.obj, model.vars = c("batch","group"), type="clr",
             as.data.frame() %>%
             tidyr::pivot_longer(cols = tidyr::everything(),
                                 names_to = "specimen", values_to = "values")
+
         tmp.long <- rbind.data.frame(tmp.long, tmp.group.long)
     }
 
@@ -723,7 +724,7 @@ mbecModelVariance <- function(input.obj, model.vars=character(),
 
 #' Estimate Explained Variance with Linear Models
 #'
-#' The function offers a selection of methods/algorithms to estimate the
+#' The function uses a linear modeling approach to estimate the
 #' proportion of variance that can be attributed to covariates of interest.
 #' This shows, how much variation is explained by the treatment effect, which
 #' proportion is introduced by processing in batches and the leftover variance,
@@ -788,7 +789,7 @@ mbecModelVarianceLM <- function(model.form, model.vars, tmp.cnts, tmp.meta,
 
 #' Estimate Explained Variance with Linear Mixed Models
 #'
-#' The function offers a selection of methods/algorithms to estimate the
+#' The function uses a linear mixed modeling approach to estimate the
 #' proportion of variance that can be attributed to covariates of interest.
 #' This shows, how much variation is explained by the treatment effect, which
 #' proportion is introduced by processing in batches and the leftover variance,
@@ -906,6 +907,9 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
         model.variances[condition.idx,eval(type)] <-
             summary(tmp.rda.covariate)$partial.chi *
             100/summary(tmp.rda.covariate)$tot.chi
+
+        # ToDO: include R-Adjusted Value to get correct representation
+
 
         utils::setTxtProgressBar(rda.pb, condition.idx)
     }
