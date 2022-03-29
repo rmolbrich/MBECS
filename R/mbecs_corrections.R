@@ -280,7 +280,8 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
 #'
 #' @keywords Batch-Effect Assessment SVA
 #' @param input.obj MbecData object
-#' @param model.vars Vector of covariate names. First element relates to batch.
+#' @param model.vars Vector of covariate names. First element relates to
+#' variable of interest.
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr'.
 #' @return A vector of p-values that indicate significance of the batch-effect
@@ -712,7 +713,7 @@ mbecPN <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 #' contains total sum-scaled and cumulative log-ratio transformed abundance
 #' matrices. Output will be a matrix of corrected abundances.
 #'
-#' @keywords BECA Duvallet Percentile Normalisation
+#' @keywords Singular Value Decomposition
 #' @param input.obj phyloseq object or numeric matrix (correct orientation is
 #' handeled internally)
 #' @param model.vars Vector of covariate names. First element relates to batch.
