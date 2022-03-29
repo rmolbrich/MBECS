@@ -133,8 +133,9 @@ mbecLM <- function(input.obj, method=c("lm","lmm"),
     } else if( method == "lm" ) {
         # fit lm to every feature with treatment and batch as as model
         # parameters then extract p-value for treatment
-        tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y){
-            nc.lm <- stats::lm(y ~ get(model.vars[1]) + get(model.vars[2]),
+        tmp.group.p <- apply(tmp.cnts, 2, FUN = function(y) {
+            # y ~ group + batch
+            nc.lm <- stats::lm(y ~ get(model.vars[2]) + get(model.vars[1]),
                                data=tmp.meta)
             nc.lm.summary <- summary(nc.lm)
             # extract p-value of group (treatment)
