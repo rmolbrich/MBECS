@@ -904,12 +904,14 @@ mbecModelVarianceRDA <- function(model.vars, tmp.cnts, tmp.meta, type) {
         tmp.rda.covariate <- vegan::rda(
             tmp.formula, data = tmp.meta)
 
+        # vegan::RsquareAdj(tmp.rda.covariate3)
+
         model.variances[condition.idx,eval(type)] <-
             summary(tmp.rda.covariate)$partial.chi *
             100/summary(tmp.rda.covariate)$tot.chi
 
         # ToDO: include R-Adjusted Value to get correct representation
-
+        # also condition should be the removed unimportant stuff
 
         utils::setTxtProgressBar(rda.pb, condition.idx)
     }
@@ -970,12 +972,13 @@ mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
 
     n.vars <- length(model.vars)
     s.names <- rownames(tmp.cnts)
-
+    # center, scale and transpose
     tmp.cnts <- apply(tmp.cnts, 2, scale, center = TRUE, scale = FALSE) %>%
         t()
     colnames(tmp.cnts) <- s.names
+    # 1.1- compute feature correlation matrix
     tmp.cor <- stats::cor(tmp.cnts)
-
+    # 1.2 compute eigenvectors and e-values
     eCor <- eigen(tmp.cor)
     eVal <- eCor$values
     eVec <- eCor$vectors
@@ -984,9 +987,11 @@ mbecModelVariancePVCA <- function(model.vars, tmp.cnts, tmp.meta, type,
     sum.eVal <- sum(eVal)
     prop.PCs <- eVal/sum.eVal
 
-    n.PCs <- max(3, min(which(vapply(cumsum(prop.PCs),
+    # used at minimum 3 PCs for modeling, but restrict to max 10
+    # according to authors
+    n.PCs <- min(10,max(3, min(which(vapply(cumsum(prop.PCs),
                                      function(x) x >= pct_threshold,
-                                     FUN.VALUE = logical(1)))))
+                                     FUN.VALUE = logical(1))))))
     # suppress tibble verbose output
     suppressMessages(lmm.df <- eVec %>%
                          tibble::as_tibble(.name_repair = "unique") %>%
