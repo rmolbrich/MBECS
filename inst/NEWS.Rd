@@ -71,6 +71,13 @@
     }
 }
 
+\section{Changes in version 0.99.13, Bioconductor Development-Release}{
 
+    \itemize{
+        \item Adjusted SVD code to more straightforward implementation.
+        \item Fixed variable ordering for LM-variance calculations.
+
+    }
+}
 
 
