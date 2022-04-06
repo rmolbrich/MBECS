@@ -218,7 +218,7 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
                              model.vars=model.vars,
                              type=eval(type))
     } else if( method == "sva" ) {
-        res.assess <- mbecSVA(input.obj, model.vars,
+        res.assess <- mbecSVA(input.obj, model.vars[-1],
                               type=eval(type))
     } else if( method == "ruv2" ) {
         res.assess <- mbecRUV2(input.obj, model.vars,
