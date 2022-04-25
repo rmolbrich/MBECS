@@ -292,7 +292,7 @@ methods::setMethod("mbecSetData", "MbecData",
             stop("No col/row-names found! Not able to match to sample names.")
         }
     } else {
-        if( !all(apply(new.cnts, 1, is.numeric)) ) {
+        if( !all(apply(as.matrix(new.cnts), 1, is.numeric)) ) {
             stop("All the values in your assessment vector need to be numeric!",
                  call.=FALSE)
         } else if( is.null(names(new.cnts)) ) {
