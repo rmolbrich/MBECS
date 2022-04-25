@@ -428,7 +428,8 @@ mbecRUV4 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
     tmp.ruv4 <- ruv::RUV4(Y=tmp.cnts, X=tmp.meta$group, ctl=tmp.nc, k=tmp.k)
     tmp.ruv4.trt_p <- tmp.ruv4$p
     tmp.ruv4.trt_adjp <- stats::p.adjust(tmp.ruv4.trt_p, method="fdr")
-    names(tmp.ruv2.trt_adjp) <- phyloseq::taxa_names(input.obj)
+
+    names(tmp.ruv4.trt_adjp) <- phyloseq::taxa_names(input.obj)
 
 
     return(tmp.ruv4.trt_adjp)
