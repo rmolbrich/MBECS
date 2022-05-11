@@ -50,9 +50,11 @@ mbecRunCorrections <- function(input.obj,
         if( m.idx == "pn" ) {
             # because percentile norm is supposed to run on tss data
             input.obj <- mbecCorrection(input.obj = input.obj,
+                                        model.vars = model.vars,
                                         method = "pn", type="tss")
         } else {
             input.obj <- mbecCorrection(input.obj = input.obj, type=eval(type),
+                                        model.vars = model.vars,
                                         method=eval(m.idx),
                                         nc.features=eval(nc.features))
         }
