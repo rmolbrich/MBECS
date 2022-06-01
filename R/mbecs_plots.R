@@ -26,10 +26,8 @@
 #' plot.rle <- mbecRLEPlot(rle.df, c('group','batch'))
 mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 
-    mbecCols <- c("#1F77B4","#AEC7E8","#FF7F0E","#FFBB78","#2CA02C","#98DF8A",
-                  "#D62728","#FF9896","#9467BD","#C5B0D5","#8C564B","#C49C94",
-                  "#E377C2","#F7B6D2","#7F7F7F","#C7C7C7","#BCBD22","#DBDB8D",
-                  "#17BECF","#9EDAE5")
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     n.tiles <- dim(unique(rle.df[,eval(model.vars[2])]))[1]
 
     if( n.tiles <= 3 ) {
@@ -82,8 +80,8 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 #' @return ggplot2 object
 #'
 #' @importFrom ggplot2 ggplot aes_string stat_boxplot facet_wrap theme theme_bw
-#' scale_fill_manual labs element_text element_blank element_rect guides
-#' guide_legend geom_boxplot unit
+#' scale_fill_manual scale_y_continuous labs element_text element_blank
+#' element_rect guides guide_legend geom_boxplot unit
 #'
 #' @export
 #'
@@ -96,8 +94,8 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 #' plot.box <- mbecBoxPlot(box.df[[1]], box.df[[2]], 'batch')
 mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
 
-    mbecCols <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B",
-                  "#E377C2","#7F7F7F","#BCBD22","#17BECF")
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     x.angle <- 0
     x.hjust <- 0.5
     density.lwd <- 0.2
@@ -105,12 +103,19 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
     legend.cex <- 0.7
     legend.title.cex <- 0.75
 
-    legend.title <- paste(label,
-                          gsub("(^|[[:space:]])([[:alpha:]])","\\1\\U\\2",
-                               model.var, perl = TRUE), sep =" ")
+
     ret.plot <- list()
 
     for (idx in otu.idx) {
+        # set-up legend title
+        legend.title <- paste(idx, "-",
+                              gsub("(^|[[:space:]])([[:alpha:]])","\\1\\U\\2",
+                                   model.var, perl = TRUE), sep =" ")
+
+        if( !is.null(label) ) {
+            legend.title <- paste(label, "-", legend.title, sep=" ")
+        }
+
         p.box <-
             ggplot(data=tmp, aes_string(x=model.var,
                                                      y=idx,
@@ -118,6 +123,8 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
             stat_boxplot(geom="errorbar", width=0.4) +
             geom_boxplot() +
             scale_fill_manual(values=mbecCols) +
+            ggplot2::scale_y_continuous(labels = function(x)
+                format(x, scientific = TRUE)) +
             theme_bw() +
             theme(
                 panel.background=element_blank(),
@@ -127,26 +134,21 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
                                                     hjust=x.hjust),
                 panel.grid=element_blank(),
                 axis.title.x=element_blank(),
-                axis.text=element_text(size=10),
+                axis.text=element_text(size=8, hjust=0.5),
                 axis.title=element_text(size=12),
                 plot.title=element_text(hjust=0.5),
-
+                axis.text.y = element_text(angle = 90),
                 legend.position='bottom', legend.box='horizontal',
-                legend.direction='horizontal',
-                legend.key.height=unit(0.8, 'cm'),
-                legend.key.width=unit(0.4, 'cm'),
-                legend.title =
-                    element_text(size=rel(legend.title.cex)),
-                legend.spacing.x=unit(0.4, 'cm'),
-                legend.spacing.y=unit(0.4, 'cm'),
-                legend.text=element_text(size=rel(legend.cex))
-            ) + labs(fill=legend.title, y="Value", title=idx)
+                legend.direction='horizontal') +
+            labs(fill=legend.title, y="Value", title=idx)
 
         p.density <- ggplot(tmp, aes_string(x=idx,
                                                        fill=model.var)) +
             geom_density(alpha=0.5) +
             scale_fill_manual(values=mbecCols) +
-            labs(title=idx, x="Value", fill=legend.title) +
+            ggplot2::scale_y_continuous(labels = function(x)
+                format(x, scientific = TRUE)) +
+            labs(title=element_blank(), y="Density", fill=legend.title) +
             theme_bw() +
             theme(
                 panel.background=element_blank(),
@@ -155,20 +157,12 @@ mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
                 axis.text.x=element_text(angle=x.angle, hjust=x.hjust),
                 panel.grid=element_blank(),
                 axis.title.x=element_blank(),
-                axis.text=element_text(size=10),
+                axis.text=element_text(size=8, hjust=0.5),
                 axis.title=element_text(size=12),
                 plot.title=element_text(hjust=0.5),
-
+                axis.text.y = element_text(angle = 90),
                 legend.position='bottom', legend.box='horizontal',
-                legend.direction='horizontal',
-                legend.key.height=unit(0.8, 'cm'),
-                legend.key.width=unit(0.4, 'cm'),
-                legend.title =
-                    element_text(size=rel(legend.title.cex)),
-                legend.spacing.x=unit(0.4, 'cm'),
-                legend.spacing.y=unit(0.4, 'cm'),
-                legend.text=
-                    element_text(size=rel(legend.cex)))
+                legend.direction='horizontal')
 
         g <- ggplotGrob(p.box)$grobs
 
@@ -220,6 +214,7 @@ mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
                            clustering_method = "ward.D", treeheight_row = 30,
                            annotation_col = tmp.meta[, eval(model.vars)],
                            border_color = "NA", main = p.title,
+                           #annotation_colors = mbecCols,
                            annotation_names_col = TRUE, show_colnames = FALSE)
     return(heat.plot)
 }
@@ -251,6 +246,8 @@ mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
 #' model.vars=c('group','batch'))
 mbecMosaicPlot <- function(study.summary, model.vars) {
 
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     # local variable references to shut up check()
     Var1 <- Var2 <- NULL
 
@@ -273,6 +270,7 @@ mbecMosaicPlot <- function(study.summary, model.vars) {
         guides(
             fill=guide_legend(title=eval(vars.axes[1]), reverse=TRUE,
                                        keywidth=1, keyheight=1)) +
+        scale_fill_manual(values=mbecCols) +
         ylab("Proportion of all observations") +
         theme(axis.text.x=element_blank(),
                        axis.text.y=element_text(color=eval(main_color),
@@ -303,6 +301,7 @@ mbecMosaicPlot <- function(study.summary, model.vars) {
         guides(fill=guide_legend(title=eval(vars.axes[2]),
                                                    reverse=TRUE,
                                                    keywidth=1, keyheight=1)) +
+        scale_fill_manual(values=mbecCols) +
         ylab("Proportion of all observations") +
         theme(axis.text.x=element_blank(),
                        axis.text.y=element_text(
@@ -380,8 +379,8 @@ mbecMosaicPlot <- function(study.summary, model.vars) {
 #' plot.pca <- mbecPCAPlot(plot.df=pca.df[[1]], metric.df=pca.df[[2]],
 #' model.vars=c('group','batch'), pca.axes=c(1,2))
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
-    mbecCols <- c("#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B",
-                  "#E377C2","#7F7F7F","#BCBD22","#17BECF")
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     x.angle <- 0
     x.hjust <- 0.5
     legend.cex <- 0.7
@@ -392,6 +391,16 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
     label.col <- mbecUpperCase(model.vars[1])
     label.sha <- mbecUpperCase(model.vars[2])
     title <- paste("PCA:", label.sha, "-", label.col)
+
+    x.label <- paste0(colnames(plot.df[pca.axes[1] + 1]), ": ",
+                      metric.df$var.explained[pca.axes[1]], "% expl.var")
+    y.label <- paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
+           metric.df$var.explained[pca.axes[2]], "% expl.var")
+
+    if( !is.null(label) ) {
+        x.label <- paste(label, "-", x.label, sep=" ")
+    }
+
     if (length(model.vars) >= 2) {
         pMain <-
             ggplot(
@@ -403,33 +412,19 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                 values=c(0,1,2,3,6,8,15,16,17,23,25,4,5,9)) +
             geom_point() +
             scale_color_manual(values=mbecCols) +
-            labs(title=label, colour=label.col, shape=label.sha) +
+            labs(title=element_blank(), colour=label.col, shape=label.sha) +
             xlim(metric.df$axis.min[pca.axes[1]],
                           metric.df$axis.max[pca.axes[1]]) +
             ylim(metric.df$axis.min[pca.axes[2]],
                           metric.df$axis.max[pca.axes[2]]) +
-            xlab(
-                paste0(colnames(plot.df[pca.axes[1] + 1]), ": ",
-                       metric.df$var.explained[pca.axes[1]], "% expl.var")) +
-            ylab(
-                paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
-                       metric.df$var.explained[pca.axes[2]], "% expl.var")) +
-            theme_bw() +
+            xlab(x.label) + ylab(y.label) + theme_bw() +
             theme(
                 panel.background=element_blank(),
                 axis.line=element_blank(),
                 axis.text=element_blank(),
                 axis.ticks=element_blank(),
                 legend.position='right', legend.box='horizontal',
-                legend.direction='vertical',
-                legend.key.height=unit(0.2, 'cm'),
-                legend.key.width=unit(0.1, 'cm'),
-                legend.title=element_text(
-                    size=rel(legend.title.cex)),
-                legend.spacing.x=unit(0.1, 'cm'),
-                legend.spacing.y=unit(0.1, 'cm'),
-                legend.text=element_text(
-                    size=rel(legend.cex)))
+                legend.direction='vertical')
 
         pTop <-
             ggplot(data=plot.df,
@@ -448,21 +443,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                 axis.text=element_blank(),
                 axis.ticks=element_blank(),
                 legend.position='right', legend.box='horizontal',
-                legend.direction='vertical',
-                legend.key.height=unit(0.2, 'cm'),
-                legend.key.width=unit(0.1, 'cm'),
-                legend.title=element_text(
-                    size=rel(legend.title.cex)),
-                legend.spacing.x=unit(0.1, 'cm'),
-                legend.spacing.y=unit(0.1, 'cm'),
-                legend.text=element_text(
-                    size=rel(legend.cex))) +
+                legend.direction='vertical') +
             labs(title=element_blank()) +
-            theme(axis.title.x=element_blank(),
-                           axis.title.y=element_text(
-                               size=rel(0.8)),
-                           plot.title=element_text(
-                               hjust=0.5,size = rel(1.5)))
+            theme(axis.title.x=element_blank())
 
         pRight <-
             ggplot(data=plot.df,
@@ -481,20 +464,10 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                 axis.text=element_blank(),
                 axis.ticks=element_blank(),
                 legend.position='right', legend.box='horizontal',
-                legend.direction='vertical',
-                legend.key.height=unit(0.2, 'cm'),
-                legend.key.width=unit(0.1, 'cm'),
-                legend.title=element_text(
-                    size = rel(legend.title.cex)),
-                legend.spacing.x=unit(0.1, 'cm'),
-                legend.spacing.y=unit(0.1, 'cm'),
-                legend.text=element_text(
-                    size=rel(legend.cex))) +
-            theme(axis.title.x=element_text(
-                size=rel(0.8)),
-                           axis.title.y=element_blank(),
-                axis.line=element_blank(),
-                plot.title=element_blank())
+                legend.direction='vertical') +
+            labs(title=element_blank()) +
+            theme(axis.title.y=element_blank())
+
     } else {
         pMain <-
             ggplot(data=plot.df,
@@ -505,16 +478,12 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
             geom_point() +
             scale_color_manual(values=mbecCols) +
             theme_bw() +
-            labs(title=label, colour=label.col, shape=label.sha) +
+            labs(title=element_blank(), colour=label.col, shape=label.sha) +
             xlim(metric.df$axis.min[pca.axes[1]],
                           metric.df$axis.max[pca.axes[1]]) +
             ylim(metric.df$axis.min[pca.axes[2]],
                           metric.df$axis.max[pca.axes[2]]) +
-            xlab(paste0(colnames(plot.df[pca.axes[1]+1]), ": ",
-                                 metric.df$var.explained[pca.axes[1]],
-                                 "% expl.var")) +
-            ylab(paste0(colnames(plot.df[pca.axes[2] + 1]), ": ",
-                        metric.df$var.explained[pca.axes[2]], "% expl.var"))
+            xlab(x.label) + ylab(y.label)
 
         pTop <- ggplot(data=plot.df,
                                 aes_string(
@@ -527,11 +496,7 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
                           metric.df$axis.max[pca.axes[1]]) +
             theme_bw() +
             labs(title=element_blank()) +
-            theme(axis.title.x=element_blank(),
-                           axis.title.y=element_text(
-                               size=rel(0.8)), plot.title=
-                               element_text(hjust=0.5,
-                                                     size=rel(1.5)))
+            theme(axis.title.x=element_blank())
 
         pRight <-
             ggplot(data=plot.df,
@@ -544,11 +509,8 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
             xlim(metric.df$axis.min[pca.axes[2]],
                           metric.df$axis.max[pca.axes[2]]) +
             theme_bw() +
-            theme(axis.title.x=element_text(
-                size=rel(0.8)),
-                           axis.title.y=element_blank(),
-                axis.line=element_blank(),
-                plot.title=element_blank())
+            labs(title=element_blank()) +
+            theme(axis.title.y=element_blank())
     }
 
     g <- ggplotGrob(pMain)$grobs
@@ -602,6 +564,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
 #' plot.lm <- mbecVarianceStatsPlot(variance.obj=df.var.lm)
 mbecVarianceStatsPlot <- function(variance.obj) {
 
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+
     # local variable references to shut up check()
     type <- variance <- NULL
 
@@ -620,6 +585,7 @@ mbecVarianceStatsPlot <- function(variance.obj) {
                               outlier.stroke=0.5, outlier.size=0.5,
                               outlier.alpha=0.5) +
         facet_grid(cols=vars(type)) +
+        scale_fill_manual(values = mbecCols) +
         theme_bw() +
         theme(axis.text.x=element_text(angle=45, hjust=1),
                        strip.text=element_text(size=12),
@@ -628,7 +594,7 @@ mbecVarianceStatsPlot <- function(variance.obj) {
                        axis.title=element_text(size=15),
                        legend.title=element_text(size=15),
                        legend.text=element_text(size=12)) +
-        labs(x="Linear (Mixed) Model", y="Proportion Variance",
+        labs(x="Linear (Mixed) Model", y="Proportion of Variance",
                       name="Covariate") +
         ylim(0, 1) +
         facet_grid(cols=vars(type), scales="free",
@@ -669,6 +635,8 @@ mbecVarianceStatsPlot <- function(variance.obj) {
 #' plot.rda <- mbecRDAStatsPlot(rda.obj=df.var.rda)
 mbecRDAStatsPlot <- function(rda.obj) {
 
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     # local variable references to shut up check()
     type <- variance <- NULL
 
@@ -688,6 +656,7 @@ mbecRDAStatsPlot <- function(rda.obj) {
                              label="variance.r"),
                   position = position_dodge(width=0.9), size=3) +
         facet_grid(cols=vars(type)) +
+        scale_fill_manual(values = mbecCols) +
         theme_bw() +
         labs(x="RDA",y="Variance explained (%)") +
         theme(axis.text.x=element_text(angle=60,hjust=1),
@@ -735,6 +704,8 @@ mbecRDAStatsPlot <- function(rda.obj) {
 #' plot.pvca <- mbecPVCAStatsPlot(pvca.obj=df.var.pvca)
 mbecPVCAStatsPlot <- function(pvca.obj) {
 
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     # local variable references to shut up check()
     type <- covariate <- variance <- variance.p <- NULL
 
@@ -756,6 +727,7 @@ mbecPVCAStatsPlot <- function(pvca.obj) {
                               aes_string(x = "covariate", y = "variance.p",
                                            fill = "covariate")) +
         geom_bar(stat="identity", position="dodge", colour="black") +
+        scale_fill_manual(values = mbecCols) +
         geom_text(data=plot.df,
                            aes_string(
                                "covariate", "variance.offset",
@@ -816,10 +788,8 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
     # local variable references to shut up check()
     variable <- type <- sil.coefficient <- NULL
 
-    cols <- c("#1F77B4","#AEC7E8","#FF7F0E","#FFBB78","#2CA02C","#98DF8A",
-              "#D62728","#FF9896","#9467BD","#C5B0D5","#8C564B","#C49C94",
-              "#E377C2","#F7B6D2","#7F7F7F","#C7C7C7","#BCBD22","#DBDB8D",
-              "#17BECF","#9EDAE5")
+    mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
+                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
     # first tidy-magic to create df for plotting
     plot.df <- scoef.obj %>%
         dplyr::mutate(variable=gsub("\\.", ":", variable)) %>%
@@ -842,7 +812,7 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
                        axis.title=element_text(size=15),
                        legend.title=element_text(size=15),
                        legend.text=element_text(size=12)) +
-        scale_color_manual(values=cols) +
+        scale_color_manual(values=mbecCols) +
         labs(x="Silhouette Coefficient", y="Grouping", name="Type") +
         facet_grid(cols=vars(type), scales="free",
                             space="free_x", drop=TRUE)

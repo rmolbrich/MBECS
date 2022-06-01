@@ -9,7 +9,8 @@ mbecSVA(input.obj, model.vars, type = c("clr", "otu", "tss"))
 \arguments{
 \item{input.obj}{MbecData object}
 
-\item{model.vars}{Vector of covariate names. First element relates to batch.}
+\item{model.vars}{Vector of covariate names. First element relates to
+variable of interest.}
 
 \item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 'clr'.}

@@ -34,7 +34,6 @@ The input for this function is supposed to be an MbecData object that
 contains total sum-scaled and cumulative log-ratio transformed abundance
 matrices. Output will be a matrix of corrected abundances.
 }
-\keyword{BECA}
-\keyword{Duvallet}
-\keyword{Normalisation}
-\keyword{Percentile}
+\keyword{Decomposition}
+\keyword{Singular}
+\keyword{Value}

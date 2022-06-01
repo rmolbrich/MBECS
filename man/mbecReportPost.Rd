@@ -39,7 +39,8 @@ Constructs a comparative report of batch corrected data.
 }
 \examples{
 data(dummy.list)
-dummy.test <- mbecTransform(dummy.list, method="clr")
+dummy.test <- mbecTransform(list(dummy.list$cnts[,seq(20)],
+dummy.list$meta), method="clr")
 dummy.corrected <- mbecCorrection(input.obj=dummy.test,
 model.vars=c("batch","group"), method="bat", type="clr" )
 

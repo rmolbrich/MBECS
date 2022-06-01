@@ -25,7 +25,7 @@ Data.frame that contains proportions of variance for given covariates
 in a linear mixed modelling approach.
 }
 \description{
-The function offers a selection of methods/algorithms to estimate the
+The function uses a linear mixed modeling approach to estimate the
 proportion of variance that can be attributed to covariates of interest.
 This shows, how much variation is explained by the treatment effect, which
 proportion is introduced by processing in batches and the leftover variance,
