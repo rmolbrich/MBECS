@@ -478,7 +478,7 @@ mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
                 Using pseudo-negative controls.")
         tmp.group.p <- mbecLM(input.obj=input.obj, method="lm",
                               model.vars=model.vars, type=eval(type))
-        tmp.nc <- tmp.group.p > 0.9
+        tmp.nc <- tmp.group.p > 0.05
     }
 
     message("Applying Remove Unwanted Variantion v3 (RUV-III).")
