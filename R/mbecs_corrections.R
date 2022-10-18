@@ -675,6 +675,13 @@ mbecPN <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
     tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
 
+    if( !is(tmp.meta[,eval(model.vars[1])], "factor") ) {
+        warning("Batch variable is not a factor! Converting to factor now.")
+        tmp.meta[,eval(model.vars[1])] <- as.factor(
+            tmp.meta[,eval(model.vars[1])])
+    }
+
+
     if( !is(tmp.meta[,eval(model.vars[2])], "factor") ) {
         warning("Grouping variable is not a factor! Converting to factor now.")
         tmp.meta[,eval(model.vars[2])] <- as.factor(

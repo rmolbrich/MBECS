@@ -27,7 +27,9 @@
 mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     n.tiles <- dim(unique(rle.df[,eval(model.vars[2])]))[1]
 
     if( n.tiles <= 3 ) {
@@ -95,7 +97,9 @@ mbecRLEPlot <- function(rle.df, model.vars, label=NULL) {
 mbecBoxPlot <- function(tmp, otu.idx, model.var, label=NULL) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     x.angle <- 0
     x.hjust <- 0.5
     density.lwd <- 0.2
@@ -247,7 +251,9 @@ mbecHeatPlot <- function(tmp.cnts, tmp.meta, model.vars, label=NULL) {
 mbecMosaicPlot <- function(study.summary, model.vars) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     # local variable references to shut up check()
     Var1 <- Var2 <- NULL
 
@@ -379,8 +385,11 @@ mbecMosaicPlot <- function(study.summary, model.vars) {
 #' plot.pca <- mbecPCAPlot(plot.df=pca.df[[1]], metric.df=pca.df[[2]],
 #' model.vars=c('group','batch'), pca.axes=c(1,2))
 mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
+
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     x.angle <- 0
     x.hjust <- 0.5
     legend.cex <- 0.7
@@ -565,7 +574,9 @@ mbecPCAPlot <- function(plot.df, metric.df, model.vars, pca.axes, label=NULL) {
 mbecVarianceStatsPlot <- function(variance.obj) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
 
     # local variable references to shut up check()
     type <- variance <- NULL
@@ -636,7 +647,9 @@ mbecVarianceStatsPlot <- function(variance.obj) {
 mbecRDAStatsPlot <- function(rda.obj) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     # local variable references to shut up check()
     type <- variance <- NULL
 
@@ -705,7 +718,9 @@ mbecRDAStatsPlot <- function(rda.obj) {
 mbecPVCAStatsPlot <- function(pvca.obj) {
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     # local variable references to shut up check()
     type <- covariate <- variance <- variance.p <- NULL
 
@@ -789,7 +804,9 @@ mbecSCOEFStatsPlot <- function(scoef.obj) {
     variable <- type <- sil.coefficient <- NULL
 
     mbecCols <- c("#9467bd","#BCBD22","#2CA02C","#E377C2","#1F77B4","#FF7F0E",
-                  "#D62728","#8C564B","#E377C2","#7F7F7F","#17BECF")
+                  "#AEC7E8","#FFBB78","#98DF8A","#D62728","#FF9896","#C5B0D5",
+                  "#8C564B","#C49C94","#F7B6D2","#7F7F7F","#C7C7C7","#DBDB8D",
+                  "#17BECF","#9EDAE5")
     # first tidy-magic to create df for plotting
     plot.df <- scoef.obj %>%
         dplyr::mutate(variable=gsub("\\.", ":", variable)) %>%

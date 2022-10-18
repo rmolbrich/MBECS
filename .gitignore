@@ -14,3 +14,6 @@ tests/testthat/.DS_Store
 .httr-oauth
 .DS_Store
 Complete_rebuild_2.0.R
+Code_forFigures.R
+/doc/
+/Meta/
