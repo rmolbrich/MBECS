@@ -80,4 +80,12 @@
     }
 }
 
+\section{Changes in version 1.3.1, Bioconductor Development-Release}{
+
+    \itemize{
+        \item Included PLSDA algorithm.
+        \item WiP requires adjustment of vignette and tests, should work though.
+
+    }
+}
 
