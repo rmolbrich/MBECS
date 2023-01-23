@@ -35,7 +35,8 @@
 #' method=c("pn"))
 mbecRunCorrections <- function(input.obj,
                                model.vars=c("batch","group"), type="clr",
-                               method=c("ruv3","bmc","bat","rbe","pn","svd"),
+                               method=c("ruv3","bmc","bat","rbe",
+                                        "pn","svd","pls"),
                                nc.features=NULL) {
 
     input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
@@ -163,7 +164,12 @@ mbecRunCorrections <- function(input.obj,
 #' the batch-effect and remove this effect from the data. The interesting thing
 #' is that this works pretty well (with the test-data anyway) But since the SEVs
 #' are latent factors that are (most likely) confounded with other effects it is
-#' not obvious to me that this is the optimal approach to solve this issue.
+#' not obvious that this is the optimal approach to solve this issue.
+#'
+#' Conditional Quantile Regression (CQR) is a comprehensive method that
+#' accommodates the complex distributions of microbial read counts by
+#' non-parametric modeling, and it generates batch-removed zero-inflated read
+#' counts that can be used in and benefit usual subsequent analyses.
 #'
 #' The input for this function is supposed to be an MbecData object that
 #' contains total sum-scaled and cumulative log-ratio transformed abundance
@@ -174,8 +180,8 @@ mbecRunCorrections <- function(input.obj,
 #' @param input.obj An MbecData object with 'tss' and 'clr' matrices.
 #' @param model.vars Vector of covariate names. First element relates to batch.
 #' @param method Denotes the algorithms to use. One of 'lm, lmm, sva, ruv2,
-#' ruv4' for assessment methods or one of 'ruv3, bmc, bat, rbe, pn, svd' for
-#' correction algorithms.
+#' ruv4' for assessment methods or one of 'ruv3, bmc, bat, rbe, pn, svd', 'cqr'
+#' for correction algorithms.
 #' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 #' 'clr' but percentile normalization is supposed to work on tss-abundances.
 #' @param nc.features (OPTIONAL) A vector of features names to be used as
@@ -200,7 +206,7 @@ mbecRunCorrections <- function(input.obj,
 #' method="pn", type="tss")
 mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
                            method=c("lm","lmm","sva","ruv2","ruv4","ruv3","bmc",
-                                    "bat","rbe","pn","svd"),
+                                    "bat","rbe","pn","svd","pls"),
                            type=c("clr","otu","tss"), nc.features=NULL) {
 
     input.obj <- mbecProcessInput(input.obj, required.col=eval(model.vars))
@@ -248,13 +254,16 @@ mbecCorrection <- function(input.obj, model.vars=c("batch","group"),
     } else if( method == "svd" ) {
         res.correct <- mbecSVD(input.obj, model.vars,
                                type=eval(type))
+    } else if( method == "pls" ) {
+        res.correct <- mbecPLSDA(input.obj, model.vars,
+                                 type=eval(type))
     }
 
     ## figure out where to put the result
     if( method %in% c("lm","lmm","sva","ruv2","ruv4") ) {
         return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.assess,
                                   type = "ass", label = eval(method))
-    } else if( method %in% c("ruv3","bmc","bat","rbe","pn", "svd") ) {
+    } else if( method %in% c("ruv3","bmc","bat","rbe","pn","svd","pls") ) {
         return.obj <- mbecSetData(input.obj = input.obj, new.cnts = res.correct,
                                   type = "cor", label = eval(method))
     }
@@ -499,6 +508,58 @@ mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
 
 
 # CORRECTION FUNCTIONS ----------------------------------------------------
+
+#' Conditional Quantile Regression (CQR)
+#'
+#' ConQuR is a comprehensive method that accommodates the complex distributions
+#' of microbial read counts by non-parametric modeling, and it generates
+#' batch-removed zero-inflated read counts that can be used in and benefit
+#' usual subsequent analyses.
+#'
+#' The input for this function is supposed to be an MbecData object that
+#' contains total sum-scaled and cumulative log-ratio transformed abundance
+#' matrices. Output will be a matrix of corrected abundances.
+#'
+#' @keywords BECA Conditional Quantile Regression
+#' @param input.obj phyloseq object or numeric matrix (correct orientation is
+#' handeled internally)
+#' @param model.vars Vector of covariate names. First element relates to batch.
+#' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+#' 'otu'.
+#' @return A matrix of batch-effect corrected counts
+#'
+#' @include mbecs_classes.R
+mbecCQR <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
+    message("Applying Conditional Quantile Reg. (CQR) for batch-correction.")
+
+    type <- match.arg(type)
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+
+
+    batchid <- tmp.meta[[model.vars[1]]]
+    covar <- dplyr::select(tmp.meta, eval(model.vars[-1]))
+
+    # disable warning for execution..
+    options(warn=-1)
+
+    corrected.cnts = ConQuR::ConQuR(tax_tab=tmp.cnts, batchid=batchid,
+                                    covariates=covar,
+                                    batch_ref=levels(batchid)[1])
+
+    # re-enable warnings
+    options(warn=1)
+
+    # reorder according to meta-table - in case order has changed
+    corrected.cnts <- corrected.cnts[tmp.meta$sID,]
+
+    return(corrected.cnts)
+}
+
+
+
+
+
 
 
 #' Batch Mean Centering (BMC)
@@ -773,3 +834,221 @@ mbecSVD <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     return(corrected.cnts)
 }
+
+
+
+
+#' Partial Least Squares Discriminant Analysis
+#'
+#' This function estimates latent dimensions from the explanatory matrix
+#' \code{X}. The latent dimensions are maximally associated with the outcome
+#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' adjusted to work in the MBECS-package. To that end, the function
+#' \code{mixOmics::explained_variance} was replaced with a computation based on
+#' \code{vegan::cca} since this is already used in the MBECS package.
+#' Additionally, the matrix deflation function was replaced with own code. The
+#' near zero-variance correction function is taken from the caret -package. The
+#' credit for algorithm and implementation goes to
+#' 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
+#' that is referenced in the documentation and vignette.
+#'
+#' @keywords PLSDA batch correction
+#' @param input.obj phyloseq object or numeric matrix (correct orientation is
+#' handeled internally)
+#' @param model.vars Vector of covariate names. First element relates to batch.
+#' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
+#' 'clr'.
+#' @return A matrix of batch-effect corrected counts
+#'
+#' @include mbecs_classes.R
+mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
+
+    ## ToDo: Streamline this
+
+    message("Applying PLSDA for batch-correction.")
+
+    type <- match.arg(type)
+    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
+    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
+
+    ### first set-up the parameters that we do not want to deal with right now
+    ncomp.trt = 2
+    ncomp.bat = 2
+    keepX.trt = rep(ncol(tmp.cnts), ncomp.trt)
+    keepX.bat = rep(ncol(tmp.cnts), ncomp.bat)
+    max.iter = 500
+    tol = 1e-06
+    near.zero.var = TRUE
+    balance = TRUE
+    ### first set-up the parameters that we do not want to deal with right now
+
+
+    n = nrow(tmp.cnts)
+    # make sure covariates are factors
+    tmp.meta <- helpFactor(tmp.meta, model.vars)
+
+    ## this will keep the row-names.. which is nice
+    Y.bat.mat <- model.matrix(~ 0 + tmp.meta[[model.vars[1]]], tmp.meta)
+    ## we also want to set colnames
+    colnames(Y.bat.mat) = levels(tmp.meta[[model.vars[1]]])
+    #levels in batch-factor
+    q.bat = ncol(Y.bat.mat)
+
+    # basically remove all the features that exhibit variance close to zero
+    if (near.zero.var == TRUE) {
+        nzv = caret::nearZeroVar(tmp.cnts)
+        if (length(nzv > 0)) {
+            warning("Zero- or near-zero variance predictors.
+                    \nReset predictors matrix\n
+                    to not near-zero variance predictors.\nSee $nzv\n
+                    for problematic predictors.")
+            tmp.cnts = tmp.cnts[, -nzv$Position, drop = FALSE]
+            if (ncol(tmp.cnts) == 0) {
+                stop("No more predictors")
+            }
+        }
+    }
+    # basically remove all the features that exhibit variance close to zero
+
+    # limit number of batch associated dimensions to number of features
+    n.taxa = ncol(tmp.cnts) # number of features
+    if (ncomp.bat > n.taxa) {
+        warning("Reset maximum number of variates 'ncomp.bat' to ncol(X) = ",
+                n.taxa, ".")
+        ncomp.bat = n.taxa
+    }
+    if (length(keepX.bat) != ncomp.bat) {
+        stop("length of 'keepX.bat' must be equal to ", ncomp.bat,
+             ".")
+    }
+    if (any(keepX.bat > n.taxa)) {
+        stop("each component of 'keepX' must be lower than or equal to ",
+             n.taxa, ".")
+    }
+
+    # if treatment is given, this part will preserve associated variation
+    if( length(model.vars) >= 2 ) {
+        ### build result vector/matrices
+        ## this will keep the row-names.. which is nice
+        Y.trt.mat <- model.matrix(~ 0 + tmp.meta[[model.vars[2]]], tmp.meta)
+        ## we also want to set colnames
+        colnames(Y.trt.mat) = levels(tmp.meta[[model.vars[2]]])
+        #levels in batch-factor
+        q.trt = ncol(Y.trt.mat)
+
+
+        if (ncomp.trt > n.taxa) {
+            warning("Reset max. number of variates 'ncomp.trt' to ncol(X) = ",
+                    n.taxa, ".")
+            ncomp.trt = n.taxa
+        }
+        if (length(keepX.trt) != ncomp.trt) {
+            stop("length of 'keepX.trt' must be equal to ", ncomp.trt,
+                 ".")
+        }
+        if (any(keepX.trt > n.taxa)) {
+            stop("each component of 'keepX' must be lower than or equal to ",
+                 n.taxa, ".")
+        }
+
+        ## UNBALANCED DESIGN
+        # for unbalanced design, adjust the weight matrix
+        if (!balance) {
+
+            tmp.meta <- base::table(tmp.meta[, eval(model.vars[1])],
+                                    tmp.meta[, eval(model.vars[2])],
+                                    dnn = eval(model.vars)) %>%
+                as.data.frame() %>%
+                dplyr::right_join(., tmp.meta,
+                                  by =eval(model.vars)) %>%
+                dplyr::mutate(weight = 1/Freq) %>%
+                dplyr::mutate(weight = sqrt(weight/min(weight)))
+
+            # get a weighted matrix
+            tmp.cnts.scale <- scale(tmp.meta$weight * tmp.cnts, center = TRUE,
+                                    scale = TRUE)
+            tmp.cnts.mean <- attributes(tmp.cnts.scale)$`scaled:center`
+            tmp.cnts.sd <- attributes(tmp.cnts.scale)$`scaled:scale`
+
+            Y.bat.scale = scale(tmp.meta$weight * Y.bat.mat, center = TRUE,
+                                scale = TRUE)
+            Y.trt.scale = scale(tmp.meta$weight * Y.trt.mat, center = TRUE,
+                                scale = TRUE)
+        }
+        # in case of a balanced design - no weighting
+        else {
+            tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)
+            tmp.cnts.mean <- attributes(tmp.cnts.scale)$`scaled:center`
+            tmp.cnts.sd <- attributes(tmp.cnts.scale)$`scaled:scale`
+            Y.bat.scale = scale(Y.bat.mat, center = TRUE, scale = TRUE)
+            Y.trt.scale = scale(Y.trt.mat, center = TRUE, scale = TRUE)
+        }
+        plsda_trt <-  externalPLSDA(X = tmp.cnts.scale, Y = Y.trt.scale,
+                            ncomp = ncomp.trt, keepX = keepX.trt, tol = tol,
+                            max.iter = max.iter)
+        tmp.cnts.notrt <- plsda_trt$defl_data$X
+
+        ### TRY OUT THE caret plsda function
+        letest <- caret::plsda(x = tmp.cnts.scale, y = Y.bat.mat,
+                               ncomp = ncomp.trt, scale = TRUE, tol = tol,
+                               max.iter = max.iter,
+                               near.zero.var = FALSE, logratio = "CLR", multilevel = NULL,
+                               all.outputs = TRUE)
+
+
+    }
+    else {
+        ## ToDo: take care of this weight mess
+        tmp.meta$weight <- 1
+
+        tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)
+        tmp.cnts.mean <- attributes(tmp.cnts.scale)$`scaled:center`
+        tmp.cnts.sd <- attributes(tmp.cnts.scale)$`scaled:scale`
+        Y.bat.scale = scale(Y.bat.mat, center = TRUE, scale = TRUE)
+        plsda_trt = NULL
+        tmp.cnts.notrt = tmp.cnts.scale
+    }
+
+    plsda_bat <- externalPLSDA(X = tmp.cnts.notrt, Y = Y.bat.scale, ncomp = ncomp.bat,
+                       keepX = keepX.bat, tol = tol, max.iter = max.iter)
+    bat_loadings <- plsda_bat$loadings$a
+    tmp.cnts.temp <- tmp.cnts.scale
+    for (h in seq_len(ncomp.bat)) {
+        a.bat = bat_loadings[, h]
+        t.bat = tmp.cnts.temp %*% a.bat
+        tmp.cnts.temp <- mbecsDeflate(tmp.cnts.temp, t.bat)
+    }
+    tmp.cnts.nobat <- tmp.cnts.temp
+    tmp.cnts.nobat.final <- t(t(tmp.cnts.nobat) * tmp.cnts.sd + tmp.cnts.mean)
+    tmp.cnts.nobat.final <- tmp.cnts.nobat.final/tmp.meta$weight
+    if (length(model.vars) >= 2) {
+        tmp.cnts.notrt.final <- t(t(tmp.cnts.notrt) *
+                                      tmp.cnts.sd + tmp.cnts.mean)
+        tmp.cnts.notrt.final <- tmp.cnts.notrt.final/tmp.meta$weight
+    }
+    else {
+        tmp.cnts.notrt.final = NULL
+    }
+    ## ToDo: take care of this, but first make everything work.
+    # cl = match.call()
+    # cl[[1]] = as.name("PLSDA_batch")
+    # result = list(call = cl, X = tmp.cnts, X.nobatch = tmp.cnts.nobat.final,
+    #               X.notrt = tmp.cnts.notrt.final,
+    #               Y = list(trt = Y.trt, bat = Y.bat),
+    #               latent_var.trt = plsda_trt$latent_comp,
+    #               latent_var.bat = plsda_bat$latent_comp,
+    #               loadings.trt = plsda_trt$loadings,
+    #               loadings.bat = plsda_bat$loadings,
+    #               tol = tol, max.iter = max.iter, iter.trt = plsda_trt$iters,
+    #               iter.bat = plsda_bat$iters,
+    #               explained_variance.trt = plsda_trt$exp_var,
+    #               explained_variance.bat = plsda_bat$exp_var, weight = weight)
+    # if (near.zero.var == TRUE)
+    #     result$nzv = nzv
+
+    return(tmp.cnts.nobat.final)
+}
+
+
+
+

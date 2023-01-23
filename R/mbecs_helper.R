@@ -1,5 +1,40 @@
 # HELPER FUNCTIONS --------------------------------------------------------
 
+#' Check If Covariates Are Factors
+#'
+#' For a given covariate matrix and a vector of factor names this function tests
+#' if they are formatted as factors and re-formats them if required.
+#'
+#' @keywords limma nonEstimable Wrapper
+#' @param tmp.meta A covariate matrix to check.
+#' @param model.vars Names of covariates to construct to check in
+#' \code{tmp.meta}.
+#' @return A covariate matrix with factorized variables.
+#'
+#' @export
+#'
+#' @examples
+#' # This will ensure that the covariates 'batch' and 'group' are factors.
+#' data(dummy.list)
+#' eval.obj <- mbecTestModel(tmp.meta=dummy.list$meta,
+#' model.vars=c("group","batch"))
+mbecHelpFactor <- function(tmp.meta, model.vars) {
+
+    for (g.idx in c(seq_along(model.vars))) {
+        if (!is.factor(tmp.meta[, eval(model.vars[g.idx])])) {
+            warning("Grouping variables need to be factors. Coercing: ",
+                    eval(model.vars[g.idx]),
+                    " to factor now, adjust beforehand to get best results.")
+            tmp.meta[, eval(model.vars[g.idx])] <-
+                factor(tmp.meta[, eval(model.vars[g.idx])])
+        }
+    }
+    return(tmp.meta)
+}
+
+
+
+
 #' Check If Model Is Estimable
 #'
 #' Applies Limma's 'nonEstimable()' to a given model and returns NULL if
@@ -62,7 +97,6 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
 
 
 
-
 #' Capitalize Word Beginning
 #'
 #' Change the first letter of the input to uppercase. Used in plotting functions
@@ -74,6 +108,8 @@ mbecTestModel <- function(input.obj, model.vars=NULL, model.form=NULL) {
 mbecUpperCase <- function(input=character()) {
     return(gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2",input,perl = TRUE))
 }
+
+
 
 
 #' Linear (Mixed) Model Feature to Batch Fit
@@ -163,6 +199,8 @@ mbecLM <- function(input.obj, method=c("lm","lmm"),
 
     return(tmp.group.p)
 }
+
+
 
 
 # TRANSFORMATION FUNCTIONS ------------------------------------------------
@@ -382,6 +420,180 @@ mbecCLR <- function(input.mtx, offset = 0) {
     input.mtx <- log((input.mtx / gman))
 
     return(input.mtx)
+}
+
+
+
+# PLSDA FUNCTIONS ---------------------------------------------------------
+
+
+
+#' Calculate matrix residuals
+#'
+#' Internal function that performs matrix deflation to remove latent components
+#' from a 'sxf' oriented matrix to produce the residual matrix.
+#'
+#' @keywords residual matrix deflation latent components
+#' @param input.mtx A matrix of counts (samples x features).
+#' @param t An 'sxf' matrix object of latent components defined as
+#' t = input.mtx %*% svd.loadings.
+#' @return A matrix of residual counts of same size and orientation as the
+#' input.
+mbecDeflate <- function(input.mtx, t) {
+
+    input.mtx  <- input.mtx - t %*%
+        t(crossprod(input.mtx, t) / drop(crossprod(t)))
+
+    return(input.mtx)
+}
+
+#' Calculate explained variance using CCA
+#'
+#' Internal function that performs Canonical Correspondence Analysis to compute
+#' the proportion of explained variance the can be attributed to a set of given
+#' components.
+#'
+#' @keywords cca explained variance
+#' @param input.mtx A matrix of counts (samples x features).
+#' @param var.mtx An 'sxcomponents' matrix object of orthogonal components that
+#' explain the variance in input.mtx
+#' @param n.comp Number of columns in var.mtx that should be used. Defaults to
+#' the total number of columns in var.mtx.
+#' @return A vector that contains the proportional variance explained for each
+#' selected component in var.mtx.
+mbecExplainedVariance <- function(input.mtx, var.mtx, n.comp=ncol(var.mtx)) {
+
+    res <- setNames(numeric(n.comp), paste0("comp", seq_len(n.comp)))
+
+    for( c.idx in seq_len(n.comp) ) {
+        tmp.cca <- vegan::rda(input.mtx, var.mtx[,c.idx], scale=TRUE)
+        res[c.idx] <- tmp.cca$CCA$tot.chi / tmp.cca$tot.chi
+    }
+    return(res)
+}
+
+
+
+#' Partial Least Squares Discriminant Analysis Computation
+#'
+#' This function estimates latent dimensions from the explanatory matrix
+#' \code{X}. The latent dimensions are maximally associated with the outcome
+#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' adjusted to work in the MBECS-package. To that end, the function
+#' \code{mixOmics::explained_variance} was replaced with a computation based on
+#' \code{vegan::cca} since this is already used in the MBECS package.
+#' Additionally, the matrix deflation function was replaced with own code. The
+#' credit for algorithm and implementation goes to
+#' 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
+#' that is referenced in the documentation and vignette.
+#'
+#' @keywords cca explained variance
+#' @param input.mtx A matrix of counts (samples x features).
+#' @param var.mtx An 'sxcomponents' matrix object of orthogonal components that
+#' explain the variance in \code{input.mtx}.
+#' @param n.comp Number of columns in \code{var.mtx} that should be used.
+#' Defaults to the total number of columns in \code{var.mtx}.
+#' @return A vector that contains the proportional variance explained for each
+#' selected component in \code{var.mtx}.
+externalPLSDA <- function(X, Y, ncomp, keepX = rep(ncol(X), ncomp), tol = 1e-06,
+                  max.iter = 500){
+
+    ## ToDo: I should really streamline this code.
+
+    mat.t = mat.u = matrix(nrow = nrow(X), ncol = ncomp)
+    mat.a = matrix(nrow = ncol(X), ncol = ncomp)
+    mat.b = matrix(nrow = ncol(Y), ncol = ncomp)
+
+    c.iter = NULL
+    X.temp = X
+    Y.temp = Y
+
+    for(h in seq_len(ncomp)) {
+
+        nx = ncol(X) - keepX[h]
+
+        # Initialisation
+        M = crossprod(X.temp, Y.temp)
+        svd.M = svd(M, nu = 1, nv = 1)
+        a.old = svd.M$u
+        b.old = svd.M$v
+
+        t = X.temp %*% a.old
+        u = Y.temp %*% b.old
+
+        iter = 1
+
+        # Iteration
+        repeat {
+            a.new = t(X.temp) %*%  u
+
+            if (nx != 0) {
+
+                abs_a = abs(a.new)
+
+                if(any(rank(abs_a, ties.method = "max") <= nx)){
+                    a.new =
+                        ifelse(rank(abs_a, ties.method = "max") <= nx, 0,
+                               sign(a.new) *
+                                   (abs_a - max(abs_a[rank(abs_a,
+                                                           ties.method = "max")
+                                                      <= nx])))
+                }
+            }
+
+            a.new = a.new / drop(sqrt(crossprod(a.new)))
+
+            t = X.temp %*% a.new
+
+            b.new = t(Y.temp) %*% t
+
+            b.new = b.new / drop(sqrt(crossprod(b.new)))
+
+            u = Y.temp %*% b.new
+
+            if (crossprod(a.new - a.old) < tol) {break}
+            if (iter == max.iter) {
+                warning(paste("Max. number of iterations reached for component",
+                              h), call. = FALSE)
+                break
+            }
+
+            a.old = a.new
+            b.old = b.new
+            iter = iter + 1
+        }
+
+        # deflation
+        # replaced with slightly quicker version
+        X.temp <- mbecsDeflate(X, t)
+        Y.temp <- mbecsDeflate(Y.temp, u)
+
+        mat.t[,h] = t
+        mat.u[,h] = u
+        mat.a[,h] = a.new
+        mat.b[,h] = b.new
+        c.iter[h] = iter
+    }
+
+    rownames(mat.t) = rownames(mat.u) = rownames(X)
+    rownames(mat.a) = colnames(X)
+    rownames(mat.b) = colnames(Y)
+    colnames(mat.t) = colnames(mat.u) = colnames(mat.a) = colnames(mat.b) =
+        names(c.iter) = paste('comp', seq_len(ncomp))
+
+    # replaced with a computation that used vegan's cca to circumvent using the
+    # mixOmics package
+    exp.var.X = mbecExplainedVariance(X, mat.t, ncomp)
+    exp.var.Y = mbecExplainedVariance(Y, mat.u, ncomp)
+
+    result = list(original_data = list(X = X, Y = Y),
+                  defl_data = list(X = X.temp, Y = Y.temp),
+                  latent_comp = list(t = mat.t, u = mat.u),
+                  loadings = list(a = mat.a, b = mat.b),
+                  iters = c.iter,
+                  exp_var = list(X = exp.var.X, Y = exp.var.Y))
+
+    return(invisible(result))
 }
 
 

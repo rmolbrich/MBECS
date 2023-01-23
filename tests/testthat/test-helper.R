@@ -144,3 +144,30 @@ test_that("CLR transformation works", {
     expect_equal(mbecCLR(cnts), cnts.norm)
 })
 
+## ToDo: implement these stubbs
+
+test_that("Matrix Deflation works", {
+
+})
+
+test_that("Variance Explanation works", {
+
+})
+
+test_that("externalPLSDA works", {
+
+})
+
+
+test_that("factor checking works", {
+
+})
+
+
+
+
+
+
+
+
+
