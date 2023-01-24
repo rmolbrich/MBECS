@@ -864,7 +864,6 @@ mbecSVD <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     ## ToDo: Streamline this
-
     message("Applying PLSDA for batch-correction.")
 
     type <- match.arg(type)
@@ -925,6 +924,9 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
         stop("each component of 'keepX' must be lower than or equal to ",
              n.taxa, ".")
     }
+
+    ## ToDo: take care of this weight mess
+    tmp.meta$weight <- 1
 
     # if treatment is given, this part will preserve associated variation
     if( length(model.vars) >= 2 ) {
@@ -998,9 +1000,6 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     }
     else {
-        ## ToDo: take care of this weight mess
-        tmp.meta$weight <- 1
-
         tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)
         tmp.cnts.mean <- attributes(tmp.cnts.scale)$`scaled:center`
         tmp.cnts.sd <- attributes(tmp.cnts.scale)$`scaled:scale`
@@ -1029,22 +1028,6 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     else {
         tmp.cnts.notrt.final = NULL
     }
-    ## ToDo: take care of this, but first make everything work.
-    # cl = match.call()
-    # cl[[1]] = as.name("PLSDA_batch")
-    # result = list(call = cl, X = tmp.cnts, X.nobatch = tmp.cnts.nobat.final,
-    #               X.notrt = tmp.cnts.notrt.final,
-    #               Y = list(trt = Y.trt, bat = Y.bat),
-    #               latent_var.trt = plsda_trt$latent_comp,
-    #               latent_var.bat = plsda_bat$latent_comp,
-    #               loadings.trt = plsda_trt$loadings,
-    #               loadings.bat = plsda_bat$loadings,
-    #               tol = tol, max.iter = max.iter, iter.trt = plsda_trt$iters,
-    #               iter.bat = plsda_bat$iters,
-    #               explained_variance.trt = plsda_trt$exp_var,
-    #               explained_variance.bat = plsda_bat$exp_var, weight = weight)
-    # if (near.zero.var == TRUE)
-    #     result$nzv = nzv
 
     return(tmp.cnts.nobat.final)
 }

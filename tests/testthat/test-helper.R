@@ -144,23 +144,71 @@ test_that("CLR transformation works", {
     expect_equal(mbecCLR(cnts), cnts.norm)
 })
 
-## ToDo: implement these stubbs
+
+# TEST NEW CODE FOR REVIEW ------------------------------------------------
 
 test_that("Matrix Deflation works", {
+    cnt.mtx <- matrix(c(1,2,5,6), nrow=2, ncol=2,
+                   dimnames=list(c("A","B"), c("F1","F2")))
+    t.vec <- c(42,42)
 
+    res.mtx  <- cnt.mtx - t.vec %*%
+        t(crossprod(cnt.mtx, t.vec) / drop(crossprod(t.vec)))
+
+    expect_equal(mbecDeflate(cnt.mtx, t.vec), res.mtx)
 })
 
+
 test_that("Variance Explanation works", {
+
+    data(dummy.list)
+    ## probably not good if dummy.list ever changes values
+    res <- c(0.06085399, 0.06085399)
+    names(res) <- paste0("comp", seq_len(n.comp))
+
+    ev.res <- evaluate_promise(
+        mbecExplainedVariance(dummy.list$cnts,
+                              matrix(seq_len(80), nrow=40, ncol=2)))
+
+    expect_identical(length(ev.res$result), length(res))
+
+    expect_identical(class(ev.res$result), "numeric")
+
+    expect_identical(typeof(ev.res$result), "double")
+
+    expect_equal(ev.res$result, res)
 
 })
 
 test_that("externalPLSDA works", {
+    data(dummy.mbec)
+
+    mps <- mbecTransform(dummy.mbec, method="clr")
+
+    pls.res <- evaluate_promise(mbecCorrection(mps, model.vars=c("batch"),
+                                              method="pls", type="clr"))
+
+    expect_identical(class(pls.res$result)[1], "MbecData")
+
+    expect_identical(typeof(pls.res$result), "S4")
+
+    expect_equal(names(pls.res$result@corrections), "pls")
 
 })
 
 
 test_that("factor checking works", {
+    data(dummy.list)
 
+    fac.res <- evaluate_promise(mbecHelpFactor(dummy.list$meta, c("group","batch","replicate")))
+
+    expect_identical(class(fac.res$result), "data.frame")
+
+    expect_identical(class(fac.res$result$group), "factor")
+
+    expect_identical(class(fac.res$result$batch), "factor")
+
+    expect_identical(class(fac.res$result$replicate), "factor")
 })
 
 

@@ -194,14 +194,13 @@ test_that("mbecBat works", {
 
 })
 
-message("Applying PLSDA for batch-correction.")
 
 test_that("mbecPLSDA works", {
     data(dummy.mbec)
     model.vars <- c("batch","group")
 
     pls.test <- evaluate_promise(
-        mbecPLSDA(input.obj=dummy.mbec, model.vars, type="otu"))
+        mbecPLSDA(input.obj=dummy.mbec, model.vars, type="clr"))
     # expect no warning
     expect_warning(pls.test, NA)
     # expect feedback message
@@ -211,12 +210,12 @@ test_that("mbecPLSDA works", {
 
     # test for single covariate
     pls.single.test <- evaluate_promise(
-        mbecBat(input.obj=dummy.mbec, model.vars[1], type="clr"))
+        mbecPLSDA(input.obj=dummy.mbec, model.vars[1], type="clr"))
     # expect no warning
     expect_warning(pls.single.test, NA)
     # expect feedback message
     expect_true(
-        any(grepl("Applying ComBat (sva) for batch-correction.\n",
+        any(grepl("Applying PLSDA for batch-correction.\n",
                   pls.single.test$messages, fixed=TRUE)))
     # expect that values differ
     expect_true(!all(pls.test$result == pls.single.test$result))
