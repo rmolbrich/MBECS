@@ -884,7 +884,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     n = nrow(tmp.cnts)
     # make sure covariates are factors
-    tmp.meta <- helpFactor(tmp.meta, model.vars)
+    tmp.meta <- mbecHelpFactor(tmp.meta, model.vars)
 
     ## this will keep the row-names.. which is nice
     Y.bat.mat <- model.matrix(~ 0 + tmp.meta[[model.vars[1]]], tmp.meta)
