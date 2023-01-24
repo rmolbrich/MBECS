@@ -884,10 +884,10 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
     n = nrow(tmp.cnts)
     # make sure covariates are factors
-    tmp.meta <- helpFactor(tmp.meta, model.vars)
+    tmp.meta <- mbecHelpFactor(tmp.meta, model.vars)
 
     ## this will keep the row-names.. which is nice
-    Y.bat.mat <- model.matrix(~ 0 + tmp.meta[[model.vars[1]]], tmp.meta)
+    Y.bat.mat <- stats::model.matrix(~ 0 + tmp.meta[[model.vars[1]]], tmp.meta)
     ## we also want to set colnames
     colnames(Y.bat.mat) = levels(tmp.meta[[model.vars[1]]])
     #levels in batch-factor
@@ -1015,7 +1015,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     for (h in seq_len(ncomp.bat)) {
         a.bat = bat_loadings[, h]
         t.bat = tmp.cnts.temp %*% a.bat
-        tmp.cnts.temp <- mbecsDeflate(tmp.cnts.temp, t.bat)
+        tmp.cnts.temp <- mbecDeflate(tmp.cnts.temp, t.bat)
     }
     tmp.cnts.nobat <- tmp.cnts.temp
     tmp.cnts.nobat.final <- t(t(tmp.cnts.nobat) * tmp.cnts.sd + tmp.cnts.mean)

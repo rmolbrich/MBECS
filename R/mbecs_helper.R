@@ -463,7 +463,7 @@ mbecDeflate <- function(input.mtx, t) {
 #' selected component in var.mtx.
 mbecExplainedVariance <- function(input.mtx, var.mtx, n.comp=ncol(var.mtx)) {
 
-    res <- setNames(numeric(n.comp), paste0("comp", seq_len(n.comp)))
+    res <- stats::setNames(numeric(n.comp), paste0("comp", seq_len(n.comp)))
 
     for( c.idx in seq_len(n.comp) ) {
         tmp.cca <- vegan::rda(input.mtx, var.mtx[,c.idx], scale=TRUE)

@@ -180,6 +180,7 @@ test_that("Variance Explanation works", {
 
 })
 
+
 test_that("externalPLSDA works", {
     data(dummy.mbec)
 
