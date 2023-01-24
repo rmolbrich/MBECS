@@ -164,7 +164,7 @@ test_that("Variance Explanation works", {
     data(dummy.list)
     ## probably not good if dummy.list ever changes values
     res <- c(0.06085399, 0.06085399)
-    names(res) <- paste0("comp", seq_len(n.comp))
+    names(res) <- paste0("comp", seq_len(2))
 
     ev.res <- evaluate_promise(
         mbecExplainedVariance(dummy.list$cnts,

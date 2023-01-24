@@ -7,8 +7,7 @@
 #'
 #' @keywords limma nonEstimable Wrapper
 #' @param tmp.meta A covariate matrix to check.
-#' @param model.vars Names of covariates to construct to check in
-#' \code{tmp.meta}.
+#' @param model.vars Names of covariates to construct to check in tmp.meta.
 #' @return A covariate matrix with factorized variables.
 #'
 #' @export
@@ -16,7 +15,7 @@
 #' @examples
 #' # This will ensure that the covariates 'batch' and 'group' are factors.
 #' data(dummy.list)
-#' eval.obj <- mbecTestModel(tmp.meta=dummy.list$meta,
+#' eval.obj <- mbecHelpFactor(tmp.meta=dummy.list$meta,
 #' model.vars=c("group","batch"))
 mbecHelpFactor <- function(tmp.meta, model.vars) {
 
@@ -431,12 +430,11 @@ mbecCLR <- function(input.mtx, offset = 0) {
 #' Calculate matrix residuals
 #'
 #' Internal function that performs matrix deflation to remove latent components
-#' from a 'sxf' oriented matrix to produce the residual matrix.
+#' from a sxf oriented matrix to produce the residual matrix.
 #'
 #' @keywords residual matrix deflation latent components
 #' @param input.mtx A matrix of counts (samples x features).
-#' @param t An 'sxf' matrix object of latent components defined as
-#' t = input.mtx %*% svd.loadings.
+#' @param t An sxf matrix object of latent components.
 #' @return A matrix of residual counts of same size and orientation as the
 #' input.
 mbecDeflate <- function(input.mtx, t) {
@@ -488,17 +486,19 @@ mbecExplainedVariance <- function(input.mtx, var.mtx, n.comp=ncol(var.mtx)) {
 #' that is referenced in the documentation and vignette.
 #'
 #' @keywords cca explained variance
-#' @param input.mtx A matrix of counts (samples x features).
-#' @param var.mtx An 'sxcomponents' matrix object of orthogonal components that
+#' @param X A matrix of counts (samples x features).
+#' @param Y An 'sxcomponents' matrix object of orthogonal components that
 #' explain the variance in \code{input.mtx}.
-#' @param n.comp Number of columns in \code{var.mtx} that should be used.
+#' @param ncomp Number of columns in \code{var.mtx} that should be used.
 #' Defaults to the total number of columns in \code{var.mtx}.
+#' @param keepX
 #' @return A vector that contains the proportional variance explained for each
 #' selected component in \code{var.mtx}.
-externalPLSDA <- function(X, Y, ncomp, keepX = rep(ncol(X), ncomp), tol = 1e-06,
-                  max.iter = 500){
+externalPLSDA <- function(X, Y, ncomp, keepX = rep(ncol(X), ncomp) ){
 
     ## ToDo: I should really streamline this code.
+    tol = 1e-06
+    max.iter = 500
 
     mat.t = mat.u = matrix(nrow = nrow(X), ncol = ncomp)
     mat.a = matrix(nrow = ncol(X), ncol = ncomp)

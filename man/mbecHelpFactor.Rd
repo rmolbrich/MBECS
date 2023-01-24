@@ -9,8 +9,7 @@ mbecHelpFactor(tmp.meta, model.vars)
 \arguments{
 \item{tmp.meta}{A covariate matrix to check.}
 
-\item{model.vars}{Names of covariates to construct to check in
-\code{tmp.meta}.}
+\item{model.vars}{Names of covariates to construct to check in tmp.meta.}
 }
 \value{
 A covariate matrix with factorized variables.
@@ -22,7 +21,7 @@ if they are formatted as factors and re-formats them if required.
 \examples{
 # This will ensure that the covariates 'batch' and 'group' are factors.
 data(dummy.list)
-eval.obj <- mbecTestModel(tmp.meta=dummy.list$meta,
+eval.obj <- mbecHelpFactor(tmp.meta=dummy.list$meta,
 model.vars=c("group","batch"))
 }
 \keyword{Wrapper}

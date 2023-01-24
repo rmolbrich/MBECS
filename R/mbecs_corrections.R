@@ -820,6 +820,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     . <- Freq <- weight <- NULL
 
     ## ToDo: Streamline this
+    ## re-include near zero variance removal
     message("Applying PLSDA for batch-correction.")
 
     type <- match.arg(type)
@@ -833,7 +834,6 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     keepX.bat = rep(ncol(tmp.cnts), ncomp.bat)
     max.iter = 500
     tol = 1e-06
-    near.zero.var = TRUE
     balance = TRUE
     ### first set-up the parameters that we do not want to deal with right now
 
@@ -850,19 +850,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     q.bat = ncol(Y.bat.mat)
 
     # basically remove all the features that exhibit variance close to zero
-    if (near.zero.var == TRUE) {
-        nzv = caret::nearZeroVar(tmp.cnts)
-        if (length(nzv > 0)) {
-            warning("Zero- or near-zero variance predictors.
-                    \nReset predictors matrix\n
-                    to not near-zero variance predictors.\nSee $nzv\n
-                    for problematic predictors.")
-            tmp.cnts = tmp.cnts[, -nzv$Position, drop = FALSE]
-            if (ncol(tmp.cnts) == 0) {
-                stop("No more predictors")
-            }
-        }
-    }
+    ## ToDo: this
     # basically remove all the features that exhibit variance close to zero
 
     # limit number of batch associated dimensions to number of features
@@ -945,15 +933,6 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
                             ncomp = ncomp.trt, keepX = keepX.trt, tol = tol,
                             max.iter = max.iter)
         tmp.cnts.notrt <- plsda_trt$defl_data$X
-
-        ### TRY OUT THE caret plsda function
-        letest <- caret::plsda(x = tmp.cnts.scale, y = Y.bat.mat,
-                               ncomp = ncomp.trt, scale = TRUE, tol = tol,
-                               max.iter = max.iter,
-                               near.zero.var = FALSE, logratio = "CLR", multilevel = NULL,
-                               all.outputs = TRUE)
-
-
     }
     else {
         tmp.cnts.scale <- scale(tmp.cnts, center = TRUE, scale = TRUE)

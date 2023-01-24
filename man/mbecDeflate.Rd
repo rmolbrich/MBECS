@@ -9,8 +9,7 @@ mbecDeflate(input.mtx, t)
 \arguments{
 \item{input.mtx}{A matrix of counts (samples x features).}
 
-\item{t}{An 'sxf' matrix object of latent components defined as
-t = input.mtx %*% svd.loadings.}
+\item{t}{An sxf matrix object of latent components.}
 }
 \value{
 A matrix of residual counts of same size and orientation as the
@@ -18,7 +17,7 @@ input.
 }
 \description{
 Internal function that performs matrix deflation to remove latent components
-from a 'sxf' oriented matrix to produce the residual matrix.
+from a sxf oriented matrix to produce the residual matrix.
 }
 \keyword{components}
 \keyword{deflation}
