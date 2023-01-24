@@ -166,10 +166,17 @@ mbecRunCorrections <- function(input.obj,
 #' are latent factors that are (most likely) confounded with other effects it is
 #' not obvious that this is the optimal approach to solve this issue.
 #'
-#' Conditional Quantile Regression (CQR) is a comprehensive method that
-#' accommodates the complex distributions of microbial read counts by
-#' non-parametric modeling, and it generates batch-removed zero-inflated read
-#' counts that can be used in and benefit usual subsequent analyses.
+#' Principal Least Squares Discriminant Analysis (PLSDA)
+#' This function estimates latent dimensions from the explanatory matrix
+#' \code{X}. The latent dimensions are maximally associated with the outcome
+#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' adjusted to work in the MBECS-package. To that end, the function
+#' \code{mixOmics::explained_variance} was replaced with a computation based on
+#' \code{vegan::cca} since this is already used in the MBECS package.
+#' Additionally, the matrix deflation function was replaced with own code. The
+#' credit for algorithm and implementation goes to
+#' 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
+#' that is referenced in the documentation and vignette.
 #'
 #' The input for this function is supposed to be an MbecData object that
 #' contains total sum-scaled and cumulative log-ratio transformed abundance
@@ -509,59 +516,6 @@ mbecRUV3 <- function(input.obj, model.vars, type=c("clr","otu","tss"),
 
 # CORRECTION FUNCTIONS ----------------------------------------------------
 
-#' Conditional Quantile Regression (CQR)
-#'
-#' ConQuR is a comprehensive method that accommodates the complex distributions
-#' of microbial read counts by non-parametric modeling, and it generates
-#' batch-removed zero-inflated read counts that can be used in and benefit
-#' usual subsequent analyses.
-#'
-#' The input for this function is supposed to be an MbecData object that
-#' contains total sum-scaled and cumulative log-ratio transformed abundance
-#' matrices. Output will be a matrix of corrected abundances.
-#'
-#' @keywords BECA Conditional Quantile Regression
-#' @param input.obj phyloseq object or numeric matrix (correct orientation is
-#' handeled internally)
-#' @param model.vars Vector of covariate names. First element relates to batch.
-#' @param type Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
-#' 'otu'.
-#' @return A matrix of batch-effect corrected counts
-#'
-#' @include mbecs_classes.R
-mbecCQR <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
-    message("Applying Conditional Quantile Reg. (CQR) for batch-correction.")
-
-    type <- match.arg(type)
-    tmp <- mbecGetData(input.obj, orientation="sxf", type=eval(type))
-    tmp.cnts <- tmp[[1]]; tmp.meta <- tmp[[2]]
-
-
-    batchid <- tmp.meta[[model.vars[1]]]
-    covar <- dplyr::select(tmp.meta, eval(model.vars[-1]))
-
-    # disable warning for execution..
-    options(warn=-1)
-
-    corrected.cnts = ConQuR::ConQuR(tax_tab=tmp.cnts, batchid=batchid,
-                                    covariates=covar,
-                                    batch_ref=levels(batchid)[1])
-
-    # re-enable warnings
-    options(warn=1)
-
-    # reorder according to meta-table - in case order has changed
-    corrected.cnts <- corrected.cnts[tmp.meta$sID,]
-
-    return(corrected.cnts)
-}
-
-
-
-
-
-
-
 #' Batch Mean Centering (BMC)
 #'
 #' For known BEs, this method takes the batches, i.e., subgroup of samples
@@ -863,6 +817,8 @@ mbecSVD <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 #' @include mbecs_classes.R
 mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 
+    . <- Freq <- weight <- NULL
+
     ## ToDo: Streamline this
     message("Applying PLSDA for batch-correction.")
 
@@ -932,7 +888,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     if( length(model.vars) >= 2 ) {
         ### build result vector/matrices
         ## this will keep the row-names.. which is nice
-        Y.trt.mat <- model.matrix(~ 0 + tmp.meta[[model.vars[2]]], tmp.meta)
+        Y.trt.mat <- stats::model.matrix(~ 0 + tmp.meta[[model.vars[2]]], tmp.meta)
         ## we also want to set colnames
         colnames(Y.trt.mat) = levels(tmp.meta[[model.vars[2]]])
         #levels in batch-factor

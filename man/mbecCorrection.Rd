@@ -8,7 +8,7 @@ mbecCorrection(
   input.obj,
   model.vars = c("batch", "group"),
   method = c("lm", "lmm", "sva", "ruv2", "ruv4", "ruv3", "bmc", "bat", "rbe", "pn",
-    "svd"),
+    "svd", "pls"),
   type = c("clr", "otu", "tss"),
   nc.features = NULL
 )
@@ -19,8 +19,8 @@ mbecCorrection(
 \item{model.vars}{Vector of covariate names. First element relates to batch.}
 
 \item{method}{Denotes the algorithms to use. One of 'lm, lmm, sva, ruv2,
-ruv4' for assessment methods or one of 'ruv3, bmc, bat, rbe, pn, svd' for
-correction algorithms.}
+ruv4' for assessment methods or one of 'ruv3, bmc, bat, rbe, pn, svd', 'cqr'
+for correction algorithms.}
 
 \item{type}{Which abundance matrix to use, one of 'otu, tss, clr'. DEFAULT is
 'clr' but percentile normalization is supposed to work on tss-abundances.}
@@ -130,7 +130,19 @@ and compute singular eigenvectors (SEV). Assume that the first SEV captures
 the batch-effect and remove this effect from the data. The interesting thing
 is that this works pretty well (with the test-data anyway) But since the SEVs
 are latent factors that are (most likely) confounded with other effects it is
-not obvious to me that this is the optimal approach to solve this issue.
+not obvious that this is the optimal approach to solve this issue.
+
+Principal Least Squares Discriminant Analysis (PLSDA)
+This function estimates latent dimensions from the explanatory matrix
+\code{X}. The latent dimensions are maximally associated with the outcome
+matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+adjusted to work in the MBECS-package. To that end, the function
+\code{mixOmics::explained_variance} was replaced with a computation based on
+\code{vegan::cca} since this is already used in the MBECS package.
+Additionally, the matrix deflation function was replaced with own code. The
+credit for algorithm and implementation goes to
+'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
+that is referenced in the documentation and vignette.
 
 The input for this function is supposed to be an MbecData object that
 contains total sum-scaled and cumulative log-ratio transformed abundance

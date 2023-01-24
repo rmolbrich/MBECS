@@ -565,8 +565,8 @@ externalPLSDA <- function(X, Y, ncomp, keepX = rep(ncol(X), ncomp), tol = 1e-06,
 
         # deflation
         # replaced with slightly quicker version
-        X.temp <- mbecsDeflate(X, t)
-        Y.temp <- mbecsDeflate(Y.temp, u)
+        X.temp <- mbecDeflate(X, t)
+        Y.temp <- mbecDeflate(Y.temp, u)
 
         mat.t[,h] = t
         mat.u[,h] = u
