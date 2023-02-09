@@ -475,11 +475,11 @@ mbecExplainedVariance <- function(input.mtx, var.mtx, n.comp=ncol(var.mtx)) {
 #' Partial Least Squares Discriminant Analysis Computation
 #'
 #' This function estimates latent dimensions from the explanatory matrix
-#' \code{X}. The latent dimensions are maximally associated with the outcome
-#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' X. The latent dimensions are maximally associated with the outcome
+#' matrix Y. It is a built-in function of PLSDA_batch and has been
 #' adjusted to work in the MBECS-package. To that end, the function
-#' \code{mixOmics::explained_variance} was replaced with a computation based on
-#' \code{vegan::cca} since this is already used in the MBECS package.
+#' mixOmics::explained_variance was replaced with a computation based on
+#' vegan::cca since this is already used in the MBECS package.
 #' Additionally, the matrix deflation function was replaced with own code. The
 #' credit for algorithm and implementation goes to
 #' 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
@@ -488,13 +488,13 @@ mbecExplainedVariance <- function(input.mtx, var.mtx, n.comp=ncol(var.mtx)) {
 #' @keywords cca explained variance
 #' @param X A matrix of counts (samples x features).
 #' @param Y An 'sxcomponents' matrix object of orthogonal components that
-#' explain the variance in \code{input.mtx}.
-#' @param ncomp Number of columns in \code{var.mtx} that should be used.
-#' Defaults to the total number of columns in \code{var.mtx}.
-#' @param keepX
+#' explain the variance in input.mtx.
+#' @param ncomp Number of columns in var.mtx that should be used.
+#' Defaults to the total number of columns in var.mtx.
+#' @param keepX Number of components to keep
 #' @return A vector that contains the proportional variance explained for each
-#' selected component in \code{var.mtx}.
-externalPLSDA <- function(X, Y, ncomp, keepX = rep(ncol(X), ncomp) ){
+#' selected component in var.mtx.
+externalPLSDA <- function( X, Y, ncomp, keepX = rep(ncol(X), ncomp) ){
 
     ## ToDo: I should really streamline this code.
     tol = 1e-06

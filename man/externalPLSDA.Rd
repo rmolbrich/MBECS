@@ -4,35 +4,30 @@
 \alias{externalPLSDA}
 \title{Partial Least Squares Discriminant Analysis Computation}
 \usage{
-externalPLSDA(
-  X,
-  Y,
-  ncomp,
-  keepX = rep(ncol(X), ncomp),
-  tol = 1e-06,
-  max.iter = 500
-)
+externalPLSDA(X, Y, ncomp, keepX = rep(ncol(X), ncomp))
 }
 \arguments{
-\item{input.mtx}{A matrix of counts (samples x features).}
+\item{X}{A matrix of counts (samples x features).}
 
-\item{var.mtx}{An 'sxcomponents' matrix object of orthogonal components that
-explain the variance in \code{input.mtx}.}
+\item{Y}{An 'sxcomponents' matrix object of orthogonal components that
+explain the variance in input.mtx.}
 
-\item{n.comp}{Number of columns in \code{var.mtx} that should be used.
-Defaults to the total number of columns in \code{var.mtx}.}
+\item{ncomp}{Number of columns in var.mtx that should be used.
+Defaults to the total number of columns in var.mtx.}
+
+\item{keepX}{Number of components to keep}
 }
 \value{
 A vector that contains the proportional variance explained for each
-selected component in \code{var.mtx}.
+selected component in var.mtx.
 }
 \description{
 This function estimates latent dimensions from the explanatory matrix
-\code{X}. The latent dimensions are maximally associated with the outcome
-matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+X. The latent dimensions are maximally associated with the outcome
+matrix Y. It is a built-in function of PLSDA_batch and has been
 adjusted to work in the MBECS-package. To that end, the function
-\code{mixOmics::explained_variance} was replaced with a computation based on
-\code{vegan::cca} since this is already used in the MBECS package.
+mixOmics::explained_variance was replaced with a computation based on
+vegan::cca since this is already used in the MBECS package.
 Additionally, the matrix deflation function was replaced with own code. The
 credit for algorithm and implementation goes to
 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication

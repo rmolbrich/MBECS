@@ -168,11 +168,11 @@ mbecRunCorrections <- function(input.obj,
 #'
 #' Principal Least Squares Discriminant Analysis (PLSDA)
 #' This function estimates latent dimensions from the explanatory matrix
-#' \code{X}. The latent dimensions are maximally associated with the outcome
-#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' X. The latent dimensions are maximally associated with the outcome
+#' matrix Y. It is a built-in function of PLSDA_batch and has been
 #' adjusted to work in the MBECS-package. To that end, the function
-#' \code{mixOmics::explained_variance} was replaced with a computation based on
-#' \code{vegan::cca} since this is already used in the MBECS package.
+#' mixOmics::explained_variance was replaced with a computation based on
+#' vegan::cca since this is already used in the MBECS package.
 #' Additionally, the matrix deflation function was replaced with own code. The
 #' credit for algorithm and implementation goes to
 #' 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
@@ -795,11 +795,11 @@ mbecSVD <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
 #' Partial Least Squares Discriminant Analysis
 #'
 #' This function estimates latent dimensions from the explanatory matrix
-#' \code{X}. The latent dimensions are maximally associated with the outcome
-#' matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+#' X. The latent dimensions are maximally associated with the outcome
+#' matrix Y. It is a built-in function of PLSDA_batch and has been
 #' adjusted to work in the MBECS-package. To that end, the function
-#' \code{mixOmics::explained_variance} was replaced with a computation based on
-#' \code{vegan::cca} since this is already used in the MBECS package.
+#' mixOmics::explained_variance was replaced with a computation based on
+#' vegan::cca since this is already used in the MBECS package.
 #' Additionally, the matrix deflation function was replaced with own code. The
 #' near zero-variance correction function is taken from the caret -package. The
 #' credit for algorithm and implementation goes to
@@ -930,8 +930,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
             Y.trt.scale = scale(Y.trt.mat, center = TRUE, scale = TRUE)
         }
         plsda_trt <-  externalPLSDA(X = tmp.cnts.scale, Y = Y.trt.scale,
-                            ncomp = ncomp.trt, keepX = keepX.trt, tol = tol,
-                            max.iter = max.iter)
+                            ncomp = ncomp.trt, keepX = keepX.trt)
         tmp.cnts.notrt <- plsda_trt$defl_data$X
     }
     else {
@@ -944,7 +943,7 @@ mbecPLSDA <- function(input.obj, model.vars, type=c("clr","otu","tss")) {
     }
 
     plsda_bat <- externalPLSDA(X = tmp.cnts.notrt, Y = Y.bat.scale, ncomp = ncomp.bat,
-                       keepX = keepX.bat, tol = tol, max.iter = max.iter)
+                       keepX = keepX.bat)
     bat_loadings <- plsda_bat$loadings$a
     tmp.cnts.temp <- tmp.cnts.scale
     for (h in seq_len(ncomp.bat)) {

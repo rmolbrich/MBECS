@@ -134,11 +134,11 @@ not obvious that this is the optimal approach to solve this issue.
 
 Principal Least Squares Discriminant Analysis (PLSDA)
 This function estimates latent dimensions from the explanatory matrix
-\code{X}. The latent dimensions are maximally associated with the outcome
-matrix \code{Y}. It is a built-in function of \code{PLSDA_batch} and has been
+X. The latent dimensions are maximally associated with the outcome
+matrix Y. It is a built-in function of PLSDA_batch and has been
 adjusted to work in the MBECS-package. To that end, the function
-\code{mixOmics::explained_variance} was replaced with a computation based on
-\code{vegan::cca} since this is already used in the MBECS package.
+mixOmics::explained_variance was replaced with a computation based on
+vegan::cca since this is already used in the MBECS package.
 Additionally, the matrix deflation function was replaced with own code. The
 credit for algorithm and implementation goes to
 'https://github.com/EvaYiwenWang/PLSDAbatch' and the associated publication
